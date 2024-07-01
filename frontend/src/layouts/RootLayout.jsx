@@ -65,7 +65,7 @@ export default function RouteLayout() {
 
   useEffect(() => {
     console.log("in RootLayout useEffect");
-    if (location.pathname === "/") {
+    if (user && location.pathname === "/") {
       navigate("/dashboard");
     }
     if (user && userObj?.error) {
@@ -75,7 +75,7 @@ export default function RouteLayout() {
       });
     }
     if (!user && location.pathname !== "/signup") {
-      return navigate("/login");
+      navigate("/login");
     }
     if (notificationsCleared) {
       if (notification) {
@@ -83,7 +83,7 @@ export default function RouteLayout() {
           type: "CLEAR_NOTIFICATIONS",
         });
       }
-      navigate(location.pathname);
+      // navigate(location.pathname);
     }
     if (!notification && !userObj?.error) {
       if (userObj?.recentReceivedComments.length > 0) {

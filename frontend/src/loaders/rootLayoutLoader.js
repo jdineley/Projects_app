@@ -8,7 +8,7 @@ const rootLayoutLoader =
     const newCommentId = url.searchParams.get("commentId");
     const newCommenterEmail = url.searchParams.get("user");
     const notificationsCleared = url.searchParams.get("notificationsCleared");
-
+    console.log(notificationsCleared);
     try {
       if (user) {
         const resp1 = await fetch(
