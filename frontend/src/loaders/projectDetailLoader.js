@@ -19,7 +19,7 @@ const projectDetailLoader =
     try {
       if (user) {
         const res1 = await fetch(
-          `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/projects/${projectId}`,
           {
             method: "GET",
             mode: "cors",
@@ -33,7 +33,7 @@ const projectDetailLoader =
         }
         if (assignUser) {
           const res2 = await fetch(
-            `${VITE_REACT_APP_API_URL}/users/getUsers?assignUser=${assignUser}`,
+            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?assignUser=${assignUser}`,
             {
               method: "GET",
               mode: "cors",
@@ -50,7 +50,7 @@ const projectDetailLoader =
 
         if (taskDep) {
           const res3 = await fetch(
-            `${VITE_REACT_APP_API_URL}/tasks/getTasks?task=${taskDep}`,
+            `${VITE_REACT_APP_API_URL}/api/v1/tasks/getTasks?task=${taskDep}`,
             {
               method: "GET",
               mode: "cors",

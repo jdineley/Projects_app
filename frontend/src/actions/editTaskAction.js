@@ -18,7 +18,7 @@ const editTaskAction =
 
     try {
       const response = await fetch(
-        `${VITE_REACT_APP_API_URL}/tasks/${taskId}`,
+        `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}`,
         {
           method: "PATCH",
           mode: "cors",

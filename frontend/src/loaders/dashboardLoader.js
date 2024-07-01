@@ -21,13 +21,16 @@ const dashboardLoader = (user) => async () => {
     //   throw Error("could not fetch the current user");
     // }
     if (user) {
-      const res2 = await fetch(`${VITE_REACT_APP_API_URL}/users/getUser`, {
-        method: "GET",
-        mode: "cors",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
+      const res2 = await fetch(
+        `${VITE_REACT_APP_API_URL}/api/v1/users/getUser`,
+        {
+          method: "GET",
+          mode: "cors",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
 
       if (!res2.ok) {
         throw Error("could not fetch the current user");

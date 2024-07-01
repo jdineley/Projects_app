@@ -6,13 +6,16 @@ const userProfileLoader = (user) => async () => {
   // const requestedVacationId = url.searchParams.get("vacationId");
   try {
     if (user) {
-      const resp1 = await fetch(`${VITE_REACT_APP_API_URL}/users/getUser`, {
-        method: "GET",
-        mode: "cors",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
+      const resp1 = await fetch(
+        `${VITE_REACT_APP_API_URL}/api/v1/users/getUser`,
+        {
+          method: "GET",
+          mode: "cors",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
       const userObj = await resp1.json();
       if (!resp1.ok) {
         throw Error(user.error);

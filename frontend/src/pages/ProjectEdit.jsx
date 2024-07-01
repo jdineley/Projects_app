@@ -22,7 +22,7 @@ export default function ProjectEdit() {
     console.log("projectId:", project._id);
     try {
       const response = await fetch(
-        `${VITE_REACT_APP_API_URL}/projects/${project._id}`,
+        `${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}`,
         {
           method: "DELETE",
           mode: "cors",

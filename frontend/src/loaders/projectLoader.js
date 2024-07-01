@@ -22,13 +22,16 @@ const projectsLoader =
 
       // return projects;
       if (user) {
-        const res = await fetch(`${VITE_REACT_APP_API_URL}/users/getUser`, {
-          method: "GET",
-          mode: "cors",
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        const res = await fetch(
+          `${VITE_REACT_APP_API_URL}/api/v1/users/getUser`,
+          {
+            method: "GET",
+            mode: "cors",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
 
         if (!res.ok) {
           throw Error("could not fetch the logged in user");

@@ -16,7 +16,7 @@ const editProjectAction =
 
     try {
       const response = await fetch(
-        `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
+        `${VITE_REACT_APP_API_URL}/api/v1/projects/${projectId}`,
         {
           method: "PATCH",
           mode: "cors",

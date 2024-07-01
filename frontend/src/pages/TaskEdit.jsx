@@ -27,7 +27,7 @@ export default function TaskEdit() {
     console.log("taskId:", selectedTask._id);
     try {
       const response = await fetch(
-        `${VITE_REACT_APP_API_URL}/tasks/${selectedTask._id}`,
+        `${VITE_REACT_APP_API_URL}/api/v1/tasks/${selectedTask._id}`,
         {
           method: "DELETE",
           mode: "cors",

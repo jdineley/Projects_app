@@ -4,14 +4,17 @@ const signupAction = async ({ request }) => {
   const submission = Object.fromEntries(data);
 
   try {
-    const response = await fetch(`${VITE_REACT_APP_API_URL}/users/signup`, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(submission),
-    });
+    const response = await fetch(
+      `${VITE_REACT_APP_API_URL}/api/v1/users/signup`,
+      {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submission),
+      }
+    );
     console.log(response);
     if (response.statusText === "Not Found") {
       throw Error("Server connection error");

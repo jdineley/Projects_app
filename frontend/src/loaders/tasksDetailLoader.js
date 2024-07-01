@@ -16,7 +16,7 @@ const taskDetailLoader =
     try {
       if (user) {
         const response = await fetch(
-          `${VITE_REACT_APP_API_URL}/tasks/${taskId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}`,
           {
             headers: {
               Authorization: `Bearer: ${user.token}`,
@@ -30,7 +30,7 @@ const taskDetailLoader =
         const { task, taskComments } = await response.json();
         if (taskDep) {
           const res3 = await fetch(
-            `${VITE_REACT_APP_API_URL}/tasks/getTasks?task=${taskDep}`,
+            `${VITE_REACT_APP_API_URL}/api/v1/tasks/getTasks?task=${taskDep}`,
             {
               method: "GET",
               mode: "cors",

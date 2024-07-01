@@ -10,20 +10,23 @@ const reviewAction =
     try {
       if (intent === "newComment") {
         console.log("in newComment");
-        const response = await fetch(`${VITE_REACT_APP_API_URL}/comments`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          body: JSON.stringify({
-            user: user._id,
-            action: actionId,
-            content: comment,
-            projectId,
-            reviewId,
-          }),
-        });
+        const response = await fetch(
+          `${VITE_REACT_APP_API_URL}/api/v1/comments`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: JSON.stringify({
+              user: user._id,
+              action: actionId,
+              content: comment,
+              projectId,
+              reviewId,
+            }),
+          }
+        );
         console.log(response);
         if (!response.ok) {
           throw Error("failed to create comment");

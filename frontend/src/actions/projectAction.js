@@ -10,7 +10,7 @@ const projectAction =
       const { projectId, title, start, end, ...reviews } = list;
       try {
         const res = await fetch(
-          `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/projects/${projectId}`,
           {
             method: "PATCH",
             mode: "cors",
@@ -35,7 +35,7 @@ const projectAction =
       const { title, start, end, ...reviews } = list;
 
       try {
-        const res = await fetch(`${VITE_REACT_APP_API_URL}/projects`, {
+        const res = await fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects`, {
           method: "POST",
           mode: "cors",
           headers: {
@@ -83,7 +83,7 @@ const projectAction =
       try {
         const { projectId } = list;
         const res = await fetch(
-          `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/projects/${projectId}`,
           {
             method: "PATCH",
             mode: "cors",

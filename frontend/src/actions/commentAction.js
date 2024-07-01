@@ -17,19 +17,22 @@ const commentAction =
     if (intent === "task-comment") {
       const { comment } = list;
       try {
-        const response = await fetch(`${VITE_REACT_APP_API_URL}/comments`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          body: JSON.stringify({
-            user: user._id,
-            task: taskId,
-            review: reviewId,
-            content: comment,
-          }),
-        });
+        const response = await fetch(
+          `${VITE_REACT_APP_API_URL}/api/v1/comments`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: JSON.stringify({
+              user: user._id,
+              task: taskId,
+              review: reviewId,
+              content: comment,
+            }),
+          }
+        );
 
         if (!response.ok) {
           throw Error("failed to create comment");
@@ -58,7 +61,7 @@ const commentAction =
 
       try {
         const response = await fetch(
-          `${VITE_REACT_APP_API_URL}/tasks/${taskId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}`,
           {
             method: "PATCH",
             mode: "cors",

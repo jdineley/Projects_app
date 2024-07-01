@@ -10,7 +10,7 @@ const assignUserLoader =
     try {
       if (assignUser) {
         const res2 = await fetch(
-          `${VITE_REACT_APP_API_URL}/users/getUsers?assignUser=${assignUser}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?assignUser=${assignUser}`,
           {
             method: "GET",
             mode: "cors",

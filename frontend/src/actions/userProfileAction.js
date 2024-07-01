@@ -18,18 +18,21 @@ const userProfileAction =
 
     try {
       if (intent === "create-vacation") {
-        const resp1 = await fetch(`${VITE_REACT_APP_API_URL}/vacations`, {
-          method: "POST",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          body: JSON.stringify({
-            lastWorkDate,
-            returnToWorkDate,
-          }),
-        });
+        const resp1 = await fetch(
+          `${VITE_REACT_APP_API_URL}/api/v1/vacations`,
+          {
+            method: "POST",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: JSON.stringify({
+              lastWorkDate,
+              returnToWorkDate,
+            }),
+          }
+        );
         const json1 = await resp1.json();
         if (!resp1.ok) {
           throw Error(json1.error);
@@ -40,7 +43,7 @@ const userProfileAction =
 
       if (intent === "approve-vacation") {
         const resp2 = await fetch(
-          `${VITE_REACT_APP_API_URL}/vacations/${vacationId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/vacations/${vacationId}`,
           {
             method: "PATCH",
             mode: "cors",
@@ -66,7 +69,7 @@ const userProfileAction =
 
       if (intent === "delete-vacation") {
         const resp3 = await fetch(
-          `${VITE_REACT_APP_API_URL}/vacations/${vacationId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/vacations/${vacationId}`,
           {
             method: "DELETE",
             mode: "cors",
