@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 
 export default function ProjectEdit() {
-  // const { project } = useOutletContext();
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
   const { project } = useLoaderData();
   const [projectInState, setProjectInState] = useState(project);
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export default function ProjectEdit() {
     console.log("projectId:", project._id);
     try {
       const response = await fetch(
-        `http://localhost:4000/api/v1/projects/${project._id}`,
+        `${VITE_REACT_APP_API_URL}/projects/${project._id}`,
         {
           method: "DELETE",
           mode: "cors",

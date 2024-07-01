@@ -4,6 +4,7 @@ const projectDetailAction =
   (user) =>
   async ({ request, params }) => {
     console.log("in project detail action");
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, taskId, reviewId } = params;
     const data = await request.formData();
     const { intent, ...list } = Object.fromEntries(data);
@@ -25,7 +26,7 @@ const projectDetailAction =
 
       try {
         const response = await fetch(
-          `http://localhost:4000/api/v1/tasks/${taskId}`,
+          `${VITE_REACT_APP_API_URL}/tasks/${taskId}`,
           {
             method: "PATCH",
             mode: "cors",
@@ -70,7 +71,7 @@ const projectDetailAction =
       console.log(taskDepsIds);
       try {
         const response = await fetch(
-          `http://localhost:4000/api/v1/tasks/project/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/tasks/project/${projectId}`,
           {
             method: "POST",
             mode: "cors",
@@ -103,7 +104,7 @@ const projectDetailAction =
         try {
           const { projectId } = list;
           const res = await fetch(
-            `http://localhost:4000/api/v1/projects/${projectId}`,
+            `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
             {
               method: "DELETE",
               mode: "cors",
@@ -131,7 +132,7 @@ const projectDetailAction =
         try {
           const { projectId } = list;
           const res = await fetch(
-            `http://localhost:4000/api/v1/projects/${projectId}`,
+            `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
             {
               method: "PATCH",
               mode: "cors",
@@ -158,16 +159,13 @@ const projectDetailAction =
       try {
         const { taskDetail } = list;
         const { taskId } = list;
-        const res = await fetch(
-          `http://localhost:4000/api/v1/tasks/${taskId}`,
-          {
-            method: "DELETE",
-            mode: "cors",
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
-        );
+        const res = await fetch(`${VITE_REACT_APP_API_URL}/tasks/${taskId}`, {
+          method: "DELETE",
+          mode: "cors",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
         const json = await res.json();
         if (!res.ok) {
           throw Error("failed to delete task");
@@ -183,7 +181,7 @@ const projectDetailAction =
     if (intent === "task-comment") {
       const { comment } = list;
       try {
-        const response = await fetch("http://localhost:4000/api/v1/comments", {
+        const response = await fetch(`${VITE_REACT_APP_API_URL}/comments`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -209,7 +207,7 @@ const projectDetailAction =
       const { projectId, title, start, end, ...reviews } = list;
       try {
         const res = await fetch(
-          `http://localhost:4000/api/v1/projects/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
           {
             method: "PATCH",
             mode: "cors",
@@ -234,7 +232,7 @@ const projectDetailAction =
       try {
         const { projectId } = list;
         const res = await fetch(
-          `http://localhost:4000/api/v1/projects/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
           {
             method: "PATCH",
             mode: "cors",

@@ -3,6 +3,8 @@ import { useAuthContext } from "../hooks/useAuthContext";
 // import { useState } from "react";
 
 export default function TaskEdit() {
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
+
   const { selectedTask } = useOutletContext();
   const { user } = useAuthContext();
   // const [formInputs, setFormInputs] = useState({
@@ -25,7 +27,7 @@ export default function TaskEdit() {
     console.log("taskId:", selectedTask._id);
     try {
       const response = await fetch(
-        `http://localhost:4000/api/v1/tasks/${selectedTask._id}`,
+        `${VITE_REACT_APP_API_URL}/tasks/${selectedTask._id}`,
         {
           method: "DELETE",
           mode: "cors",

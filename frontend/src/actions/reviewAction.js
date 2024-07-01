@@ -2,7 +2,7 @@ const reviewAction =
   (user) =>
   async ({ request, params }) => {
     console.log("in the review action");
-
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, reviewId } = params;
     const data = await request.formData();
     const { intent, comment, actionId } = Object.fromEntries(data);
@@ -10,7 +10,7 @@ const reviewAction =
     try {
       if (intent === "newComment") {
         console.log("in newComment");
-        const response = await fetch("http://localhost:4000/api/v1/comments", {
+        const response = await fetch(`${VITE_REACT_APP_API_URL}/comments`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

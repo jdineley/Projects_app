@@ -2,6 +2,7 @@ const userProfileAction =
   (user) =>
   async ({ request }) => {
     console.log("hit userProfileAction");
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const data = await request.formData();
     const {
       intent,
@@ -17,7 +18,7 @@ const userProfileAction =
 
     try {
       if (intent === "create-vacation") {
-        const resp1 = await fetch("http://localhost:4000/api/v1/vacations", {
+        const resp1 = await fetch(`${VITE_REACT_APP_API_URL}/vacations`, {
           method: "POST",
           mode: "cors",
           headers: {
@@ -39,7 +40,7 @@ const userProfileAction =
 
       if (intent === "approve-vacation") {
         const resp2 = await fetch(
-          `http://localhost:4000/api/v1/vacations/${vacationId}`,
+          `${VITE_REACT_APP_API_URL}/vacations/${vacationId}`,
           {
             method: "PATCH",
             mode: "cors",
@@ -65,7 +66,7 @@ const userProfileAction =
 
       if (intent === "delete-vacation") {
         const resp3 = await fetch(
-          `http://localhost:4000/api/v1/vacations/${vacationId}`,
+          `${VITE_REACT_APP_API_URL}/vacations/${vacationId}`,
           {
             method: "DELETE",
             mode: "cors",

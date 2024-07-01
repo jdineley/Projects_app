@@ -4,26 +4,23 @@ const rootLayoutAction =
   (user) =>
   async ({ request }) => {
     console.log("hit rootLayoutAction");
-
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const data = await request.formData();
     const { intent, path } = Object.fromEntries(data);
     console.log("path", path);
     try {
       if (intent === "clear-notifications") {
-        const res = await fetch(
-          `http://localhost:4000/api/v1/users/${user._id}`,
-          {
-            method: "PATCH",
-            mode: "cors",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
-            },
-            body: JSON.stringify({
-              intent,
-            }),
-          }
-        );
+        const res = await fetch(`${VITE_REACT_APP_API_URL}/users/${user._id}`, {
+          method: "PATCH",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({
+            intent,
+          }),
+        });
         const json = await res.json();
         if (!res.ok) {
           throw Error(json.error);

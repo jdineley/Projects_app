@@ -3,12 +3,13 @@ import { redirect } from "react-router-dom";
 const newTaskAction =
   (user) =>
   async ({ request, params }) => {
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const data = await request.formData();
     const projectId = params.projectId;
     const submission = Object.fromEntries(data);
 
     try {
-      await fetch(`http://localhost:4000/api/v1/tasks/project/${projectId}`, {
+      await fetch(`${VITE_REACT_APP_API_URL}/tasks/project/${projectId}`, {
         method: "POST",
         mode: "cors",
         headers: {

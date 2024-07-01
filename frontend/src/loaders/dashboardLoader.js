@@ -1,5 +1,6 @@
 const dashboardLoader = (user) => async () => {
   console.log("in dashboard loader");
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
   try {
     // const res = await fetch("http://localhost:4000/api/v1/projects", {
     //   method: "GET",
@@ -20,7 +21,7 @@ const dashboardLoader = (user) => async () => {
     //   throw Error("could not fetch the current user");
     // }
     if (user) {
-      const res2 = await fetch("http://localhost:4000/api/v1/users/getUser", {
+      const res2 = await fetch(`${VITE_REACT_APP_API_URL}/users/getUser`, {
         method: "GET",
         mode: "cors",
         headers: {

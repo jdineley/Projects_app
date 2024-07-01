@@ -1,6 +1,7 @@
 const projectsLoader =
   (user) =>
   async ({ request }) => {
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const url = new URL(request.url);
     // from project delete redirect()
     const projectDeleted = url.searchParams.get("projectDeleted");
@@ -21,7 +22,7 @@ const projectsLoader =
 
       // return projects;
       if (user) {
-        const res = await fetch("http://localhost:4000/api/v1/users/getUser", {
+        const res = await fetch(`${VITE_REACT_APP_API_URL}/users/getUser`, {
           method: "GET",
           mode: "cors",
           headers: {

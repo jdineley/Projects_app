@@ -4,6 +4,7 @@ const editProjectAction =
   (user) =>
   async ({ request, params }) => {
     console.log("hit editProjectAction");
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const data = await request.formData();
     const { projectId } = params;
     console.log("params", params);
@@ -15,7 +16,7 @@ const editProjectAction =
 
     try {
       const response = await fetch(
-        `http://localhost:4000/api/v1/projects/${projectId}`,
+        `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
         {
           method: "PATCH",
           mode: "cors",

@@ -2,6 +2,7 @@ const commentAction =
   (user) =>
   async ({ request, params }) => {
     console.log("in commentAction");
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const taskId = params.taskId;
     const reviewId = params.reviewId;
     const data = await request.formData();
@@ -16,7 +17,7 @@ const commentAction =
     if (intent === "task-comment") {
       const { comment } = list;
       try {
-        const response = await fetch("http://localhost:4000/api/v1/comments", {
+        const response = await fetch(`${VITE_REACT_APP_API_URL}/comments`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -57,7 +58,7 @@ const commentAction =
 
       try {
         const response = await fetch(
-          `http://localhost:4000/api/v1/tasks/${taskId}`,
+          `${VITE_REACT_APP_API_URL}/tasks/${taskId}`,
           {
             method: "PATCH",
             mode: "cors",

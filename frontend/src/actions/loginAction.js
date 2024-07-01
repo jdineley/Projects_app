@@ -1,9 +1,10 @@
 const loginAction = async ({ request }) => {
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
   const data = await request.formData();
   const submission = Object.fromEntries(data);
 
   try {
-    const response = await fetch("http://localhost:4000/api/v1/users/login", {
+    const response = await fetch(`${VITE_REACT_APP_API_URL}/users/login`, {
       method: "POST",
       mode: "cors",
       headers: {

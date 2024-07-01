@@ -2,7 +2,8 @@ const rootLayoutLoader =
   (user) =>
   async ({ request }) => {
     console.log("hit rootLayoutLoader");
-
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
+    // console.log("$$$$$$$$$$$$$$$$$$$$", import.meta.env.VITE_REACT_APP_API_URL);
     const url = new URL(request.url);
     const newCommentId = url.searchParams.get("commentId");
     const newCommenterEmail = url.searchParams.get("user");
@@ -10,17 +11,15 @@ const rootLayoutLoader =
 
     try {
       if (user) {
-        const resp1 = await fetch(
-          "http://localhost:4000/api/v1/users/getUser",
-          {
-            method: "GET",
-            mode: "cors",
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
-        );
+        const resp1 = await fetch(`${VITE_REACT_APP_API_URL}/users/getUser`, {
+          method: "GET",
+          mode: "cors",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
         const userObj = await resp1.json();
+        console.log(userObj);
         if (!resp1.ok && userObj.error) {
           return { userObj };
         } else if (!resp1.ok) {

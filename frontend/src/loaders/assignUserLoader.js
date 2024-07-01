@@ -2,6 +2,7 @@ const assignUserLoader =
   (user) =>
   async ({ request }) => {
     console.log("in assignUser loader");
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const url = new URL(request.url);
     const assignUser = url.searchParams?.get("assignUser");
     console.log(assignUser);
@@ -9,7 +10,7 @@ const assignUserLoader =
     try {
       if (assignUser) {
         const res2 = await fetch(
-          `http://localhost:4000/api/v1/users/getUsers?assignUser=${assignUser}`,
+          `${VITE_REACT_APP_API_URL}/users/getUsers?assignUser=${assignUser}`,
           {
             method: "GET",
             mode: "cors",

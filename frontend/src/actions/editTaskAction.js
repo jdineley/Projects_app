@@ -4,6 +4,7 @@ const editTaskAction =
   (user) =>
   async ({ request, params }) => {
     console.log("hit editTaskAction");
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const data = await request.formData();
     const { taskId, projectId } = params;
     console.log("params", params);
@@ -17,7 +18,7 @@ const editTaskAction =
 
     try {
       const response = await fetch(
-        `http://localhost:4000/api/v1/tasks/${taskId}`,
+        `${VITE_REACT_APP_API_URL}/tasks/${taskId}`,
         {
           method: "PATCH",
           mode: "cors",

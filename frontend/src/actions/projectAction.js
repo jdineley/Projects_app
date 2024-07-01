@@ -2,7 +2,7 @@ const projectAction =
   (user) =>
   async ({ request }) => {
     console.log("in project action");
-
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const data = await request.formData();
     const { intent, ...list } = Object.fromEntries(data);
     console.log("intent", intent);
@@ -10,7 +10,7 @@ const projectAction =
       const { projectId, title, start, end, ...reviews } = list;
       try {
         const res = await fetch(
-          `http://localhost:4000/api/v1/projects/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
           {
             method: "PATCH",
             mode: "cors",
@@ -35,7 +35,7 @@ const projectAction =
       const { title, start, end, ...reviews } = list;
 
       try {
-        const res = await fetch("http://localhost:4000/api/v1/projects", {
+        const res = await fetch(`${VITE_REACT_APP_API_URL}/projects`, {
           method: "POST",
           mode: "cors",
           headers: {
@@ -83,7 +83,7 @@ const projectAction =
       try {
         const { projectId } = list;
         const res = await fetch(
-          `http://localhost:4000/api/v1/projects/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
           {
             method: "PATCH",
             mode: "cors",

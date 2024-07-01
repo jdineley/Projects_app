@@ -1,5 +1,6 @@
 const loginLoader = async () => {
-  const res = await fetch("http://localhost:4000/api/v1/users/login");
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
+  const res = await fetch(`${VITE_REACT_APP_API_URL}/users/login`);
 
   if (!res.ok) {
     throw Error("LOGIN FAILED");

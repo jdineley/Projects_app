@@ -2,6 +2,7 @@ const projectDetailLoader =
   (user) =>
   async ({ params, request }) => {
     console.log("calling project detail loader..");
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, reviewId } = params;
     const url = new URL(request.url);
 
@@ -18,7 +19,7 @@ const projectDetailLoader =
     try {
       if (user) {
         const res1 = await fetch(
-          `http://localhost:4000/api/v1/projects/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/projects/${projectId}`,
           {
             method: "GET",
             mode: "cors",
@@ -32,7 +33,7 @@ const projectDetailLoader =
         }
         if (assignUser) {
           const res2 = await fetch(
-            `http://localhost:4000/api/v1/users/getUsers?assignUser=${assignUser}`,
+            `${VITE_REACT_APP_API_URL}/users/getUsers?assignUser=${assignUser}`,
             {
               method: "GET",
               mode: "cors",
@@ -49,7 +50,7 @@ const projectDetailLoader =
 
         if (taskDep) {
           const res3 = await fetch(
-            `http://localhost:4000/api/v1/tasks/getTasks?task=${taskDep}`,
+            `${VITE_REACT_APP_API_URL}/tasks/getTasks?task=${taskDep}`,
             {
               method: "GET",
               mode: "cors",

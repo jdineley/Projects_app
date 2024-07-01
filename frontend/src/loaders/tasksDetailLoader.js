@@ -1,6 +1,7 @@
 const taskDetailLoader =
   (user) =>
   async ({ params, request }) => {
+    const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { taskId } = params;
     const url = new URL(request.url);
     const newCommentId = url.searchParams.get("commentId");
@@ -15,7 +16,7 @@ const taskDetailLoader =
     try {
       if (user) {
         const response = await fetch(
-          `http://localhost:4000/api/v1/tasks/${taskId}`,
+          `${VITE_REACT_APP_API_URL}/tasks/${taskId}`,
           {
             headers: {
               Authorization: `Bearer: ${user.token}`,
@@ -29,7 +30,7 @@ const taskDetailLoader =
         const { task, taskComments } = await response.json();
         if (taskDep) {
           const res3 = await fetch(
-            `http://localhost:4000/api/v1/tasks/getTasks?task=${taskDep}`,
+            `${VITE_REACT_APP_API_URL}/tasks/getTasks?task=${taskDep}`,
             {
               method: "GET",
               mode: "cors",
