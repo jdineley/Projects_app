@@ -1,0 +1,23 @@
+REST routes
+
+Poject is made up of 2 connected resources:
+1. Projects
+2. Todos
+
+Endpoints
+/api/todos/...
+1. Endpoint to GET all todos independant of the project: /api/todos
+2. Endpoint to GET specific todo: /api/todos/:todo_id
+3. Endpoint to POST todo: /api/todo/:project_id
+4. Endpoint to PUT todo: /api/todo/:project_id
+5. Endpoint to DELETE todo: /api/todos/:id
+
+/api/projects/...
+1. Endpoint to GET all projects: /api/projects
+2. Endpoint to GET specific project: /api/projects/:project_id
+3. Endpoint to POST project: /api/projects
+4. Endpoint to PUT project: /api/projects/:project_id
+9. Endpoint to DELETE project: /api/projects/:project_id
+
+
+

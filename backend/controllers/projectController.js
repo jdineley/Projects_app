@@ -1,0 +1,502 @@
+const Project = require("../models/Project");
+const Task = require("../models/Task");
+const User = require("../models/User");
+const Review = require("../models/Review");
+const ReviewObjective = require("../models/ReviewObjective");
+const ReviewAction = require("../models/ReviewAction");
+const Comment = require("../models/Comment");
+const Reply = require("../models/Reply");
+const mongoose = require("mongoose");
+
+// util
+const { fixReviews } = require("../util");
+
+const getAllProjects = async (req, res) => {
+  console.log("In get all projects..");
+  try {
+    const projects = await Project.find()
+      .populate(["owner", "tasks", "reviews"])
+      .sort({
+        createdAt: -1,
+      });
+    res.status(200).json(projects);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+};
+
+const getProject = async (req, res) => {
+  console.log("hit project get project route");
+  const { projectId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    return res.status(404).json({ error: "No such Project" });
+  }
+  try {
+    const project = await Project.findById(projectId).populate([
+      "owner",
+      "tasks",
+      "reviews",
+      "users",
+      { path: "vacationRequests", populate: "user" },
+    ]);
+    if (!project) {
+      return res.status(404).json({ error: "No such Project" });
+    }
+    let projectTasks = [];
+    for (const task of project.tasks) {
+      const populatedTask = await Task.findById(task._id).populate([
+        "user",
+        "comments",
+        "dependencies",
+      ]);
+      projectTasks.push(populatedTask);
+    }
+
+    res.status(200).json({ project, projectTasks });
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+};
+
+const createProject = async (req, res) => {
+  console.log("hit the createProject route");
+  const { intent, title, start, end, ...reviews } = req.body;
+  const { _id: userId } = req.user;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(404).json({ error: "Invalid user id" });
+  }
+
+  const [reviewArray] = fixReviews(reviews, intent);
+
+  try {
+    const currentUser = await User.findById(userId);
+    const project = await Project.create({
+      title,
+      start,
+      end,
+      owner: req.user._id,
+    });
+
+    for (let review of reviewArray) {
+      const reviewNew = await Review.create({
+        ...review,
+        project: project._id,
+      });
+      project.reviews.push(reviewNew._id);
+      await project.save();
+    }
+    currentUser.projects.push(project._id);
+    await currentUser.save();
+    res.status(200).json({ project, result: intent });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const updateProject = async (req, res) => {
+  console.log("Hit update project handler");
+  const { intent, title, start, end, ...reviews } = req.body;
+  const { projectId } = req.params;
+  console.log("intent", intent);
+  console.log("projectId", projectId);
+  // Add archive project logic starting here:
+  // https://www.reddit.com/r/node/comments/9nudkk/update_many_nested_objects_in_mongoose/
+  // Set project.archived = true
+  // Use above to recursively set all [docs] achived:true
+  // Then change the application logic to look for doc.archived (true/false) when rendering
+  // Probably need to look at making the overall application User centric, such that most pages take the userObject as the starting point...  Instead of, for example, getting all projects from the api and fitering on the front end..  instead only find the resources that are applicable based on the logged on user object
+
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    return res.status(404).json({ error: "No such project!" });
+  }
+
+  const [reviewArray, newReviewArray] = fixReviews(reviews, intent);
+
+  console.log(reviewArray);
+
+  try {
+    const projectToUpdate = await Project.findById(projectId);
+    if (projectToUpdate.owner._id.toString() !== req.user._id.toString()) {
+      return res
+        .status(401)
+        .json({ error: "Not authorised to update project" });
+    }
+
+    if (intent === "edit-project") {
+      console.log("in edit project, thingy");
+      const project = await Project.findOneAndUpdate(
+        { _id: projectId },
+        {
+          title,
+          start,
+          end,
+        },
+        { returnDocument: "after" }
+      );
+      if (!project) {
+        res.status(404).json({ error: "no such project" });
+      }
+
+      // Address number of reviews has changed:
+      if (
+        projectToUpdate.reviews.length !==
+        [...reviewArray, ...newReviewArray].length
+      ) {
+        console.log("$$$$ changed number of reviews $$$$");
+        // create new reviews:
+        let newReviewIds = [];
+        for (const newReview of newReviewArray) {
+          const newReviewObj = await Review.create({
+            ...newReview,
+            project: projectId,
+          });
+          newReviewIds.push(newReviewObj._id);
+        }
+        const revArrayIds = reviewArray.map((rev) => rev.reviewId);
+        projectToUpdate.reviews = [...revArrayIds, ...newReviewIds];
+        await projectToUpdate.save();
+      }
+
+      // Update modified existing reviews:
+      for (let review of reviewArray) {
+        const reviewNew = await Review.findOneAndUpdate(
+          {
+            _id: review.reviewId,
+          },
+          {
+            title: review.title,
+            date: review.date,
+          },
+          { returnDocument: "after" }
+        );
+      }
+      res.status(200).json({ project, result: intent });
+    } else if (intent === "archive-project") {
+      console.log("in achived project");
+      const archivedProject = await Project.findOneAndUpdate(
+        { _id: projectId },
+        {
+          archived: true,
+        },
+        { returnDocument: "after" }
+      );
+      const user = await User.findById(req.user._id);
+      user.archivedProjects.push(archivedProject._id);
+      await user.save();
+      // for (const userId of archivedProject.users) {
+      //   const user = await User.findById(userId);
+      //   user.hasArchivedProjects = true;
+      //   await user.save();
+      // }
+      console.log(archivedProject);
+      let allArchivedProjectDescendentIds = {};
+      if (archivedProject.reviews.length > 0) {
+        for (const reviewid of archivedProject.reviews) {
+          const review = await Review.findById(reviewid);
+          review.archived = true;
+          await review.save();
+          if (!allArchivedProjectDescendentIds.Review) {
+            allArchivedProjectDescendentIds.Review = [];
+          }
+          allArchivedProjectDescendentIds.Review.push(review._id);
+          if (review.objectives.length > 0) {
+            for (const objectiveId of review.objectives) {
+              const objective = await ReviewObjective.findById(objectiveId);
+              objective.archived = true;
+              await objective.save();
+              if (!allArchivedProjectDescendentIds.ReviewObjective) {
+                allArchivedProjectDescendentIds.ReviewObjective = [];
+              }
+              allArchivedProjectDescendentIds.ReviewObjective.push(
+                objective._id
+              );
+              if (objective.actions.length > 0) {
+                for (const actionId of objective.actions) {
+                  const action = await ReviewAction.findById(actionId);
+                  action.archived = true;
+                  await action.save();
+                  if (!allArchivedProjectDescendentIds.ReviewAction) {
+                    allArchivedProjectDescendentIds.ReviewAction = [];
+                  }
+                  allArchivedProjectDescendentIds.ReviewAction.push(action._id);
+                  if (action.comments.length > 0) {
+                    for (const commentId of action.comments) {
+                      const comment = await Comment.findById(commentId);
+                      comment.archived = true;
+                      await comment.save();
+                      if (!allArchivedProjectDescendentIds.Comment) {
+                        allArchivedProjectDescendentIds.Comment = [];
+                      }
+                      allArchivedProjectDescendentIds.Comment.push(comment._id);
+                      if (comment.replies.length > 0) {
+                        for (const replyId of comment.replies) {
+                          const reply = await Reply.findById(replyId);
+                          reply.archived = true;
+                          await reply.save();
+                          if (!allArchivedProjectDescendentIds.Reply) {
+                            allArchivedProjectDescendentIds.Reply = [];
+                          }
+                          allArchivedProjectDescendentIds.Reply.push(reply._id);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      if (archivedProject.tasks.length > 0) {
+        for (const taskId of archivedProject.tasks) {
+          const task = await Task.findById(taskId);
+          task.archived = true;
+          await task.save();
+          if (!allArchivedProjectDescendentIds.Task) {
+            allArchivedProjectDescendentIds.Task = [];
+          }
+          allArchivedProjectDescendentIds.Task.push(task._id);
+          if (task.comments.length > 0) {
+            for (const commentId of task.comments) {
+              const comment = await Comment.findById(commentId);
+              comment.archived = true;
+              await comment.save();
+              if (!allArchivedProjectDescendentIds.Comment) {
+                allArchivedProjectDescendentIds.Comment = [];
+              }
+              allArchivedProjectDescendentIds.Comment.push(comment._id);
+              if (comment.replies.length > 0) {
+                for (const replyId of comment.replies) {
+                  const reply = await Reply.findById(replyId);
+                  reply.archived = true;
+                  await reply.save();
+                  if (!allArchivedProjectDescendentIds.Reply) {
+                    allArchivedProjectDescendentIds.Reply = [];
+                  }
+                  allArchivedProjectDescendentIds.Reply.push(reply._id);
+                }
+              }
+            }
+          }
+        }
+      }
+      archivedProject.descendentsAtArchive = allArchivedProjectDescendentIds;
+      await archivedProject.save();
+      console.log(
+        "@@@ allArchivedProjectDescendentIds @@@",
+        allArchivedProjectDescendentIds
+      );
+      console.log("%%% archivedProject %%%", archivedProject);
+      res.status(200).json({ archivedProject, result: intent });
+    } else if (intent === "unarchive-project") {
+      const projectToUnarchive = await Project.findById(projectId);
+      if (!projectToUnarchive) {
+        res.status(404).json({ error: "no such project" });
+      }
+      console.log(
+        "projectToUnarchive.descendentsAtArchive",
+        projectToUnarchive.descendentsAtArchive
+      );
+      projectToUnarchive.archived = false;
+
+      if (projectToUnarchive.descendentsAtArchive.Review?.length > 0) {
+        console.log("in Review");
+        for (const reviewId of projectToUnarchive.descendentsAtArchive.Review) {
+          const review = await Review.findById(reviewId);
+          review.archived = false;
+          await review.save();
+        }
+      }
+      if (projectToUnarchive.descendentsAtArchive.ReviewObjective?.length > 0) {
+        console.log("in ReviewObjective");
+        for (const reviewObjectiveId of projectToUnarchive.descendentsAtArchive
+          .ReviewObjective) {
+          const reviewObjective = await ReviewObjective.findById(
+            reviewObjectiveId
+          );
+          reviewObjective.archived = false;
+          await reviewObjective.save();
+        }
+      }
+      if (projectToUnarchive.descendentsAtArchive.ReviewAction?.length > 0) {
+        console.log("in ReviewAction");
+        for (const reviewActionId of projectToUnarchive.descendentsAtArchive
+          .ReviewAction) {
+          console.log("reviewActionId", reviewActionId);
+          const reviewAction = await ReviewAction.findById(reviewActionId);
+          console.log("reviewAction", reviewAction);
+          reviewAction.archived = false;
+          await reviewAction.save();
+        }
+      }
+      if (projectToUnarchive.descendentsAtArchive.Comment?.length > 0) {
+        console.log("in Comment");
+        for (const commentId of projectToUnarchive.descendentsAtArchive
+          .Comment) {
+          const comment = await Comment.findById(commentId);
+          comment.archived = false;
+          await comment.save();
+        }
+      }
+      if (projectToUnarchive.descendentsAtArchive.Task?.length > 0) {
+        console.log("in Task");
+        for (const taskId of projectToUnarchive.descendentsAtArchive.Task) {
+          const task = await Task.findById(taskId);
+          task.archived = false;
+          await task.save();
+        }
+      }
+      if (projectToUnarchive.descendentsAtArchive.Reply?.length > 0) {
+        console.log("in Reply");
+        for (const replyId of projectToUnarchive.descendentsAtArchive.Reply) {
+          const reply = await Reply.findById(replyId);
+          reply.archived = false;
+          await reply.save();
+        }
+      }
+      await projectToUnarchive.save();
+      const user = await User.findByIdAndUpdate(req.user._id, {
+        $pull: {
+          archivedProjects: projectToUnarchive._id,
+        },
+      });
+
+      res.status(200).json({ projectToUnarchive, result: intent });
+    }
+  } catch (error) {
+    console.log("patch error", error.message);
+    res.status(error.status || 400).json({ error: error.message });
+  }
+};
+
+const deleteProject = async (req, res) => {
+  console.log("in delete route handler");
+  const { intent } = req.body;
+  const { projectId } = req.params;
+  const { _id: userId } = req.user;
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    return res.status(404).json({ error: "No such project" });
+  }
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(404).json({ error: "Invalid user id" });
+  }
+  try {
+    const currentUser = await User.findById(userId);
+    const projectToDelete = await Project.findById(projectId);
+    if (projectToDelete.owner._id.toString() !== userId.toString()) {
+      return res
+        .status(401)
+        .json({ error: "Not authorised to delete project" });
+    }
+    if (!projectToDelete.archived) {
+      return res
+        .status(401)
+        .json({ error: "Project must be archived before deletion" });
+    }
+    const project = await Project.findByIdAndDelete(projectId);
+    // if (!project) {
+    //   return res.status(404).json({ error: "No such project" });
+    // }
+    // post project delete/archive clean-up:
+    // 1. remove deleted project from user.projects
+    // 2.
+    for (const decendentGroup in project.descendentsAtArchive) {
+      for (const docId of project.descendentsAtArchive[decendentGroup]) {
+        const Model = {
+          Review,
+          ReviewObjective,
+          ReviewAction,
+          Comment,
+          Task,
+          Reply,
+        }[decendentGroup];
+        await Model.findByIdAndDelete(docId);
+      }
+    }
+    // currentUser.projects = currentUser.projects.filter(
+    //   (project) => project.toString() !== projectId
+    // );
+    // await currentUser.save();
+    await currentUser.updateOne({
+      $pull: { projects: project._id, archivedProjects: project._id },
+    });
+    for (const userId of project.users) {
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { userInProjects: project._id } }
+      );
+    }
+    res.status(200).json({ project, result: intent });
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  getAllProjects,
+  getProject,
+  createProject,
+  updateProject,
+  deleteProject,
+};
+// Health and fitness mobile app
+// 666b651dee1b339d2ab50389
+// descendentsAtArchive: {
+//   Review: [
+//     new ObjectId('666b651dee1b339d2ab5038b'),
+//     new ObjectId('666b651dee1b339d2ab5038d')
+//   ],
+//   ReviewObjective: [
+//     new ObjectId('666b65626bd44040bd5d7261'),
+//     new ObjectId('666b65626bd44040bd5d727f')
+//   ],
+//   ReviewAction: [ new ObjectId('666b651dee1b339d2ab5038b') ],
+//   Comment: [
+//     new ObjectId('666b65696bd44040bd5d7391'),
+//     new ObjectId('666b656e6bd44040bd5d7461'),
+//     new ObjectId('666b656e6bd44040bd5d7469'),
+//     new ObjectId('666b6534ee1b339d2ab5070d'),
+//     new ObjectId('666b653aee1b339d2ab507fb'),
+//     new ObjectId('666b6534ee1b339d2ab50729'),
+//     new ObjectId('666b653cee1b339d2ab5085d'),
+//     new ObjectId('666b6539ee1b339d2ab507d8'),
+//     new ObjectId('666b653aee1b339d2ab50817'),
+//     new ObjectId('666b6536ee1b339d2ab5076f'),
+//     new ObjectId('666b6530ee1b339d2ab50681'),
+//     new ObjectId('666b6536ee1b339d2ab5077d')
+//   ],
+//   Task: [
+//     new ObjectId('666b651dee1b339d2ab50397'),
+//     new ObjectId('666b651eee1b339d2ab503c4'),
+//     new ObjectId('666b6529ee1b339d2ab5056c'),
+//     new ObjectId('666b652aee1b339d2ab5059b'),
+//     new ObjectId('666b652bee1b339d2ab505d1'),
+//     new ObjectId('666b652dee1b339d2ab50601'),
+//     new ObjectId('666b652dee1b339d2ab50609'),
+//     new ObjectId('666b652eee1b339d2ab5062c')
+//   ],
+//   Reply: [
+//     new ObjectId('666b6541ee1b339d2ab5093a'),
+//     new ObjectId('666b6545ee1b339d2ab509e4'),
+//     new ObjectId('666b6540ee1b339d2ab50903'),
+//     new ObjectId('666b6540ee1b339d2ab50908'),
+//     new ObjectId('666b6541ee1b339d2ab50935'),
+//     new ObjectId('666b6543ee1b339d2ab5099e')
+//   ]
+// }
+// }
+
+// users
+// Array (5)
+// 0
+// 666b651aee1b339d2ab5031b
+// 1
+// 666b651aee1b339d2ab5030c
+// 2
+// 666b651aee1b339d2ab50315
+// 3
+// 666b651aee1b339d2ab50312
+// 4
+// 666b651aee1b339d2ab50318

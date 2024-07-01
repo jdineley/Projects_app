@@ -1,0 +1,41 @@
+const reviewAction =
+  (user) =>
+  async ({ request, params }) => {
+    console.log("in the review action");
+
+    const { projectId, reviewId } = params;
+    const data = await request.formData();
+    const { intent, comment, actionId } = Object.fromEntries(data);
+
+    try {
+      if (intent === "newComment") {
+        console.log("in newComment");
+        const response = await fetch("http://localhost:4000/api/v1/comments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({
+            user: user._id,
+            action: actionId,
+            content: comment,
+            projectId,
+            reviewId,
+          }),
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw Error("failed to create comment");
+        }
+        console.log("here");
+        const json3 = await response.json();
+        console.log(json3);
+        return json3;
+      }
+    } catch (error) {
+      throw Error("Failed to post new project");
+    }
+  };
+
+export default reviewAction;
