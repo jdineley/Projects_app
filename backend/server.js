@@ -18,6 +18,7 @@ const helmet = require("helmet");
 
 // express app
 const app = express();
+const port = process.env.PORT || 4000;
 
 // middleware
 app.use(express.json());
@@ -41,7 +42,7 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("Connected to the db");
-    app.listen(process.env.PORT, () => {
+    app.listen(port, () => {
       console.log("Server listening on port" + " " + process.env.PORT);
     });
   })
