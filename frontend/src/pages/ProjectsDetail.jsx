@@ -9,7 +9,8 @@ import {
   Form,
 } from "react-router-dom";
 import { useAuthContext } from "../hooks/useAuthContext";
-import moment from "moment";
+// date-fns
+import { format } from "date-fns";
 import { useNotificationContext } from "../hooks/useNotificationContext";
 
 // components
@@ -181,7 +182,7 @@ export default function ProjectsDetail() {
         )}
         {!isMobileResolution && (
           <Table.Cell>
-            {moment(task.deadline).utc().format("YYYY-MM-DD")}
+            {format(new Date(task.deadline), "dd/MM/yyyy")}
           </Table.Cell>
         )}
         <Table.Cell>{task.user.email.split("@")[0]}</Table.Cell>

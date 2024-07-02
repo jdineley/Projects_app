@@ -1,4 +1,12 @@
-import { Text, HoverCard, Flex, Box, Heading, Button } from "@radix-ui/themes";
+import {
+  Text,
+  HoverCard,
+  Flex,
+  Box,
+  Heading,
+  Button,
+  Badge,
+} from "@radix-ui/themes";
 import { useFetcher } from "react-router-dom";
 
 import { format } from "date-fns";
@@ -15,12 +23,6 @@ const RejectedVacationRequests = ({ vac, userObj }) => {
               {format(vac.returnToWorkDate, "MM/dd/yyyy")}
             </p>
           </HoverCard.Trigger>
-          {/* <fetcher.Form method="POST">
-            <input type="hidden" name="vacationId" value={vac._id} />
-            <Button name="intent" value="delete-vacation">
-              Del.
-            </Button>
-          </fetcher.Form> */}
           <Button
             onClick={() => {
               if (window.confirm("Are you sure you want to delete vacation?")) {
@@ -52,11 +54,12 @@ const RejectedVacationRequests = ({ vac, userObj }) => {
                     </Heading>
                     {vac.approvals[proj._id] &&
                       (vac.approvals[proj._id].accepted === "true" ? (
-                        <p>Accepted</p>
+                        <Badge>Accepted</Badge>
                       ) : (
-                        <p>
-                          Rejected because: {vac.approvals[proj._id].reason}
-                        </p>
+                        <>
+                          <Badge color="red">Rejected </Badge>{" "}
+                          <small>{vac.approvals[proj._id].reason}</small>
+                        </>
                       ))}
                   </Box>
                 );

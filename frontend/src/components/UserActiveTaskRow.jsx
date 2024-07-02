@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import { isTaskAtRisk } from "../utility";
 
 // icon
-import { FaEdit } from "react-icons/fa";
+// import { FaEdit } from "react-icons/fa";
 
 const UserActiveTaskRow = ({
   task,
@@ -191,7 +191,7 @@ const UserActiveTaskRow = ({
         </>
       )}
       {!isMobileResolution && (
-        <Table.Cell>{format(new Date(task.deadline), "MM/dd/yyyy")}</Table.Cell>
+        <Table.Cell>{format(new Date(task.deadline), "dd/MM/yyyy")}</Table.Cell>
       )}
       {!task.archived && !taskDetail && (
         <Table.Cell>

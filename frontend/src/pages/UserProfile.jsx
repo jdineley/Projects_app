@@ -136,139 +136,143 @@ export default function UserProfile() {
   }, [userObj?.vacationRequests, vacEndInState, vacStartInState]);
 
   return (
-    <Grid
-      columns={isTabletResolution ? "1" : "2"}
-      gap="3"
-      width="auto"
-      style={
-        isTabletResolution ? { maxWidth: "600px" } : { maxWidth: "1000px" }
-      }
-    >
-      <Card className="flex-1">
-        <h2>Personal vacation management</h2>
-        <div className="border-b border-solid border-0 border-slate-200">
-          <h3>
-            Remaining vacation days:{" "}
-            <small>
-              {(localVacDaysRemainingRendered ||
-                localVacDaysRemainingRendered === 0) &&
-              dateSelectionErrors.length === 0
-                ? localVacDaysRemainingRendered
-                : userObj?.remainingVacationDays}
-            </small>
-          </h3>
-        </div>
-        <div className="border-b border-solid border-0 border-slate-200">
-          <h3>Vacation request</h3>
-          <fetcher.Form method="post" className="mb-4">
-            <label htmlFor="lastWorkDate">
-              Enter last date at work:
-              <input
-                type="date"
-                name="lastWorkDate"
-                id="lastWorkDate"
-                placeholder="Last date at work"
-                disabled={userObj?.remainingVacationDays === 0 ? true : false}
-                onChange={(e) => {
-                  setVacStartInState(e.target.value);
-                }}
-                value={vacStartInState}
-              />
-            </label>
-            <label>
-              Enter return to work date:
-              <input
-                type="date"
-                id="returnToWorkDate"
-                name="returnToWorkDate"
-                placeholder="Return to work date"
-                disabled={userObj?.remainingVacationDays === 0 ? true : false}
-                onChange={(e) => {
-                  setVacEndInState(e.target.value);
-                }}
-                value={vacEndInState}
-              />
-            </label>
-            {localVacDaysRemaining >= 0 && dateSelectionErrors.length === 0 && (
-              <button
-                disabled={fetcher.state === "submitting" ? true : false}
-                name="intent"
-                value="create-vacation"
-              >
-                Send vacation request
-              </button>
-            )}
-            {localVacDaysRemaining && localVacDaysRemaining < 0 ? (
-              <Text as="p" color="tomato">
-                You have exceeded your vacation allocation
-              </Text>
-            ) : null}
-            {dateSelectionErrors.map((msg, i) => {
-              return (
-                <Text key={i} as="p" color="tomato">
-                  {msg}
+    <>
+      <h1 className="mb-4">User Profile</h1>
+      <Grid
+        columns={isTabletResolution ? "1" : "2"}
+        gap="3"
+        width="auto"
+        style={
+          isTabletResolution ? { maxWidth: "600px" } : { maxWidth: "1000px" }
+        }
+      >
+        <Card className="flex-1">
+          <h2>Personal vacation management</h2>
+          <div className="border-b border-solid border-0 border-slate-200">
+            <h3>
+              Remaining vacation days:{" "}
+              <small>
+                {(localVacDaysRemainingRendered ||
+                  localVacDaysRemainingRendered === 0) &&
+                dateSelectionErrors.length === 0
+                  ? localVacDaysRemainingRendered
+                  : userObj?.remainingVacationDays}
+              </small>
+            </h3>
+          </div>
+          <div className="border-b border-solid border-0 border-slate-200">
+            <h3>Vacation request</h3>
+            <fetcher.Form method="post" className="mb-4">
+              <label htmlFor="lastWorkDate">
+                Enter last date at work:
+                <input
+                  type="date"
+                  name="lastWorkDate"
+                  id="lastWorkDate"
+                  placeholder="Last date at work"
+                  disabled={userObj?.remainingVacationDays === 0 ? true : false}
+                  onChange={(e) => {
+                    setVacStartInState(e.target.value);
+                  }}
+                  value={vacStartInState}
+                />
+              </label>
+              <label>
+                Enter return to work date:
+                <input
+                  type="date"
+                  id="returnToWorkDate"
+                  name="returnToWorkDate"
+                  placeholder="Return to work date"
+                  disabled={userObj?.remainingVacationDays === 0 ? true : false}
+                  onChange={(e) => {
+                    setVacEndInState(e.target.value);
+                  }}
+                  value={vacEndInState}
+                />
+              </label>
+              {localVacDaysRemaining >= 0 &&
+                dateSelectionErrors.length === 0 && (
+                  <button
+                    disabled={fetcher.state === "submitting" ? true : false}
+                    name="intent"
+                    value="create-vacation"
+                  >
+                    Send vacation request
+                  </button>
+                )}
+              {localVacDaysRemaining && localVacDaysRemaining < 0 ? (
+                <Text as="p" color="tomato">
+                  You have exceeded your vacation allocation
                 </Text>
-              );
-            })}
-          </fetcher.Form>
-        </div>
+              ) : null}
+              {dateSelectionErrors.map((msg, i) => {
+                return (
+                  <Text key={i} as="p" color="tomato">
+                    {msg}
+                  </Text>
+                );
+              })}
+            </fetcher.Form>
+          </div>
 
-        {pendingVacationRequests?.length > 0 && (
-          <div className="border-b border-solid border-0 border-slate-200">
-            <h3>Pending vacation requests:</h3>
-            {pendingVacationRequests?.map((vac) => {
-              return (
-                <PendingVacationRequests
-                  key={vac._id}
-                  userObj={userObj}
-                  vac={vac}
-                />
-              );
-            })}
-          </div>
-        )}
-        {approvedVacationRequests?.length > 0 && (
-          <div className="border-b border-solid border-0 border-slate-200">
-            <h3>Approved vacation requests:</h3>
-            {approvedVacationRequests?.map((vac) => {
-              return (
-                <ApprovedVacationRequests
-                  key={vac._id}
-                  vac={vac}
-                  userObj={userObj}
-                />
-              );
-            })}
-          </div>
-        )}
-        {rejectedVacationRequests?.length > 0 && (
-          <div className="border-b border-solid border-0 border-slate-200">
-            <h3>Rejected vacation requests:</h3>
-            {rejectedVacationRequests?.map((vac) => {
-              return (
-                <RejectedVacationRequests
-                  key={vac._id}
-                  vac={vac}
-                  userObj={userObj}
-                />
-              );
-            })}
-          </div>
-        )}
-      </Card>
-      <Card className="flex-1">
-        <h2>Project vacation management</h2>
-        <div className="flex flex-col gap-9">
-          {userObj?.projects.map((proj) => (
-            <div key={proj._id}>
-              <h3>{proj.title}</h3>
-              <div>
-                <ProjectTimeline project={proj} userProfile={true} />
-              </div>
+          {pendingVacationRequests?.length > 0 && (
+            <div className="border-b border-solid border-0 border-slate-200">
+              <h3>Pending vacation requests:</h3>
+              {pendingVacationRequests?.map((vac) => {
+                return (
+                  <PendingVacationRequests
+                    key={vac._id}
+                    userObj={userObj}
+                    vac={vac}
+                  />
+                );
+              })}
             </div>
-          ))}
-        </div>
-      </Card>
-    </Grid>
+          )}
+          {approvedVacationRequests?.length > 0 && (
+            <div className="border-b border-solid border-0 border-slate-200">
+              <h3>Approved vacation requests:</h3>
+              {approvedVacationRequests?.map((vac) => {
+                return (
+                  <ApprovedVacationRequests
+                    key={vac._id}
+                    vac={vac}
+                    userObj={userObj}
+                  />
+                );
+              })}
+            </div>
+          )}
+          {rejectedVacationRequests?.length > 0 && (
+            <div className="border-b border-solid border-0 border-slate-200">
+              <h3>Rejected vacation requests:</h3>
+              {rejectedVacationRequests?.map((vac) => {
+                return (
+                  <RejectedVacationRequests
+                    key={vac._id}
+                    vac={vac}
+                    userObj={userObj}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </Card>
+        <Card className="flex-1">
+          <h2>Project vacation management</h2>
+          <div className="flex flex-col gap-9">
+            {userObj?.projects.map((proj) => (
+              <div key={proj._id}>
+                <h3>{proj.title}</h3>
+                <div>
+                  <ProjectTimeline project={proj} userProfile={true} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </Grid>
+    </>
   );
 }

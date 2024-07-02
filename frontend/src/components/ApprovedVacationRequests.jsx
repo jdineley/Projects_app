@@ -1,4 +1,12 @@
-import { Text, HoverCard, Flex, Box, Heading, Button } from "@radix-ui/themes";
+import {
+  Text,
+  HoverCard,
+  Flex,
+  Box,
+  Heading,
+  Button,
+  Badge,
+} from "@radix-ui/themes";
 import { useFetcher } from "react-router-dom";
 
 import { format } from "date-fns";
@@ -52,13 +60,9 @@ const ApprovedVacationRequests = ({ vac, userObj }) => {
                       {proj.title}(PM:{proj.owner.email})
                     </Heading>
                     {vac.approvals[proj._id] &&
-                      (vac.approvals[proj._id].accepted === "true" ? (
-                        <p>Accepted</p>
-                      ) : (
-                        <p>
-                          Rejected because: {vac.approvals[proj._id].reason}
-                        </p>
-                      ))}
+                      vac.approvals[proj._id].accepted === "true" && (
+                        <Badge>Accepted</Badge>
+                      )}
                   </Box>
                 );
               })}

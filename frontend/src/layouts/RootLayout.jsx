@@ -193,19 +193,19 @@ export default function RouteLayout() {
           <div id="app-title">
             <FcCollaboration size="40px" />
             <h1>Projects</h1>
-            {currentPathNoQuery === "/user" ? <p>- user profile</p> : ""}
+            {/* {currentPathNoQuery === "/user" ? <p>- user profile</p> : ""} */}
           </div>
-          {user && !isMobileResolution && (
+          {user && (
             <NavLink to="/dashboard">
               <Button variant="ghost" color="gray">
-                Dashboard
+                {!isMobileResolution ? "Dashboard" : "Dash"}
               </Button>
             </NavLink>
           )}
           {user && (
             <NavLink to="/projects">
               <Button variant="ghost" color="gray">
-                Projects
+                {!isMobileResolution ? "Projects" : "Proj"}
               </Button>
             </NavLink>
           )}

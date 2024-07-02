@@ -82,7 +82,7 @@ export default function Projects() {
               </Table.Cell>
             )}
             <Table.Cell>
-              {format(new Date(project.end), "MM/dd/yyyy")}
+              {format(new Date(project.end), "dd/MM/yyyy")}
             </Table.Cell>
             {!isMobileResolution && (
               <Table.Cell>{project.tasks.length}</Table.Cell>
@@ -196,7 +196,7 @@ export default function Projects() {
                 <Link to={project._id}>{project.title}</Link>
               </Table.Cell>
               <Table.Cell>
-                {format(new Date(project.end), "MM/dd/yyyy")}
+                {format(new Date(project.end), "dd/MM/yyyy")}
               </Table.Cell>
               {!isMobileResolution && (
                 <Table.Cell>{project.tasks.length}</Table.Cell>
@@ -216,7 +216,7 @@ export default function Projects() {
                 <Link to={project._id}>{project.title}</Link>
               </Table.Cell>
               <Table.Cell>
-                {format(new Date(project.end), "MM/dd/yyyy")}
+                {format(new Date(project.end), "dd/MM/yyyy")}
               </Table.Cell>
               <Table.Cell>{project.owner.email}</Table.Cell>
             </Table.Row>
