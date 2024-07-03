@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 
-import { Dialog, Button, Flex, TextField, Text } from "@radix-ui/themes";
+import { Dialog, Button, Flex, TextField, Text, Badge } from "@radix-ui/themes";
 
 // icons
 import { CiTrash } from "react-icons/ci";
 import { FaEdit } from "react-icons/fa";
 
-import { isBefore, isEqual } from "date-fns";
+import { isBefore, isEqual, isWithinInterval } from "date-fns";
 
 const ProjectTitleEditDialog = ({
   projectTitle,
@@ -26,7 +26,7 @@ const ProjectTitleEditDialog = ({
   const [open, setOpen] = useState(false);
   const [formFieldsCompleted, setFormFieldsCompleted] = useState(true);
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
-
+  console.log(projectReviews);
   let saving = false;
   // let deleting = false;
   let archiving = false;
@@ -50,6 +50,21 @@ const ProjectTitleEditDialog = ({
     ) {
       localDateSelectionErrors.push("start and end dates must be different");
     }
+    if (projectReviews.length > 0) {
+      projectReviews.forEach((rev) => {
+        if (
+          rev.date &&
+          !isWithinInterval(new Date(rev.date), {
+            start: new Date(projectStart),
+            end: new Date(projectEnd),
+          })
+        ) {
+          localDateSelectionErrors.push(
+            "review dates must between project start and end"
+          );
+        }
+      });
+    }
 
     setDateSelectionErrors(localDateSelectionErrors);
     const errorTracker = [projectTitle, projectStart, projectEnd].filter(
@@ -59,7 +74,7 @@ const ProjectTitleEditDialog = ({
     );
     if (errorTracker.length === 3) setFormFieldsCompleted(true);
     else setFormFieldsCompleted(false);
-  }, [projectEnd, projectStart, projectTitle]);
+  }, [projectEnd, projectStart, projectTitle, projectReviews]);
 
   return (
     <Dialog.Root
@@ -147,7 +162,7 @@ const ProjectTitleEditDialog = ({
             <div key={review._id} className="review-form">
               <label>
                 <Text as="div" size="2" mb="1" weight="bold">
-                  Review Title
+                  Review Title {!review._id && <Badge>new review</Badge>}
                 </Text>
                 <TextField.Input
                   name="title"
@@ -189,34 +204,61 @@ const ProjectTitleEditDialog = ({
                   }}
                 />
               </label>
-              <button
-                className="review-trash"
-                onClick={() => {
-                  const filteredReviews = arr.filter((rev) => {
-                    return rev._id !== review._id;
-                  });
-                  setProjectReviews(filteredReviews);
-                  // ** Delete review and children from the db?
-                }}
-              >
-                <CiTrash size="20px" />
-              </button>
+              {review._id && (
+                <button
+                  className="review-trash"
+                  onClick={() => {
+                    // const filteredReviews = arr.filter((rev, index) => {
+                    //   if (rev._id) return rev._id !== review._id;
+                    //   else {
+                    //     return index.toString() !== document.getElementById(i).id;
+                    //     // console.log(typeof index);
+                    //   }
+                    // });
+                    // setProjectReviews(filteredReviews);
+                    const filteredReviews = arr.filter((rev) => {
+                      return rev._id !== review._id;
+                    });
+                    setProjectReviews(filteredReviews);
+                    // ** Delete review and children from the db?
+                  }}
+                >
+                  <CiTrash size="20px" />
+                </button>
+              )}
             </div>
           ))}
         </Flex>
-        <Button
-          onClick={() => {
-            setProjectReviews([
-              ...projectReviews,
-              {
-                title: "",
-                date: "",
-              },
-            ]);
-          }}
-        >
-          Add Review
-        </Button>
+        <Flex justify="between">
+          <Button
+            onClick={() => {
+              setProjectReviews([
+                ...projectReviews,
+                {
+                  title: "",
+                  date: "",
+                },
+              ]);
+            }}
+          >
+            Add Review
+          </Button>
+          {projectReviews.some((rev) => !rev._id) && (
+            <button
+              className="review-trash"
+              onClick={() => {
+                const filteredReviews = projectReviews.filter((rev) =>
+                  rev._id ? rev : null
+                );
+                setProjectReviews(filteredReviews);
+                // ** Delete review and children from the db?
+              }}
+            >
+              {/* <CiTrash size="20px" /> */}
+              Delete all new reviews
+            </button>
+          )}
+        </Flex>
         {dateSelectionErrors.map((msg, i) => {
           return (
             <Text key={i} as="p" color="tomato">

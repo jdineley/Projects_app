@@ -105,16 +105,20 @@ const VacationRequestDialog = ({ vac, project, rejected }) => {
                 Accept
               </label>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <RadioGroup.Item
-                className="RadioGroupItem"
-                value={false}
-                id="r2"
-              />
-              <label className="Label" htmlFor="r2" style={{ margin: "0px" }}>
-                Reject
-              </label>
-            </div>
+            {!rejected && (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <RadioGroup.Item
+                  className="RadioGroupItem"
+                  value={false}
+                  id="r2"
+                />
+                <label className="Label" htmlFor="r2" style={{ margin: "0px" }}>
+                  Reject
+                </label>
+              </div>
+            )}
           </RadioGroup.Root>
           {vacationAccepted === false && (
             <label>

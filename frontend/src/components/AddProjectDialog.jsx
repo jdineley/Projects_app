@@ -12,7 +12,7 @@ import {
 // icons
 import { MdOutlinePostAdd } from "react-icons/md";
 
-import { isBefore, isEqual } from "date-fns";
+import { isBefore, isEqual, isWithinInterval } from "date-fns";
 
 const AddProjectDialog = ({
   projectTitle,
@@ -52,6 +52,21 @@ const AddProjectDialog = ({
     ) {
       localDateSelectionErrors.push("start and end dates must be different");
     }
+    if (projectReviews.length > 0) {
+      projectReviews.forEach((rev) => {
+        if (
+          rev.date &&
+          !isWithinInterval(new Date(rev.date), {
+            start: new Date(projectStart),
+            end: new Date(projectEnd),
+          })
+        ) {
+          localDateSelectionErrors.push(
+            "review dates must between project start and end"
+          );
+        }
+      });
+    }
     setDateSelectionErrors(localDateSelectionErrors);
 
     const errorTracker = [projectTitle, projectStart, projectEnd].filter(
@@ -61,7 +76,7 @@ const AddProjectDialog = ({
     );
     if (errorTracker.length === 3) setFormFieldsCompleted(true);
     else setFormFieldsCompleted(false);
-  }, [projectEnd, projectStart, projectTitle]);
+  }, [projectEnd, projectStart, projectTitle, projectReviews]);
 
   return (
     <Dialog.Root
