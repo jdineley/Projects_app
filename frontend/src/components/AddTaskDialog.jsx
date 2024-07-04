@@ -15,7 +15,7 @@ import {
 
 import { MdOutlinePostAdd } from "react-icons/md";
 
-import { isPast, isToday } from "date-fns";
+import { isPast, isToday, isWithinInterval } from "date-fns";
 
 export const AddTaskDialog = ({
   userTask,
@@ -64,6 +64,18 @@ export const AddTaskDialog = ({
     if (daysToCompleteTask === "0") {
       userInputErrorMessages.push(
         "Days to complete task must be greater than 0"
+      );
+    }
+
+    if (
+      newTaskDeadline &&
+      !isWithinInterval(new Date(newTaskDeadline), {
+        start: new Date(project.start),
+        end: new Date(project.end),
+      })
+    ) {
+      userInputErrorMessages.push(
+        "Task deadline must fall within the project timescale"
       );
     }
 

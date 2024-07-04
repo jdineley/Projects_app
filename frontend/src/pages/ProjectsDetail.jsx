@@ -319,7 +319,8 @@ export default function ProjectsDetail() {
           <div>
             <ProjectTimeline project={project} />
             <div className="title-icon-collect">
-              <h3>My {!project?.archived && "Active"} Tasks</h3>
+              {/* <h3>My {!project?.archived && "Active"} Tasks</h3> */}
+              <h3>My Tasks</h3>
               {!project?.archived && (
                 <AddTaskDialog
                   searchedTasks={searchedTasks}
@@ -401,7 +402,7 @@ export default function ProjectsDetail() {
         )}
         <div className="other-users-container">
           <div className="title-icon-collect">
-            <h3>Other users tasks</h3>
+            <h3>Other users Tasks</h3>
             {user._id === project?.owner._id && !project?.archived && (
               <AddTaskDialog
                 userTask={false}
