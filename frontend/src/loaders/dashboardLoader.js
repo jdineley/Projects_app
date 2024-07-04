@@ -2,24 +2,6 @@ const dashboardLoader = (user) => async () => {
   console.log("in dashboard loader");
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   try {
-    // const res = await fetch("http://localhost:4000/api/v1/projects", {
-    //   method: "GET",
-    //   mode: "cors",
-    //   headers: {
-    //     Authorization: `Bearer ${user.token}`,
-    //   },
-    // });
-
-    // if (!res.ok) {
-    //   throw Error("could not fetch the list of projects");
-    // }
-
-    // const projects = await res.json();
-    // console.log(projects);
-    // return projects;
-    // if (!res.ok) {
-    //   throw Error("could not fetch the current user");
-    // }
     if (user) {
       const res2 = await fetch(
         `${VITE_REACT_APP_API_URL}/api/v1/users/getUser`,

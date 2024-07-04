@@ -1,11 +1,11 @@
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNotificationContext } from "./useNotificationContext";
-
+import { useNavigate } from "react-router-dom";
 // import { ssEvents } from "../context/AuthContext";
 
 export const useLogout = () => {
   const { VITE_REACT_APP_API_URL } = import.meta.env;
-
+  const navigate = useNavigate();
   const { user, dispatch: dispatchAuth } = useAuthContext();
   const { dispatch: dispatchNotification } = useNotificationContext();
   // const ssEvents = new EventSource("http://localhost:4000/api/v1/stream");
@@ -34,6 +34,7 @@ export const useLogout = () => {
           dispatchNotification({
             type: "CLEAR_NOTIFICATIONS",
           });
+          navigate(0);
           // ssEvents.close();
           // console.log("connection closed");
         } else {

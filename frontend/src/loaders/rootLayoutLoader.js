@@ -8,7 +8,6 @@ const rootLayoutLoader =
     const newCommentId = url.searchParams.get("commentId");
     const newCommenterEmail = url.searchParams.get("user");
     const notificationsCleared = url.searchParams.get("notificationsCleared");
-    console.log(notificationsCleared);
     try {
       if (user) {
         const resp1 = await fetch(
@@ -39,8 +38,12 @@ const rootLayoutLoader =
     } catch (error) {
       throw Error(error.message);
     }
-
-    return { newCommentId, newCommenterEmail };
+    return {
+      userObj: null,
+      notificationsCleared: null,
+      newCommentId,
+      newCommenterEmail,
+    };
   };
 
 export default rootLayoutLoader;

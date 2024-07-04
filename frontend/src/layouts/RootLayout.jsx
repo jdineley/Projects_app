@@ -44,6 +44,7 @@ export default function RouteLayout() {
   const actionDataMonitor = useRef(false);
 
   const { userObj, notificationsCleared } = useLoaderData();
+
   console.log(userObj);
   const path = useActionData();
   if (path) {
@@ -83,7 +84,6 @@ export default function RouteLayout() {
           type: "CLEAR_NOTIFICATIONS",
         });
       }
-      // navigate(location.pathname);
     }
     if (!notification && !userObj?.error) {
       if (userObj?.recentReceivedComments.length > 0) {
@@ -193,7 +193,6 @@ export default function RouteLayout() {
           <div id="app-title">
             <FcCollaboration size="40px" />
             <h1>Projects</h1>
-            {/* {currentPathNoQuery === "/user" ? <p>- user profile</p> : ""} */}
           </div>
           {user && (
             <NavLink to="/dashboard">
@@ -233,8 +232,12 @@ export default function RouteLayout() {
                         notification ? (
                           <>
                             <IoIosNotifications color="white" size="1.5em" />
-                            <Text size="1" highContrast={true}>
-                              ({urls.length})
+                            <Text
+                              size="1"
+                              highContrast={true}
+                              className="text-white"
+                            >
+                              {urls.length}
                             </Text>
                           </>
                         ) : (
@@ -355,6 +358,7 @@ export default function RouteLayout() {
       <main className={navigation.state === "loading" ? "loading" : ""}>
         <Outlet />
       </main>
+      <footer></footer>
     </div>
   );
 }
