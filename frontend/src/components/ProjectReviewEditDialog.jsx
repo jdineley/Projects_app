@@ -322,6 +322,7 @@ const ProjectReviewEditDialog = ({
               },
               "newObjective"
             );
+            document.getElementById("newObjectiveTitle").value = "";
           }}
         >
           <Flex gap="2">

@@ -63,11 +63,7 @@ export default function ProjectsDetail() {
 
   const { user } = useAuthContext();
   const submit = useSubmit();
-  const navigation = useNavigation();
   const { notification } = useNotificationContext();
-  console.log(notification, percentCompleteChanged, json);
-
-  const saving = navigation.location && percentCompleteChanged;
 
   const percentChangeButtonsRef = useRef([]);
   const archiveButtonRef = useRef(null);
@@ -83,14 +79,11 @@ export default function ProjectsDetail() {
         inline: "nearest",
       });
     }
-    if (percentCompleteChanged) {
-      setPercentCompleteChanged(false);
-    }
     if (json) {
       const { result } = json;
       toast(result);
     }
-  }, [notification, newTaskId, json, percentCompleteChanged]);
+  }, [notification, newTaskId, json]);
 
   let userTasks;
   let otherUsersTasks;
@@ -112,6 +105,7 @@ export default function ProjectsDetail() {
     percentChangeButtonsRef.current.forEach((button) => {
       submit(button);
       percentChangeButtonsRef.current = [];
+      setPercentCompleteChanged(false);
     });
   }
 
@@ -352,7 +346,6 @@ export default function ProjectsDetail() {
                                 type="submit"
                                 onClick={handleSubmitAllPercentFetchers}
                                 id="percent-complete-save"
-                                className={saving && "saving"}
                                 style={{
                                   backgroundColor: percentCompleteChanged
                                     ? "rgb(22, 101, 192)"

@@ -242,6 +242,7 @@ const ReviewObjectiveEdit = ({
               },
               "newAction"
             );
+            document.getElementById("newObjectiveAction").value = "";
           }}
         >
           <Box as="div" mb="3">
