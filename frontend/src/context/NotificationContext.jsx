@@ -7,9 +7,10 @@ export const notificationReducer = (state, action) => {
     case "NEW_NOTIFICATION":
       return {
         notification: true,
-        urls: [...state.urls, action.payload.url].filter(
-          (url, i, arr) => arr.indexOf(url) === i
-        ),
+        // urls: [...state.urls, action.payload.url].filter(
+        //   (url, i, arr) => arr.indexOf(url) === i
+        // ),
+        urls: [...state.urls, action.payload.url],
       };
     case "CLEAR_NOTIFICATION":
       return {

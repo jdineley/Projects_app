@@ -103,9 +103,12 @@ const createTask = async (req, res) => {
     res.status(200).json(task);
     console.log("just before pub new task", task.user, req.user._id);
     if (task.user.toString() !== req.user._id.toString()) {
-      user.recentReceivedTasks.push(
+      user.recievedNotifications.push(
         `/projects/${projectId}?taskId=${task._id}&user=${req.user.email}&projectTitle=${project.title}&intent=new-task`
       );
+      // user.recentReceivedTasks.push(
+      //   `/projects/${projectId}?taskId=${task._id}&user=${req.user.email}&projectTitle=${project.title}&intent=new-task`
+      // );
       await user.save();
 
       channel.publish(

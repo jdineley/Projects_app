@@ -36,9 +36,12 @@ const createComment = async (req, res) => {
       await task.save();
       const taskOwner = await User.findById(task.user);
       if (user._id.toString() !== taskOwner._id.toString()) {
-        taskOwner.recentReceivedComments.push(
+        taskOwner.recievedNotifications.push(
           `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-comment`
         );
+        // taskOwner.recentReceivedComments.push(
+        //   `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-comment`
+        // );
         await taskOwner.save();
         channel.publish(
           `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-comment`,
@@ -59,9 +62,12 @@ const createComment = async (req, res) => {
       if (action.actionees.length > 0) {
         for (const actionee of action.actionees) {
           if (actionee._id.toString() !== user._id.toString()) {
-            actionee.recentReceivedComments.push(
+            actionee.recievedNotifications.push(
               `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-comment`
             );
+            // actionee.recentReceivedComments.push(
+            //   `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-comment`
+            // );
             await actionee.save();
 
             channel.publish(

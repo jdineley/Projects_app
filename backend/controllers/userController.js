@@ -126,15 +126,17 @@ const updateUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (intent === "clear-notifications") {
-      user.recentReceivedComments = [];
-      user.recentReceivedReplies = [];
-      user.recentReceivedTasks = [];
-      user.recentReceivedVacRequest = [];
-      user.recentReceivedVacAccepted = [];
-      user.recentReceivedVacRejected = [];
-      user.recentReceivedVacApproved = [];
-      user.recentReceivedVacDeleted = [];
-      user.recentReceivedActions = [];
+      // user.recentReceivedComments = [];
+      // user.recentReceivedReplies = [];
+      // user.recentReceivedTasks = [];
+      // user.recentReceivedVacRequest = [];
+      // user.recentReceivedVacAccepted = [];
+      // user.recentReceivedVacRejected = [];
+      // user.recentReceivedVacApproved = [];
+      // user.recentReceivedVacDeleted = [];
+      // user.recentReceivedActions = [];
+      // user.recentDeletedActions = [];
+      user.recievedNotifications = [];
       await user.save();
       res.status(200).json(user);
     }

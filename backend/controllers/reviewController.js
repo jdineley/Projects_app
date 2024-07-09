@@ -148,25 +148,49 @@ const updateReview = async (req, res) => {
     // notify new actionees of their new action
     if (actioneeNotificationData) {
       const { notificationTracker } = actioneeNotificationData;
+      console.log("*** notification tracker ***", notificationTracker);
       if (notificationTracker.length > 0) {
         for (const trackerElement of notificationTracker) {
           console.log("objectiveId", trackerElement.objectiveId);
           console.log("actionId", trackerElement.actionId);
           console.log("actioneeId", trackerElement.actioneeId);
+          const { type } = trackerElement;
+
           const actionee = await User.findById(trackerElement.actioneeId);
           const action = await ReviewAction.findById(trackerElement.actionId);
           const objective = await ReviewObjective.findById(
             trackerElement.objectiveId
           );
-          actionee.recentReceivedActions.push(
-            `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&intent=new-reviewAction`
-          );
-          await actionee.save();
+          if (type === "add") {
+            actionee.recievedNotifications.push(
+              `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&intent=new-reviewAction`
+            );
+            await actionee.save();
+            // channel.publish("sending", `sending-notification${actionee._id}`);
 
-          channel.publish(
-            `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&intent=new-reviewAction`,
-            `new-reviewAction-notification${actionee._id}`
-          );
+            channel.publish(
+              `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&intent=new-reviewAction`,
+              `new-reviewAction-notification${actionee._id}`
+            );
+          } else {
+            //type === 'remove'
+            // actionee.recentReceivedActions =
+            //   actionee.recentReceivedActions.filter(
+            //     (url) =>
+            //       `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&intent=new-reviewAction` !==
+            //       url
+            //   );
+            actionee.recievedNotifications.push(
+              `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&intent=removed-reviewAction`
+            );
+            await actionee.save();
+            // channel.publish("sending", `sending-notification${actionee._id}`);
+
+            channel.publish(
+              `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&intent=removed-reviewAction`,
+              `removed-reviewAction-notification${actionee._id}`
+            );
+          }
         }
       }
     }

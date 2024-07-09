@@ -82,11 +82,16 @@ const createReply = async (req, res) => {
       .forEach(async (user) => {
         const userObj = await User.findById(user);
         // if (!userObj.isLoggedIn) {
-        userObj.recentReceivedReplies.push(
+        userObj.recievedNotifications.push(
           comment.task
             ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-reply`
             : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-reply`
         );
+        // userObj.recentReceivedReplies.push(
+        //   comment.task
+        //     ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-reply`
+        //     : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-reply`
+        // );
         await userObj.save();
         // }
         channel.publish(

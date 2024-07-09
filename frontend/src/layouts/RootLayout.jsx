@@ -83,12 +83,15 @@ export default function RouteLayout() {
         notificationDispatch({
           type: "CLEAR_NOTIFICATIONS",
         });
+        navigate(currentPathNoQuery);
       }
     }
+
     if (!notification && !userObj?.error) {
-      if (userObj?.recentReceivedComments.length > 0) {
-        console.log("Notification - new comments received");
-        userObj.recentReceivedComments.forEach((url) => {
+      console.log("in redistribute notifications...", notification);
+
+      if (userObj?.recievedNotifications.length > 0) {
+        userObj.recievedNotifications.forEach((url) => {
           notificationDispatch({
             type: "NEW_NOTIFICATION",
             payload: {
@@ -97,83 +100,125 @@ export default function RouteLayout() {
           });
         });
       }
-      if (userObj?.recentReceivedReplies?.length > 0) {
-        console.log("Notification - new replies received");
-        userObj.recentReceivedReplies.forEach((url) => {
-          notificationDispatch({
-            type: "NEW_NOTIFICATION",
-            payload: {
-              url,
-            },
-          });
-        });
-      }
-      if (userObj?.recentReceivedTasks?.length > 0) {
-        console.log("Notification - new tasks received");
-        userObj.recentReceivedTasks.forEach((url) => {
-          notificationDispatch({
-            type: "NEW_NOTIFICATION",
-            payload: {
-              url,
-            },
-          });
-        });
-      }
-      if (userObj?.recentReceivedVacRequest?.length > 0) {
-        console.log("Notification - new vacation requests received");
-        userObj.recentReceivedVacRequest.forEach((url) => {
-          notificationDispatch({
-            type: "NEW_NOTIFICATION",
-            payload: {
-              url,
-            },
-          });
-        });
-      }
-      if (userObj?.recentReceivedVacAccepted?.length > 0) {
-        console.log("Notification - new vacation accepted received");
-        userObj.recentReceivedVacAccepted.forEach((url) => {
-          notificationDispatch({
-            type: "NEW_NOTIFICATION",
-            payload: {
-              url,
-            },
-          });
-        });
-      }
-      if (userObj?.recentReceivedVacRejected?.length > 0) {
-        console.log("Notification - new vacation rejected received");
-        userObj.recentReceivedVacRejected.forEach((url) => {
-          notificationDispatch({
-            type: "NEW_NOTIFICATION",
-            payload: {
-              url,
-            },
-          });
-        });
-      }
-      if (userObj?.recentReceivedVacApproved?.length > 0) {
-        console.log("Notification - new vacation approved received");
-        userObj.recentReceivedVacApproved.forEach((url) => {
-          notificationDispatch({
-            type: "NEW_NOTIFICATION",
-            payload: {
-              url,
-            },
-          });
-        });
-      }
-      if (userObj?.recentReceivedVacDeleted?.length > 0) {
-        console.log("Notification - new vacation approved received");
-        userObj.recentReceivedVacDeleted.forEach((url) => {
-          notificationDispatch({
-            type: "NEW_NOTIFICATION",
-            payload: {
-              url,
-            },
-          });
-        });
-      }
+
+      // if (userObj?.recentReceivedComments.length > 0) {
+      //   // console.log("Notification - new comments received");
+      //   userObj.recentReceivedComments.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (userObj?.recentReceivedReplies?.length > 0) {
+      //   // console.log("Notification - new replies received");
+      //   userObj.recentReceivedReplies.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (userObj?.recentReceivedTasks?.length > 0) {
+      //   // console.log("Notification - new tasks received");
+      //   userObj.recentReceivedTasks.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (userObj?.recentReceivedVacRequest?.length > 0) {
+      //   // console.log("Notification - new vacation requests received");
+      //   userObj.recentReceivedVacRequest.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (userObj?.recentReceivedVacAccepted?.length > 0) {
+      //   // console.log("Notification - new vacation accepted received");
+      //   userObj.recentReceivedVacAccepted.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (userObj?.recentReceivedVacRejected?.length > 0) {
+      //   // console.log("Notification - new vacation rejected received");
+      //   userObj.recentReceivedVacRejected.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (userObj?.recentReceivedVacApproved?.length > 0) {
+      //   // console.log("Notification - new vacation approved received");
+      //   userObj.recentReceivedVacApproved.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (userObj?.recentReceivedVacDeleted?.length > 0) {
+      //   // console.log("Notification - new vacation approved received");
+      //   userObj.recentReceivedVacDeleted.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (userObj?.recentReceivedActions?.length > 0) {
+      //   // console.log("Notification - new vacation approved received");
+      //   userObj.recentReceivedActions.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (userObj?.recentDeletedActions?.length > 0) {
+      //   // console.log("Notification - new vacation approved received");
+      //   userObj.recentDeletedActions.forEach((url) => {
+      //     notificationDispatch({
+      //       type: "NEW_NOTIFICATION",
+      //       payload: {
+      //         url,
+      //       },
+      //     });
+      //   });
+      // }
+      // if (receivingRef.current) {
+      //   receivingRef.current = false;
+      // }
+      // if (receiving) {
+      //   externalInteractionDispatch({
+      //     type: "RECEIVED",
+      //   });
+      // }
     }
   }, [
     user,
@@ -290,7 +335,7 @@ export default function RouteLayout() {
                         });
 
                         return (
-                          <Link key={url} to={url}>
+                          <Link key={i} to={url}>
                             <DropdownMenu.Item>
                               {`${notificationControlObj.intent}`}
 

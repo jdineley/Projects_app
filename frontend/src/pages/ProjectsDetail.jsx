@@ -315,14 +315,16 @@ export default function ProjectsDetail() {
             <div className="title-icon-collect">
               {/* <h3>My {!project?.archived && "Active"} Tasks</h3> */}
               <h3>My Tasks</h3>
-              {!project?.archived && (
-                <AddTaskDialog
-                  searchedTasks={searchedTasks}
-                  taskDep={taskDep}
-                  project={project}
-                  userTask={true}
-                />
-              )}
+              {!project?.archived &&
+                (project.users.includes(user._id) ||
+                  project.owner._id === user._id) && (
+                  <AddTaskDialog
+                    searchedTasks={searchedTasks}
+                    taskDep={taskDep}
+                    project={project}
+                    userTask={true}
+                  />
+                )}
             </div>
             {userTasks?.length > 0 && (
               <Table.Root variant="surface">

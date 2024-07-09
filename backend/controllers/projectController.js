@@ -35,9 +35,9 @@ const getProject = async (req, res) => {
   try {
     const project = await Project.findById(projectId).populate([
       "owner",
-      "tasks",
+      // "tasks",
       "reviews",
-      "users",
+      // "users",
       { path: "vacationRequests", populate: "user" },
     ]);
     if (!project) {
@@ -45,7 +45,7 @@ const getProject = async (req, res) => {
     }
     let projectTasks = [];
     for (const task of project.tasks) {
-      const populatedTask = await Task.findById(task._id).populate([
+      const populatedTask = await Task.findById(task).populate([
         "user",
         "comments",
         "dependencies",

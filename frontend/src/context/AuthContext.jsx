@@ -52,6 +52,7 @@ export const AuthContextProvider = ({ children }) => {
       });
 
       ssEvents = new EventSource("http://localhost:4000/api/v1/stream");
+
       ssEvents.addEventListener(`new-task-notification${user._id}`, (e) => {
         console.log("in notification dispatch");
         notificationDispatch({
@@ -164,6 +165,20 @@ export const AuthContextProvider = ({ children }) => {
           });
           toast(`New review action notification`);
           // updateUser(user, e.data, "new-reviewAction");
+        }
+      );
+      ssEvents.addEventListener(
+        `removed-reviewAction-notification${user._id}`,
+        (e) => {
+          console.log("in notification dispatch");
+          notificationDispatch({
+            type: "NEW_NOTIFICATION",
+            payload: {
+              url: e.data,
+            },
+          });
+          toast(`Removed review action notification`);
+          // updateUser(user, e.data, "removed-reviewAction");
         }
       );
       ssEvents.addEventListener("open", () => {

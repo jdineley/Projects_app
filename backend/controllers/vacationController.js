@@ -67,7 +67,7 @@ const createVacation = async (req, res) => {
         })
       ) {
         // console.log(projOwner.email);
-        projOwner.recentReceivedVacRequest.push(
+        projOwner.recievedNotifications.push(
           `/user?vacationId=${vacation._id}&user=${
             req.user.email
           }&date=${format(new Date(lastWorkDate), "MM/dd/yyyy")}-${format(
@@ -75,6 +75,14 @@ const createVacation = async (req, res) => {
             "MM/dd/yyyy"
           )}&intent=vacation-request`
         );
+        // projOwner.recentReceivedVacRequest.push(
+        //   `/user?vacationId=${vacation._id}&user=${
+        //     req.user.email
+        //   }&date=${format(new Date(lastWorkDate), "MM/dd/yyyy")}-${format(
+        //     new Date(returnToWorkDate),
+        //     "MM/dd/yyyy"
+        //   )}&intent=vacation-request`
+        // );
         await projOwner.save();
         channel.publish(
           `/user?vacationId=${vacation._id}&user=${
@@ -132,7 +140,7 @@ const updateVacation = async (req, res) => {
       await vacationToUpdate.save();
 
       if (vacationAccepted === "true") {
-        user.recentReceivedVacAccepted.push(
+        user.recievedNotifications.push(
           `/user?vacationId=${vacationToUpdate._id}&user=${
             req.user.email
           }&date=${format(
@@ -143,6 +151,17 @@ const updateVacation = async (req, res) => {
             "MM/dd/yyyy"
           )}&intent=vacation-accepted`
         );
+        // user.recentReceivedVacAccepted.push(
+        //   `/user?vacationId=${vacationToUpdate._id}&user=${
+        //     req.user.email
+        //   }&date=${format(
+        //     new Date(vacationToUpdate.lastWorkDate),
+        //     "MM/dd/yyyy"
+        //   )}-${format(
+        //     new Date(vacationToUpdate.returnToWorkDate),
+        //     "MM/dd/yyyy"
+        //   )}&intent=vacation-accepted`
+        // );
         // await user.save();
         channel.publish(
           `/user?vacationId=${vacationToUpdate._id}&user=${
@@ -171,7 +190,7 @@ const updateVacation = async (req, res) => {
         vacationToUpdate.approved = true;
         await vacationToUpdate.save();
 
-        user.recentReceivedVacApproved.push(
+        user.recievedNotifications.push(
           `/user?vacationId=${vacationToUpdate._id}&date=${format(
             new Date(vacationToUpdate.lastWorkDate),
             "MM/dd/yyyy"
@@ -180,6 +199,15 @@ const updateVacation = async (req, res) => {
             "MM/dd/yyyy"
           )}&intent=vacation-approval`
         );
+        // user.recentReceivedVacApproved.push(
+        //   `/user?vacationId=${vacationToUpdate._id}&date=${format(
+        //     new Date(vacationToUpdate.lastWorkDate),
+        //     "MM/dd/yyyy"
+        //   )}-${format(
+        //     new Date(vacationToUpdate.returnToWorkDate),
+        //     "MM/dd/yyyy"
+        //   )}&intent=vacation-approval`
+        // );
         // await user.save();
 
         channel.publish(
@@ -193,7 +221,7 @@ const updateVacation = async (req, res) => {
           `vacation-approved-notification${vacationToUpdate.user}`
         );
       } else if (approvalValuesArray.includes("false")) {
-        user.recentReceivedVacRejected.push(
+        user.recievedNotifications.push(
           `/user?vacationId=${vacationToUpdate._id}&date=${format(
             new Date(vacationToUpdate.lastWorkDate),
             "MM/dd/yyyy"
@@ -202,6 +230,15 @@ const updateVacation = async (req, res) => {
             "MM/dd/yyyy"
           )}&intent=vacation-rejected`
         );
+        // user.recentReceivedVacRejected.push(
+        //   `/user?vacationId=${vacationToUpdate._id}&date=${format(
+        //     new Date(vacationToUpdate.lastWorkDate),
+        //     "MM/dd/yyyy"
+        //   )}-${format(
+        //     new Date(vacationToUpdate.returnToWorkDate),
+        //     "MM/dd/yyyy"
+        //   )}&intent=vacation-rejected`
+        // );
 
         vacationToUpdate.status = "rejected";
         vacationToUpdate.approved = false;
@@ -280,7 +317,7 @@ const deleteVacation = async (req, res) => {
 
     for (const projId of deletedVacation.projects) {
       const project = await Project.findById(projId).populate("owner");
-      project.owner.recentReceivedVacDeleted.push(
+      project.owner.recievedNotifications.push(
         `/user?vacationId=${deletedVacation._id}&date=${format(
           new Date(deletedVacation.lastWorkDate),
           "MM/dd/yyyy"
@@ -289,6 +326,15 @@ const deleteVacation = async (req, res) => {
           "MM/dd/yyyy"
         )}&intent=vacation-deleted&user=${deletedVacation.user.email}`
       );
+      // project.owner.recentReceivedVacDeleted.push(
+      //   `/user?vacationId=${deletedVacation._id}&date=${format(
+      //     new Date(deletedVacation.lastWorkDate),
+      //     "MM/dd/yyyy"
+      //   )}-${format(
+      //     new Date(deletedVacation.returnToWorkDate),
+      //     "MM/dd/yyyy"
+      //   )}&intent=vacation-deleted&user=${deletedVacation.user.email}`
+      // );
       await project.owner.save();
       channel.publish(
         `/user?vacationId=${deletedVacation._id}&date=${format(

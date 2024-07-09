@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useImmer } from "use-immer";
 
-import { useRevalidator } from "react-router-dom";
+import { useRevalidator, useNavigate } from "react-router-dom";
 
 import { goBackToStartOfArrayIndex } from "../utility";
 
@@ -46,15 +46,74 @@ const ProjectReviewEditDialog = ({
   // {review: id, notificationTracker: [{objectiveId, actionId, actioneeId}, {...}]}
   const actioneeNotificationData = useRef(null);
 
-  function changeActioneeNotificationData(objectiveId, actionId, actioneeId) {
-    if (actioneeNotificationData.current) {
+  const navigate = useNavigate();
+  const currentPathNoQuery = location.pathname.split("?")[0];
+
+  // type = 'add' or 'remove' actionee from action
+  function changeActioneeNotificationData(
+    objectiveId,
+    actionId,
+    actioneeId,
+    type
+  ) {
+    console.log("inchangeActioneeNotification", type);
+    //the following logic handles if an action is removed or added
+    //if removed and added in the same instance then there will be nothing there
+    //this can happen multiple times
+    //if an actionee is removed as the only operation then this will be sent to the backend
+    //for removal and updating the backend - notifications should be sent for all instances of change to the users state
+    if (!actioneeNotificationData.current) {
+      actioneeNotificationData.current = {
+        notificationTracker: [],
+      };
+    }
+
+    // if (actioneeNotificationData.current) {
+    if (type === "remove") {
+      const removedActionee =
+        actioneeNotificationData.current.notificationTracker.filter(
+          (tracker) => {
+            if (
+              objectiveId === tracker.objectiveId &&
+              actionId === tracker.actionId &&
+              actioneeId === tracker.actioneeId &&
+              tracker.type === "add"
+            ) {
+              return null;
+            } else return tracker;
+          }
+        );
+      if (
+        removedActionee.length <
+        actioneeNotificationData.current.notificationTracker.length
+      ) {
+        actioneeNotificationData.current.notificationTracker = removedActionee;
+      } else {
+        actioneeNotificationData.current.notificationTracker.push({
+          objectiveId,
+          actionId,
+          actioneeId,
+          type,
+        });
+      }
+    } else {
       actioneeNotificationData.current.notificationTracker.push({
         objectiveId,
         actionId,
         actioneeId,
+        type,
       });
     }
   }
+  // function changeActioneeNotificationData(objectiveId, actionId, actioneeId) {
+  //   if (actioneeNotificationData.current) {
+  //     actioneeNotificationData.current.notificationTracker.push({
+  //       objectiveId,
+  //       actionId,
+  //       actioneeId,
+  //     });
+  //   }
+  // }
 
   async function handleSaveProjectReview(data, type) {
     try {
@@ -101,6 +160,7 @@ const ProjectReviewEditDialog = ({
           throw Error("failed to create new objective");
         }
         setReviewInState(review);
+        document.getElementById("newObjectiveTitle").value = "";
       }
 
       if (type === "newAction") {
@@ -123,6 +183,7 @@ const ProjectReviewEditDialog = ({
           throw Error("failed to create new action");
         }
         setReviewInState(review);
+        document.getElementById("newObjectiveAction").value = "";
       }
       revalidator.revalidate();
       actioneeNotificationData.current = null;
@@ -134,19 +195,6 @@ const ProjectReviewEditDialog = ({
   let saving = false;
 
   useEffect(() => {
-    // let userInputErrorMessages = [];
-
-    // if (
-    //   !isWithinInterval(new Date(reviewDate), {
-    //     start: new Date(review.start),
-    //     end: new Date(review.end),
-    //   })
-    // ) {
-    //   userInputErrorMessages.push("date must be between project start & end");
-    // }
-
-    // setSelectionErrors(userInputErrorMessages);
-
     const errorTracker = [reviewTitle, reviewDate].filter((entry) => {
       if (entry) return entry;
     });
@@ -173,7 +221,10 @@ const ProjectReviewEditDialog = ({
               setOpen(false);
             }
           }
+          navigate(currentPathNoQuery);
         } else {
+          console.log(currentPathNoQuery);
+
           setReviewTitle(review.title);
           setReviewDate(new Date(reviewDate).toISOString().split("T")[0]);
           setOpen(true);
@@ -322,7 +373,6 @@ const ProjectReviewEditDialog = ({
               },
               "newObjective"
             );
-            document.getElementById("newObjectiveTitle").value = "";
           }}
         >
           <Flex gap="2">

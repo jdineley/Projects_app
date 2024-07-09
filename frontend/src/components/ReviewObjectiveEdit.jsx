@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form } from "react-router-dom";
+import { Form, useNavigate } from "react-router-dom";
 
 import { Flex, Text, Box, Link, Button, TextArea } from "@radix-ui/themes";
 
@@ -24,11 +24,17 @@ const ReviewObjectiveEdit = ({
   actioneeNotificationData,
 }) => {
   const [open, setOpen] = useState(false);
+  // const navigate = useNavigate();
+  // const currentPathNoQuery = location.pathname.split("?")[0];
 
   return (
     <Collapsible.Root
       className="CollapsibleRoot"
       open={open}
+      // onOpenChange={() => {
+      //   navigate(currentPathNoQuery);
+      //   setOpen();
+      // }}
       onOpenChange={setOpen}
       style={{
         color: accentColor,
@@ -105,15 +111,16 @@ const ReviewObjectiveEdit = ({
                         key={user._id}
                         onClick={() => {
                           reviewInStateChangedRef.current = true;
-                          if (!changeActioneeNotificationData.current) {
-                            actioneeNotificationData.current = {
-                              notificationTracker: [],
-                            };
-                          }
+                          // if (!changeActioneeNotificationData.current) {
+                          //   actioneeNotificationData.current = {
+                          //     notificationTracker: [],
+                          //   };
+                          // }
                           changeActioneeNotificationData(
                             objective._id,
                             action._id,
-                            user._id
+                            user._id,
+                            "add"
                           );
                           setReviewInState((draft) => {
                             if (
@@ -175,10 +182,21 @@ const ReviewObjectiveEdit = ({
                               }
                             );
                             reviewInStateChangedRef.current = true;
+                            // if (!changeActioneeNotificationData.current) {
+                            //   actioneeNotificationData.current = {
+                            //     notificationTracker: [],
+                            //   };
+                            // }
                             setReviewInState((draft) => {
                               draft.objectives[i].actions[k].actionees =
                                 filteredActionees;
                             });
+                            changeActioneeNotificationData(
+                              objective._id,
+                              action._id,
+                              actionee._id,
+                              "remove"
+                            );
                             // setReviewObjectives((draft) => {
                             //   return draft.map((obj, j) => {
                             //     if (i === j) {
@@ -242,7 +260,7 @@ const ReviewObjectiveEdit = ({
               },
               "newAction"
             );
-            document.getElementById("newObjectiveAction").value = "";
+            // document.getElementById("newObjectiveAction").value = "";
           }}
         >
           <Box as="div" mb="3">

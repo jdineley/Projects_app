@@ -10,14 +10,14 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <NotificationContextProvider>
-      <AuthContextProvider>
-        <Theme accentColor="mint">
-          <App />
-          <ToastContainer />
-        </Theme>
-      </AuthContextProvider>
-    </NotificationContextProvider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <NotificationContextProvider>
+    <AuthContextProvider>
+      <Theme accentColor="mint">
+        <App />
+        <ToastContainer />
+      </Theme>
+    </AuthContextProvider>
+  </NotificationContextProvider>
+  // </React.StrictMode>
 );
