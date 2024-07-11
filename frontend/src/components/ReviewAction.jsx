@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useFetcher } from "react-router-dom";
+import { useFetcher, useNavigate, useLocation } from "react-router-dom";
 import { Flex, Badge, Box } from "@radix-ui/themes";
 import { useAuthContext } from "../hooks/useAuthContext";
+import { useNotificationContext } from "../hooks/useNotificationContext";
 
 import * as Collapsible from "@radix-ui/react-collapsible";
 
@@ -17,10 +18,18 @@ const ReviewAction = ({
   newCommenterEmail,
   allSetOpen,
   number,
+  newActionId,
 }) => {
   const [open, setOpen] = useState(() => (newCommentId ? true : false));
   const [isCommenting, setIsCommenting] = useState(false);
   const { user } = useAuthContext();
+
+  const { notification } = useNotificationContext();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const currentPathNoQuery = location.pathname.split("?")[0];
 
   allSetOpen.current.push(setOpen);
 
@@ -28,7 +37,12 @@ const ReviewAction = ({
 
   useEffect(() => {
     setIsCommenting(false);
-  }, [action]);
+    if (action._id === newActionId && notification) {
+      setTimeout(() => {
+        navigate(currentPathNoQuery);
+      }, 1000);
+    }
+  }, [action._id, newActionId, notification, navigate, currentPathNoQuery]);
 
   async function handleAddComment() {
     setIsCommenting(true);
@@ -40,7 +54,15 @@ const ReviewAction = ({
       open={open}
       onOpenChange={setOpen}
     >
-      <Flex align="center" justify="between" mb="6">
+      <Flex
+        id={action._id}
+        align="center"
+        justify="between"
+        mb="6"
+        className={`${
+          action._id === newActionId && notification ? "new-comment" : ""
+        } `}
+      >
         <div className="Repository">
           <span className="Text">
             {number + 1}. {action.content}

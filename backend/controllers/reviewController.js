@@ -163,13 +163,13 @@ const updateReview = async (req, res) => {
           );
           if (type === "add") {
             actionee.recievedNotifications.push(
-              `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&intent=new-reviewAction`
+              `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&actionId=${action._id}&intent=new-reviewAction`
             );
             await actionee.save();
             // channel.publish("sending", `sending-notification${actionee._id}`);
 
             channel.publish(
-              `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&intent=new-reviewAction`,
+              `/projects/${reviewToUpdate.project}/reviews/${reviewToUpdate._id}?projectTitle=${project.title}&reviewTitle=${reviewToUpdate.title}&objectiveTitle=${objective.title}&actionContent=${action.content}&actionId=${action._id}&intent=new-reviewAction`,
               `new-reviewAction-notification${actionee._id}`
             );
           } else {

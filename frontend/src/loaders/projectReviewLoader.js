@@ -12,7 +12,7 @@ const projectReviewLoader =
 
     const newCommentId = url.searchParams.get("commentId");
     const newCommenterEmail = url.searchParams.get("user");
-
+    const newActionId = url.searchParams.get("actionId");
     let searchedUsers;
 
     try {
@@ -56,6 +56,7 @@ const projectReviewLoader =
           actionIndex,
           newCommentId,
           newCommenterEmail,
+          newActionId,
         };
       } else {
         return {
@@ -65,6 +66,7 @@ const projectReviewLoader =
           actionIndex: null,
           newCommentId: null,
           newCommenterEmail: null,
+          newActionId: null,
         };
       }
     } catch (error) {

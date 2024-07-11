@@ -43,7 +43,7 @@ const UserProjectDashSummary = ({ project, accentColor }) => {
           {atRiskTasksArray.length > 0
             ? atRiskTasksArray.map((riskyTask) => (
                 <Badge key={riskyTask._id} color="tomato">
-                  <Link to={`projects/${project._id}/tasks/${riskyTask._id}`}>
+                  <Link to={`/projects/${project._id}/tasks/${riskyTask._id}`}>
                     {riskyTask.title}
                   </Link>
                 </Badge>

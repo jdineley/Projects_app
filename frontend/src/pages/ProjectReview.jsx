@@ -23,6 +23,7 @@ const ProjectReview = () => {
     actionIndex,
     newCommentId,
     newCommenterEmail,
+    newActionId,
   } = useLoaderData();
 
   const { user } = useAuthContext();
@@ -40,8 +41,13 @@ const ProjectReview = () => {
         block: "end",
         inline: "nearest",
       });
+      document.getElementById(newActionId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+        inline: "nearest",
+      });
     }
-  }, [newCommentId, reviewExpanded]);
+  }, [newCommentId, reviewExpanded, newActionId]);
 
   return (
     <div>
@@ -113,6 +119,7 @@ const ProjectReview = () => {
               newCommenterEmail={newCommenterEmail}
               setReviewExpanded={setReviewExpanded}
               allSetOpen={allSetOpen}
+              newActionId={newActionId}
             />
           );
         })}

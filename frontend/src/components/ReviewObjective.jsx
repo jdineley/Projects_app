@@ -17,16 +17,17 @@ const ReviewObjective = ({
   newCommenterEmail,
   setReviewExpanded,
   allSetOpen,
+  newActionId,
 }) => {
   const [open, setOpen] = useState(false);
   allSetOpen.current.push(setOpen);
 
   useEffect(() => {
-    if (newCommentId) {
+    if (newCommentId || newActionId) {
       setOpen(true);
       setReviewExpanded(true);
     }
-  }, [newCommentId, setReviewExpanded]);
+  }, [newCommentId, setReviewExpanded, newActionId]);
 
   return (
     <Collapsible.Root
@@ -70,6 +71,7 @@ const ReviewObjective = ({
               newCommenterEmail={newCommenterEmail}
               allSetOpen={allSetOpen}
               number={number}
+              newActionId={newActionId}
             />
           ))}
         </Box>
