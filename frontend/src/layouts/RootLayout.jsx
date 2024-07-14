@@ -75,7 +75,11 @@ export default function RouteLayout() {
         type: "LOGOUT",
       });
     }
-    if (!user && location.pathname !== "/signup") {
+    if (
+      !user &&
+      location.pathname !== "/signup" &&
+      location.pathname !== "/learning"
+    ) {
       navigate("/login");
     }
     if (notificationsCleared) {
@@ -253,13 +257,6 @@ export default function RouteLayout() {
               </Button>
             </NavLink>
           )}
-          {user && (
-            <NavLink to="/learning">
-              <Button variant="ghost" color="gray">
-                {!isMobileResolution ? "Learning" : "Learn"}
-              </Button>
-            </NavLink>
-          )}
           {!user && (
             <NavLink to="/login">
               <Button variant="ghost" color="gray">
@@ -274,6 +271,11 @@ export default function RouteLayout() {
               </Button>
             </NavLink>
           )}
+          <NavLink to="/learning">
+            <Button variant="ghost" color="gray">
+              {!isMobileResolution ? "Learning" : "Learn"}
+            </Button>
+          </NavLink>
           {user && (
             <div className="current-user-container">
               <DropdownMenu.Root>
