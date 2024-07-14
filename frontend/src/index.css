@@ -28,13 +28,14 @@ body {
 }
 
 #root {
-  padding: 20px;
+  /* margin: 20px; */
+  min-height: 100vh;
 }
 
 * {
   margin: 0;
   text-decoration: none;
-  /* box-sizing: border-box; */
+  box-sizing: border-box;
 }
 
 button {
@@ -74,7 +75,8 @@ label {
 }
 
 main {
-  margin-top: 20px;
+  margin-block: 20px;
+  /* min-height: 100%; */
 }
 
 h1 {
@@ -91,6 +93,10 @@ h2 {
 
 /* overall layout */
 .root-layout {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -127,6 +133,20 @@ header nav a {
 }
 header nav a.active {
   border-bottom: 2px solid var(--logo);
+}
+
+footer {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--gray-a5);
+  margin-top: auto;
+}
+
+footer a {
+  display: flex;
+  align-items: center;
 }
 
 .current-user-container {
