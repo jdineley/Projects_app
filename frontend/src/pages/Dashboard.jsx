@@ -101,7 +101,7 @@ export default function Home() {
 
   return (
     <main>
-      <h1 className="mb-4">Dashboard</h1>
+      {/* <h1 className="mb-4">Dashboard</h1> */}
       <Grid columns={isTabletResolution ? "1" : "2"} gap="3" width="auto">
         {hasSomeUnArchivedProjects && (
           <div>

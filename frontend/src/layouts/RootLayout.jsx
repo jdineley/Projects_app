@@ -253,6 +253,13 @@ export default function RouteLayout() {
               </Button>
             </NavLink>
           )}
+          {user && (
+            <NavLink to="/learning">
+              <Button variant="ghost" color="gray">
+                {!isMobileResolution ? "Learning" : "Learn"}
+              </Button>
+            </NavLink>
+          )}
           {!user && (
             <NavLink to="/login">
               <Button variant="ghost" color="gray">

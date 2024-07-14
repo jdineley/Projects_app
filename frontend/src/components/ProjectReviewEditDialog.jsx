@@ -183,7 +183,7 @@ const ProjectReviewEditDialog = ({
           throw Error("failed to create new action");
         }
         setReviewInState(review);
-        document.getElementById("newObjectiveAction").value = "";
+        // document.getElementById("newObjectiveAction").value = "";
       }
       revalidator.revalidate();
       actioneeNotificationData.current = null;

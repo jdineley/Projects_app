@@ -27,6 +27,7 @@ import LoginError from "./pages/errors/LoginError";
 import Error from "./pages/errors/Error";
 import ProjectReview from "./pages/ProjectReview";
 import UserProfile from "./pages/UserProfile";
+import Learning from "./pages/Learning";
 
 // loaders
 import projectsLoader from "./loaders/projectLoader";
@@ -81,6 +82,7 @@ function App() {
               action={signupAction}
               errorElement={<LoginError />}
             />
+            <Route path="learning" element={<Learning />} />
             <Route
               path="projects"
               element={<ProjectLayout />}

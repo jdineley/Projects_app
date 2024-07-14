@@ -251,23 +251,24 @@ const ReviewObjectiveEdit = ({
           Add new action
         </Text>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            handleSaveProjectReview(
+            await handleSaveProjectReview(
               {
-                content: document.getElementById("newObjectiveAction").value,
+                content: document.getElementById(`newObjectiveAction${i}`)
+                  .value,
                 objectiveId: objective._id,
               },
               "newAction"
             );
-            // document.getElementById("newObjectiveAction").value = "";
+            document.getElementById(`newObjectiveAction${i}`).value = "";
           }}
         >
           <Box as="div" mb="3">
             <Flex align="center" gap="2">
               <TextArea
                 style={{ flex: "1" }}
-                id="newObjectiveAction"
+                id={`newObjectiveAction${i}`}
                 name="content"
                 placeholder="New action.."
               />
