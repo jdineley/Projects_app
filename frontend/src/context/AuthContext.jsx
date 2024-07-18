@@ -21,6 +21,7 @@ export const authReducer = (state, action) => {
 let ssEvents;
 
 export const AuthContextProvider = ({ children }) => {
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
   });
@@ -51,7 +52,7 @@ export const AuthContextProvider = ({ children }) => {
         payload: user,
       });
 
-      ssEvents = new EventSource("http://localhost:4000/api/v1/stream");
+      ssEvents = new EventSource(`${VITE_REACT_APP_API_URL}/api/v1/stream`);
 
       ssEvents.addEventListener(`new-task-notification${user._id}`, (e) => {
         console.log("in notification dispatch");
