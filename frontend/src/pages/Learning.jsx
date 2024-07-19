@@ -50,11 +50,11 @@ const Learning = () => {
           </a>
         </div>
         <div className={`object-contain ${!isTabletResolution && "w-7/12"}`}>
-          <img src="/Projects flyer.1.jpeg" className="w-full min-w-96" />
+          <img src="/Projects flyer.1.jpeg" className="w-full" />
         </div>
       </div>
       <div className="object-contain">
-        <img src="/Project short 2_cropped.gif" className="w-full min-w-96" />
+        <img src="/Project short 2_cropped.gif" className="w-full" />
       </div>
     </div>
   );
