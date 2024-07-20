@@ -10,7 +10,7 @@ const Learning = () => {
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
 
   return (
-    <div className="w-10/12 ml-auto mr-auto">
+    <div className={!isTabletResolution && "w-10/12 ml-auto mr-auto"}>
       <div className={!isTabletResolution && "flex gap-3"}>
         <div className={`${!isTabletResolution && "w-5/12"} mb-5`}>
           <a
