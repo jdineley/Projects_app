@@ -1,6 +1,8 @@
+require("./instrument.js");
 require("dotenv").config();
 const mongoose = require("mongoose");
 
+const Sentry = require("@sentry/node");
 const express = require("express");
 const cors = require("cors");
 
@@ -36,6 +38,12 @@ app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/reviewObjectives", reviewObjectivesRoutes);
 app.use("/api/v1/reviewActions", reviewActionRoutes);
 app.use("/api/v1/vacations", vacationRoutes);
+
+// app.get("/debug-sentry", function mainHandler(req, res) {
+//   throw new Error("My first Sentry error!");
+// });
+
+Sentry.setupExpressErrorHandler(app);
 
 // connect to the db (async) and spin up server
 mongoose
