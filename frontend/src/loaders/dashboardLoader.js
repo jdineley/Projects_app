@@ -14,11 +14,13 @@ const dashboardLoader = (user) => async () => {
         }
       );
 
-      if (!res2.ok) {
-        throw Error("could not fetch the current user");
-      }
-
       const userObj = await res2.json();
+      console.log(userObj);
+      if (!res2.ok && userObj.error) {
+        return userObj;
+      } else if (!res2.ok) {
+        throw Error("something went wrong fetching the necessary data");
+      }
 
       return userObj;
     } else return null;

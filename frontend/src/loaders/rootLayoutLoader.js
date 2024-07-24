@@ -25,7 +25,7 @@ const rootLayoutLoader =
         if (!resp1.ok && userObj.error) {
           return { userObj };
         } else if (!resp1.ok) {
-          throw Error(user.error);
+          throw Error("something went wrong fetching the necessary data");
         }
 
         return {

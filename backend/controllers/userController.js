@@ -1,8 +1,6 @@
-// const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
-const Project = require("../models/Project");
 
 const createToken = (_id) => {
   return jwt.sign({ _id }, process.env.SECRET, { expiresIn: "3d" });
@@ -30,24 +28,8 @@ const loginUser = async (req, res) => {
     payload._id = user._id;
     payload.email = email;
     payload.token = token;
-    // payload.recentReceivedComments = user.recentReceivedComments || [];
-    // payload.recentReceivedReplies = user.recentReceivedReplies || [];
-    // payload.recentReceivedTasks = user.recentReceivedTasks || [];
-    // payload.recentReceivedVacAccepted = user.recentReceivedVacAccepted || [];
-    // payload.recentReceivedVacRejected = user.recentReceivedVacRejected || [];
-    // payload.recentReceivedVacApproved = user.recentReceivedVacApproved || [];
-    // payload.recentReceivedVacRequest = user.recentReceivedVacRequest || [];
-
     console.log("login payload", payload);
     res.status(200).json(payload);
-    // user.recentReceivedComments = [];
-    // user.recentReceivedReplies = [];
-    // user.recentReceivedTasks = [];
-    // user.recentReceivedVacAccepted = [];
-    // user.recentReceivedVacRejected = [];
-    // user.recentReceivedVacApproved = [];
-    // user.recentReceivedVacRequest = [];
-    // await user.save();
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -105,7 +87,6 @@ const getUser = async (req, res) => {
       },
       {
         path: "vacationRequests",
-        // populate: ["user", "lastWorkDate", "returnToWorkDate"],
         populate: "user",
       },
       "vacationAllocation",
@@ -119,23 +100,12 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   console.log("****************hit updateUser route*********************");
-  // console.log(req.body);
   const { intent, ...notificationObj } = req.body;
   console.log("intent", intent);
 
   try {
     const user = await User.findById(req.user._id);
     if (intent === "clear-notifications") {
-      // user.recentReceivedComments = [];
-      // user.recentReceivedReplies = [];
-      // user.recentReceivedTasks = [];
-      // user.recentReceivedVacRequest = [];
-      // user.recentReceivedVacAccepted = [];
-      // user.recentReceivedVacRejected = [];
-      // user.recentReceivedVacApproved = [];
-      // user.recentReceivedVacDeleted = [];
-      // user.recentReceivedActions = [];
-      // user.recentDeletedActions = [];
       user.recievedNotifications = [];
       await user.save();
       res.status(200).json(user);
@@ -169,8 +139,6 @@ const updateUser = async (req, res) => {
         default:
           console.log("no match.. try again");
       }
-      // const user = await User.findById(req.user._id);
-      // console.log("receivedNotications 1", user[receivedNotications]);
       if (user[receivedNotications].length > 0) {
         user[receivedNotications] = user[receivedNotications].filter((not) => {
           return not !== url;

@@ -18,7 +18,8 @@ export default function Home() {
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
 
   const userObj = useLoaderData();
-  if (!userObj) return null;
+  console.log(userObj);
+  if (!userObj || userObj.error) return null;
   const themeColors = ["brown", "tomato", "purple", "blue", "green", "sky"];
 
   let activeProjects;

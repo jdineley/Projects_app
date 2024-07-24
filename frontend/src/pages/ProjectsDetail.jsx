@@ -316,8 +316,8 @@ export default function ProjectsDetail() {
               {/* <h3>My {!project?.archived && "Active"} Tasks</h3> */}
               <h3>My Tasks</h3>
               {!project?.archived &&
-                (project.users.includes(user._id) ||
-                  project.owner._id === user._id) && (
+                (project?.users.includes(user._id) ||
+                  project?.owner._id === user._id) && (
                   <AddTaskDialog
                     searchedTasks={searchedTasks}
                     taskDep={taskDep}

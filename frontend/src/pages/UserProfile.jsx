@@ -32,6 +32,8 @@ export default function UserProfile() {
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
   const userObj = useLoaderData();
 
+  if (!userObj || userObj.error) return null;
+
   const fetcher = useFetcher();
 
   useEffect(() => {

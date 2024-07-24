@@ -17,8 +17,10 @@ const userProfileLoader = (user) => async () => {
         }
       );
       const userObj = await resp1.json();
-      if (!resp1.ok) {
-        throw Error(user.error);
+      if (!resp1.ok && userObj.error) {
+        return userObj;
+      } else if (!resp1.ok) {
+        throw Error("something went wrong fetching the necessary data");
       }
 
       // if (intent) {

@@ -47,10 +47,12 @@ export const AuthContextProvider = ({ children }) => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
-      dispatch({
-        type: "LOGIN",
-        payload: user,
-      });
+      if (!currentUserId) {
+        dispatch({
+          type: "LOGIN",
+          payload: user,
+        });
+      }
 
       ssEvents = new EventSource(`${VITE_REACT_APP_API_URL}/api/v1/stream`);
 
