@@ -27,16 +27,6 @@ const userSchema = new mongoose.Schema(
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     projects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }],
     userInProjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }],
-    // recentReceivedComments: [{ type: String, default: [] }],
-    // recentReceivedReplies: [{ type: String, default: [] }],
-    // recentReceivedTasks: [{ type: String, default: [] }],
-    // recentReceivedVacRequest: [{ type: String, default: [] }],
-    // recentReceivedVacAccepted: [{ type: String, default: [] }],
-    // recentReceivedVacRejected: [{ type: String, default: [] }],
-    // recentReceivedVacApproved: [{ type: String, default: [] }],
-    // recentReceivedVacDeleted: [{ type: String, default: [] }],
-    // recentReceivedActions: [{ type: String, default: [] }],
-    // recentDeletedActions: [{ type: String, default: [] }],
     recievedNotifications: [{ type: String, default: [] }],
     vacationAllocation: {
       type: Number,
@@ -48,23 +38,9 @@ const userSchema = new mongoose.Schema(
     remainingVacationDays: {
       type: Number,
       min: 0,
-      // max: function () {
-      //   return this.vacationAllocation;
-      // },
       default: function () {
         return this.vacationAllocation;
       },
-      // default: function () {
-      //   if(this.vacationRequests.length === 0) {
-      //     return this.vacationAllocation
-      //   } else {
-
-      //     this.vacationRequests.reduce((acc, cur) => {
-
-      //       differenceInBusinessDays(cur.lastWorkDate)
-      //     }, this.vacationAllocation)
-      //   }
-      // },
     },
     vacStatChange: {
       type: Boolean,

@@ -11,7 +11,8 @@ export default function UserComment({
   projectId,
   reviewId,
 }) {
-  console.log(comment);
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
+
   const [isReplying, setIsReplying] = useState(false);
   const [isDiscussion, setIsDiscussion] = useState(false);
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export default function UserComment({
     const reply = document.querySelector("#reply").value;
     setIsReplying(false);
     try {
-      const response = await fetch("http://localhost:4000/api/v1/replies", {
+      const response = await fetch(`${VITE_REACT_APP_API_URL}/api/v1/replies`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { useFetcher, useNavigate, useLocation } from "react-router-dom";
+import {
+  useFetcher,
+  useNavigate,
+  useLocation,
+  useLoaderData,
+} from "react-router-dom";
 import { Flex, Badge, Box } from "@radix-ui/themes";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNotificationContext } from "../hooks/useNotificationContext";
@@ -20,6 +25,7 @@ const ReviewAction = ({
   number,
   newActionId,
 }) => {
+  const { review } = useLoaderData();
   const [open, setOpen] = useState(() => (newCommentId ? true : false));
   const [isCommenting, setIsCommenting] = useState(false);
   const { user } = useAuthContext();
@@ -42,7 +48,14 @@ const ReviewAction = ({
         navigate(currentPathNoQuery);
       }, 1000);
     }
-  }, [action._id, newActionId, notification, navigate, currentPathNoQuery]);
+  }, [
+    action._id,
+    newActionId,
+    notification,
+    navigate,
+    currentPathNoQuery,
+    review,
+  ]);
 
   async function handleAddComment() {
     setIsCommenting(true);

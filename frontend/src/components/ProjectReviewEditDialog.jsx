@@ -31,6 +31,8 @@ const ProjectReviewEditDialog = ({
   actionIndex,
   themeColors,
 }) => {
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
+
   const [open, setOpen] = useState(false);
   const [reviewTitle, setReviewTitle] = useState(review.title);
   const [reviewDate, setReviewDate] = useState(review.date);
@@ -119,7 +121,7 @@ const ProjectReviewEditDialog = ({
     try {
       if (reviewInStateChangedRef.current === true) {
         const response = await fetch(
-          `http://localhost:4000/api/v1/reviews/${review._id}/projects/${projectId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/reviews/${review._id}/projects/${projectId}`,
           {
             method: "PATCH",
             mode: "cors",
@@ -142,7 +144,7 @@ const ProjectReviewEditDialog = ({
       if (type === "newObjective") {
         const { reviewId, title } = data;
         const res1 = await fetch(
-          `http://localhost:4000/api/v1/reviewObjectives/${reviewId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/reviewObjectives/${reviewId}`,
           {
             method: "POST",
             mode: "cors",
@@ -166,7 +168,7 @@ const ProjectReviewEditDialog = ({
       if (type === "newAction") {
         const { objectiveId, content } = data;
         const res2 = await fetch(
-          `http://localhost:4000/api/v1/reviewActions/objective/${objectiveId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/reviewActions/objective/${objectiveId}`,
           {
             method: "POST",
             mode: "cors",

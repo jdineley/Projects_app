@@ -2,11 +2,13 @@ import { useAuthContext } from "../hooks/useAuthContext";
 import { useEffect, useState } from "react";
 
 export default function UserReply({ reply: replyProp }) {
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
+
   const { user } = useAuthContext();
   const [reply, setReply] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:4000/api/v1/replies/${replyProp._id}`, {
+    fetch(`${VITE_REACT_APP_API_URL}/api/v1/replies/${replyProp._id}`, {
       headers: {
         Authorization: `Bearer ${user.token}`,
       },
