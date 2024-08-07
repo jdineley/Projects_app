@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  useFetcher,
-  useNavigate,
-  useLocation,
-  useLoaderData,
-} from "react-router-dom";
+import { useFetcher, useNavigate, useLocation } from "react-router-dom";
 import { Flex, Badge, Box } from "@radix-ui/themes";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNotificationContext } from "../hooks/useNotificationContext";
@@ -25,7 +20,6 @@ const ReviewAction = ({
   number,
   newActionId,
 }) => {
-  const { review } = useLoaderData();
   const [open, setOpen] = useState(() => (newCommentId ? true : false));
   const [isCommenting, setIsCommenting] = useState(false);
   const { user } = useAuthContext();
@@ -42,11 +36,21 @@ const ReviewAction = ({
   const fetcher = useFetcher();
 
   useEffect(() => {
-    setIsCommenting(false);
+    if (fetcher.data) {
+      setIsCommenting(false);
+      fetcher.data = null;
+    }
     if (action._id === newActionId && notification) {
       setTimeout(() => {
         navigate(currentPathNoQuery);
       }, 1000);
+    }
+    if (isCommenting) {
+      document.getElementById("reviewActionCommentText").scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+        inline: "nearest",
+      });
     }
   }, [
     action._id,
@@ -54,7 +58,8 @@ const ReviewAction = ({
     notification,
     navigate,
     currentPathNoQuery,
-    review,
+    isCommenting,
+    fetcher.data,
   ]);
 
   async function handleAddComment() {
@@ -122,6 +127,7 @@ const ReviewAction = ({
             >
               <fetcher.Form method="POST" className="add-task-comment-form">
                 <textarea
+                  id="reviewActionCommentText"
                   rows="8"
                   placeholder={`${user.email} add new comment...`}
                   name="comment"
