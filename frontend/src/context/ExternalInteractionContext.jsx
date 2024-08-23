@@ -1,3 +1,4 @@
+// ***********OBSOLETE*********************
 import { createContext, useReducer } from "react";
 
 export const ExternalInteractionContext = createContext();

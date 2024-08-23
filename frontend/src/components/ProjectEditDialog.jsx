@@ -5,8 +5,11 @@ import { Dialog, Button, Flex, TextField, Text, Badge } from "@radix-ui/themes";
 // icons
 import { CiTrash } from "react-icons/ci";
 import { FaEdit } from "react-icons/fa";
+import { TiVendorMicrosoft } from "react-icons/ti";
 
 import { isBefore, isEqual, isWithinInterval } from "date-fns";
+
+import { toast } from "react-toastify";
 
 const ProjectTitleEditDialog = ({
   projectTitle,
@@ -22,7 +25,9 @@ const ProjectTitleEditDialog = ({
   // deleteProjectButton,
   archiveProjectButton,
   submit,
+  user,
 }) => {
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
   const [open, setOpen] = useState(false);
   const [formFieldsCompleted, setFormFieldsCompleted] = useState(true);
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
@@ -76,6 +81,34 @@ const ProjectTitleEditDialog = ({
     else setFormFieldsCompleted(false);
   }, [projectEnd, projectStart, projectTitle, projectReviews]);
 
+  function submitMsProject(e) {
+    e.preventDefault();
+    if (
+      window.confirm("Are you sure you want to submit a MS Project .xml file?")
+    ) {
+      let file = e.target.uploadFile.files[0];
+      let formData = new FormData();
+      formData.append("file", file);
+      fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: formData,
+      })
+        .then((resp) => resp.json())
+        .then((data) => {
+          if (data.errors) {
+            alert(data.errors);
+          } else {
+            console.log(data);
+            setOpen(false);
+            toast(`${project.title} synchronised with MS Project`);
+          }
+        });
+    }
+  }
+
   return (
     <Dialog.Root
       open={open}
@@ -126,6 +159,7 @@ const ProjectTitleEditDialog = ({
             <TextField.Input
               name="title"
               // defaultValue={projectTitle}
+              disabled={project.msProjectGUID ? true : false}
               value={projectTitle}
               onChange={(e) => {
                 setProjectTitle(e.target.value);
@@ -139,6 +173,7 @@ const ProjectTitleEditDialog = ({
             <input
               type="date"
               // defaultValue={projectStart}
+              disabled={project.msProjectGUID ? true : false}
               value={projectStart}
               onChange={(e) => {
                 setProjectStart(e.target.value);
@@ -152,6 +187,7 @@ const ProjectTitleEditDialog = ({
             <input
               type="date"
               // defaultValue={projectEnd}
+              disabled={project.msProjectGUID ? true : false}
               value={projectEnd}
               onChange={(e) => {
                 setProjectEnd(e.target.value);
@@ -266,7 +302,7 @@ const ProjectTitleEditDialog = ({
             </Text>
           );
         })}
-        <Flex gap="3" mt="4" justify="end">
+        <Flex gap="3" mt="4" mb="4" justify="end">
           <Dialog.Close>
             <Button variant="soft" color="gray">
               Cancel
@@ -299,6 +335,32 @@ const ProjectTitleEditDialog = ({
             </Button>
           </Dialog.Close>
         </Flex>
+        {project.msProjectGUID && project.owner._id === user._id && (
+          <>
+            <hr className="mb-5" />
+            <Flex align="center" gap="2" mb="4">
+              <TiVendorMicrosoft />
+              <Dialog.Title mb="0">Update MS Project</Dialog.Title>
+            </Flex>
+            <form
+              onSubmit={submitMsProject}
+              method="post"
+              encType="multipart/form"
+            >
+              <Text as="div" size="2" mb="1" weight="bold">
+                Import .xml file from MS Project Desktop
+              </Text>
+              <input
+                type="file"
+                name="uploadFile"
+                accept=".xml"
+                id="xml-file"
+                required
+              />
+              <Button mt="2">Upload</Button>
+            </form>
+          </>
+        )}
       </Dialog.Content>
     </Dialog.Root>
   );

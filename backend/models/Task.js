@@ -10,6 +10,7 @@ const taskSchema = new mongoose.Schema(
     description: {
       type: String,
       required: true,
+      // default: "Description to be added..",
     },
     daysToComplete: {
       type: Number,
@@ -50,9 +51,24 @@ const taskSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    msProjectGUID: {
+      type: String,
+      // default: "",
+    },
+    // isMsProjectTask: {
+    //   type: Boolean,
+    //   default: function () {
+    //     return this.msProjectGUID !== "";
+    //   },
+    // },
+    msProjectUID: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
+
+// 346FBF06-40E8-E111-ACCD-F0DEF1A69BD1
 
 // populate the user field to keep in sync with tasks
 // taskSchema.post("save", async function (doc, next) {

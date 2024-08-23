@@ -14,6 +14,8 @@ import { formatDistanceToNow, format } from "date-fns";
 // components
 import ProjectEditDialog from "../components/ProjectEditDialog";
 import AddProjectDialog from "../components/AddProjectDialog";
+import ImportProjectDialog from "../components/ImportProjectDialog";
+import { TiVendorMicrosoft } from "react-icons/ti";
 
 // radix
 import { Table, Flex } from "@radix-ui/themes";
@@ -44,6 +46,7 @@ export default function Projects() {
   if (loaderJson) {
     ({ userObj, projectDeleted } = loaderJson);
   }
+  console.log("userObj", userObj);
   const json = useActionData();
   const [projectTitle, setProjectTitle] = useState("");
   const [projectStart, setProjectStart] = useState("");
@@ -74,7 +77,10 @@ export default function Projects() {
         return (
           <Table.Row key={project._id}>
             <Table.Cell>
-              <Link to={project._id}>{project.title}</Link>
+              <Link to={project._id} className="flex items-center gap-2">
+                {project.msProjectGUID && <TiVendorMicrosoft />}
+                {project.title}
+              </Link>
             </Table.Cell>
             {!isMobileResolution && (
               <Table.Cell>
@@ -166,6 +172,7 @@ export default function Projects() {
                   `archive-project-button${project._id}`
                 )}
                 submit={submit}
+                user={user}
               />
             </Table.Cell>
           </Table.Row>
@@ -193,7 +200,10 @@ export default function Projects() {
           return (
             <Table.Row key={project._id}>
               <Table.Cell>
-                <Link to={project._id}>{project.title}</Link>
+                <Link to={project._id} className="flex items-center gap-2">
+                  {project.msProjectGUID && <TiVendorMicrosoft />}
+                  {project.title}
+                </Link>
               </Table.Cell>
               <Table.Cell>
                 {format(new Date(project.end), "dd/MM/yyyy")}
@@ -234,47 +244,54 @@ export default function Projects() {
       <main>
         {user && (
           <div>
-            <div className="title-icon-collect">
-              <h3>My Active Projects</h3>
-              <fetcher.Form method="POST" style={{ display: "none" }}>
-                <input type="hidden" name="title" value={projectTitle} />
-                <input type="hidden" name="start" value={projectStart} />
-                <input type="hidden" name="end" value={projectEnd} />
-                {projectReviews.map((reviewObj, i) => {
-                  return (
-                    <div key={i}>
-                      <input
-                        type="hidden"
-                        name={`title${i}`}
-                        value={reviewObj.title}
-                      />
-                      <input
-                        type="hidden"
-                        name={`date${i}`}
-                        value={reviewObj.date}
-                      />
-                    </div>
-                  );
-                })}
-                <button
-                  id="create-project"
-                  type="submit"
-                  name="intent"
-                  value="create-new-project"
-                ></button>
-              </fetcher.Form>
-              <AddProjectDialog
-                projectTitle={projectTitle}
-                projectStart={projectStart}
-                projectEnd={projectEnd}
-                setProjectTitle={setProjectTitle}
-                setProjectStart={setProjectStart}
-                setProjectEnd={setProjectEnd}
-                setProjectReviews={setProjectReviews}
-                projectReviews={projectReviews}
-                button={document.getElementById("create-project")}
-                submit={submit}
-              />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h3>My Active Projects</h3>
+                <fetcher.Form method="POST" style={{ display: "none" }}>
+                  <input type="hidden" name="title" value={projectTitle} />
+                  <input type="hidden" name="start" value={projectStart} />
+                  <input type="hidden" name="end" value={projectEnd} />
+                  {projectReviews.map((reviewObj, i) => {
+                    return (
+                      <div key={i}>
+                        <input
+                          type="hidden"
+                          name={`title${i}`}
+                          value={reviewObj.title}
+                        />
+                        <input
+                          type="hidden"
+                          name={`date${i}`}
+                          value={reviewObj.date}
+                        />
+                      </div>
+                    );
+                  })}
+                  <button
+                    id="create-project"
+                    type="submit"
+                    name="intent"
+                    value="create-new-project"
+                  ></button>
+                </fetcher.Form>
+                <AddProjectDialog
+                  projectTitle={projectTitle}
+                  projectStart={projectStart}
+                  projectEnd={projectEnd}
+                  setProjectTitle={setProjectTitle}
+                  setProjectStart={setProjectStart}
+                  setProjectEnd={setProjectEnd}
+                  setProjectReviews={setProjectReviews}
+                  projectReviews={projectReviews}
+                  button={document.getElementById("create-project")}
+                  submit={submit}
+                  user={user}
+                />
+              </div>
+              {/* <div className="flex">
+                <TiVendorMicrosoft />
+                <ImportProjectDialog className="ml-auto" />
+              </div> */}
             </div>
             {hasSomeUnArchivedProjects && (
               <Table.Root variant="surface">

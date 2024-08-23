@@ -184,6 +184,20 @@ export const AuthContextProvider = ({ children }) => {
           // updateUser(user, e.data, "removed-reviewAction");
         }
       );
+      ssEvents.addEventListener(`ms-project-resync${user._id}`, (e) => {
+        console.log("in notification dispatch");
+        notificationDispatch({
+          type: "NEW_NOTIFICATION",
+          payload: {
+            url: e.data,
+          },
+        });
+        toast(
+          `MS Project Resynchronisation of ${new URLSearchParams(e.data).get(
+            "projectTitle"
+          )}`
+        );
+      });
       ssEvents.addEventListener("open", () => {
         console.log("Connection opened");
       });

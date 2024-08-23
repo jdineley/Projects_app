@@ -8,8 +8,13 @@ const Comment = require("../models/Comment");
 const Reply = require("../models/Reply");
 const mongoose = require("mongoose");
 
+const fs = require("node:fs/promises");
+const xml2js = require("xml2js");
+
 // util
 const { fixReviews } = require("../util");
+const { msProjectUpload } = require("./msProjectUpload");
+const { msProjectUpdate } = require("./msProjectUpdate");
 
 const getAllProjects = async (req, res) => {
   console.log("In get all projects..");
@@ -61,6 +66,11 @@ const getProject = async (req, res) => {
 
 const createProject = async (req, res) => {
   console.log("hit the createProject route");
+  console.log(req.body);
+  console.log(req.file);
+  // const folderPath = "../public/data/uploads/";
+  // console.log(fs.readdirSync(folderPath));
+
   const { intent, title, start, end, ...reviews } = req.body;
   const { _id: userId } = req.user;
 
@@ -72,6 +82,16 @@ const createProject = async (req, res) => {
 
   try {
     const currentUser = await User.findById(userId);
+    if (req.file) {
+      console.log("trying to import MS Project xml file..");
+      const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
+      // console.log(data);
+      const msProjObj = await xml2js.parseStringPromise(xml);
+
+      await msProjectUpload(msProjObj, currentUser);
+
+      return res.status(200).json(msProjObj);
+    }
     const project = await Project.create({
       title,
       start,
@@ -91,7 +111,7 @@ const createProject = async (req, res) => {
     await currentUser.save();
     res.status(200).json({ project, result: intent });
   } catch (error) {
-    console.log(error);
+    res.status(error.status || 400).json({ errors: error.message });
   }
 };
 
@@ -99,8 +119,10 @@ const updateProject = async (req, res) => {
   console.log("Hit update project handler");
   const { intent, title, start, end, ...reviews } = req.body;
   const { projectId } = req.params;
+  const { _id: userId } = req.user;
   console.log("intent", intent);
   console.log("projectId", projectId);
+  console.log(req.file);
   // Add archive project logic starting here:
   // https://www.reddit.com/r/node/comments/9nudkk/update_many_nested_objects_in_mongoose/
   // Set project.archived = true
@@ -117,7 +139,25 @@ const updateProject = async (req, res) => {
   console.log(reviewArray);
 
   try {
-    const projectToUpdate = await Project.findById(projectId);
+    const projectToUpdate = await Project.findById(projectId).populate([
+      "owner",
+      "tasks",
+      "users",
+    ]);
+    const currentUser = await User.findById(userId);
+    if (req.file) {
+      console.log("trying to import MS Project xml file..");
+      const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
+      // console.log(data);
+      const msProjObj = await xml2js.parseStringPromise(xml);
+      if (msProjObj.Project.GUID[0] !== projectToUpdate.msProjectGUID) {
+        throw Error("You are trying to update the wrong project");
+      }
+
+      await msProjectUpdate(projectToUpdate, msProjObj, currentUser);
+
+      return res.status(200).json(msProjObj);
+    }
     if (projectToUpdate.owner._id.toString() !== req.user._id.toString()) {
       return res
         .status(401)
@@ -441,62 +481,3 @@ module.exports = {
   updateProject,
   deleteProject,
 };
-// Health and fitness mobile app
-// 666b651dee1b339d2ab50389
-// descendentsAtArchive: {
-//   Review: [
-//     new ObjectId('666b651dee1b339d2ab5038b'),
-//     new ObjectId('666b651dee1b339d2ab5038d')
-//   ],
-//   ReviewObjective: [
-//     new ObjectId('666b65626bd44040bd5d7261'),
-//     new ObjectId('666b65626bd44040bd5d727f')
-//   ],
-//   ReviewAction: [ new ObjectId('666b651dee1b339d2ab5038b') ],
-//   Comment: [
-//     new ObjectId('666b65696bd44040bd5d7391'),
-//     new ObjectId('666b656e6bd44040bd5d7461'),
-//     new ObjectId('666b656e6bd44040bd5d7469'),
-//     new ObjectId('666b6534ee1b339d2ab5070d'),
-//     new ObjectId('666b653aee1b339d2ab507fb'),
-//     new ObjectId('666b6534ee1b339d2ab50729'),
-//     new ObjectId('666b653cee1b339d2ab5085d'),
-//     new ObjectId('666b6539ee1b339d2ab507d8'),
-//     new ObjectId('666b653aee1b339d2ab50817'),
-//     new ObjectId('666b6536ee1b339d2ab5076f'),
-//     new ObjectId('666b6530ee1b339d2ab50681'),
-//     new ObjectId('666b6536ee1b339d2ab5077d')
-//   ],
-//   Task: [
-//     new ObjectId('666b651dee1b339d2ab50397'),
-//     new ObjectId('666b651eee1b339d2ab503c4'),
-//     new ObjectId('666b6529ee1b339d2ab5056c'),
-//     new ObjectId('666b652aee1b339d2ab5059b'),
-//     new ObjectId('666b652bee1b339d2ab505d1'),
-//     new ObjectId('666b652dee1b339d2ab50601'),
-//     new ObjectId('666b652dee1b339d2ab50609'),
-//     new ObjectId('666b652eee1b339d2ab5062c')
-//   ],
-//   Reply: [
-//     new ObjectId('666b6541ee1b339d2ab5093a'),
-//     new ObjectId('666b6545ee1b339d2ab509e4'),
-//     new ObjectId('666b6540ee1b339d2ab50903'),
-//     new ObjectId('666b6540ee1b339d2ab50908'),
-//     new ObjectId('666b6541ee1b339d2ab50935'),
-//     new ObjectId('666b6543ee1b339d2ab5099e')
-//   ]
-// }
-// }
-
-// users
-// Array (5)
-// 0
-// 666b651aee1b339d2ab5031b
-// 1
-// 666b651aee1b339d2ab5030c
-// 2
-// 666b651aee1b339d2ab50315
-// 3
-// 666b651aee1b339d2ab50312
-// 4
-// 666b651aee1b339d2ab50318

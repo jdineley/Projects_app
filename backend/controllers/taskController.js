@@ -10,6 +10,10 @@ const { channel } = require("../routes/v1/sse");
 // date-fns
 const { format } = require("date-fns");
 
+// util
+const { resyncUserAndVacs, resyncProjTasksUsersVacs } = require("../util");
+const Vacation = require("../models/Vacation");
+
 const getAllTasks = async (req, res) => {
   try {
     const tasks = await Task.find().sort({
@@ -74,14 +78,13 @@ const createTask = async (req, res) => {
   console.log("hit create task route");
   const { projectId } = req.params;
   const { assigneeId } = req.body;
-  console.log(req.body);
 
   if (!mongoose.Types.ObjectId.isValid(projectId)) {
     return res.status(404).json({ error: "No such project" });
   }
 
   try {
-    const project = await Project.findById(projectId);
+    const project = await Project.findById(projectId).populate(["tasks"]);
     if (!project) {
       return res.status(404).json({ error: "No such project" });
     }
@@ -94,21 +97,39 @@ const createTask = async (req, res) => {
       project: projectId,
       ...req.body,
     });
-    const user = await User.findById(task.user);
-    project.tasks.push(task._id);
-    user.tasks.push(task._id);
+    const user = await User.findById(task.user).populate([
+      "tasks",
+      "vacationRequests",
+    ]);
+
+    project.tasks.push(task);
+    user.tasks.push(task);
+
+    // if new task is created:
+    //    1. Correct user.userInProject[]
+    //    2. if user.vacationRequests.length > 0
+    //        3. set all vacationRequests to 'pending'
+    //        4. Loop userInProjects[] to check userVacReq.projects[]
+    await resyncUserAndVacs(user);
+
+    // if new task is created:
+    //    1. Correct project.users[]
+    //    2. Loop through project.users[]
+    //        3. if user.vacReq[].length > 0
+    //            4. Loop user.vacReq[]
+    //                5. Check all vacReqs against the project start and end to set project.vacRequest[]
+    await resyncProjTasksUsersVacs(project);
 
     await project.save();
     await user.save();
+
+    //update vacation.projects[]
+
     res.status(200).json(task);
-    console.log("just before pub new task", task.user, req.user._id);
     if (task.user.toString() !== req.user._id.toString()) {
       user.recievedNotifications.push(
         `/projects/${projectId}?taskId=${task._id}&user=${req.user.email}&projectTitle=${project.title}&intent=new-task`
       );
-      // user.recentReceivedTasks.push(
-      //   `/projects/${projectId}?taskId=${task._id}&user=${req.user.email}&projectTitle=${project.title}&intent=new-task`
-      // );
       await user.save();
 
       channel.publish(
@@ -200,18 +221,24 @@ const deleteTask = async (req, res) => {
     if (!task) {
       return res.status(404).json({ error: "No such task" });
     }
-    const taskUser = await User.findById(task.user);
-    const taskProject = await Project.findById(task.project);
+    const taskUser = await User.findById(task.user).populate[
+      ("tasks", "vacationRequests")
+    ];
+    const taskProject = await Project.findById(task.project).populate([
+      "tasks",
+    ]);
     if (taskUser) {
-      taskUser.tasks = taskUser.tasks.filter((tasks) => {
-        return task.toString() !== taskId;
+      taskUser.tasks = taskUser.tasks.filter((task) => {
+        return task._id.toString() !== taskId;
       });
     }
     if (taskProject) {
       taskProject.tasks = taskProject.tasks.filter((task) => {
-        return task.toString() !== taskId;
+        return task._id.toString() !== taskId;
       });
     }
+    await resyncUserAndVacs(taskUser);
+    await resyncProjTasksUsersVacs(taskProject, taskUser);
     await taskUser.save();
     await taskProject.save();
     if (task.comments.length > 0) {

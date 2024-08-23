@@ -77,10 +77,12 @@ mongoose
           percentageUpdateProfile.push(
             [0, 5, 10][Math.floor(Math.random() * [0, 5, 10].length)]
           );
-          const totalPercent = percentageUpdateProfile.reduce((acc, cur) => {
+          let totalPercent = percentageUpdateProfile.reduce((acc, cur) => {
             if (i === 0) return acc;
             return acc + cur;
           }, 0);
+
+          if (totalPercent > 100) totalPercent = 100;
 
           const accumTime = timePercentUpdateProfile.reduce((acc, cur, j) => {
             if (j <= i) return acc + cur;

@@ -7,6 +7,7 @@ const {
   getMidTermDate,
   createReviewObjectives,
   createReviewActions,
+  resyncUserAndVacs,
 } = require("./util");
 
 const {
@@ -15,6 +16,7 @@ const {
   addMonths,
   isPast,
   addWeeks,
+  isAfter,
 } = require("date-fns");
 
 const Project = require("./models/Project");
@@ -161,6 +163,20 @@ mongoose
               daysToComplete: generateRandomNumberBetweenMinMax(5, 90),
             });
 
+            // add dynamic deadline:
+            let deadline = addMonths(
+              new Date(Date.now()),
+              generateRandomNumberBetweenMinMax(4, 8)
+            );
+            if (isAfter(new Date(deadline), new Date(project.end))) {
+              deadline = subWeeks(
+                new Date(project.end),
+                generateRandomNumberBetweenMinMax(2, 6)
+              );
+            }
+            newTask.deadline = new Date(deadline);
+            await newTask.save();
+
             project.tasks.push(newTask._id);
             user.tasks.push(newTask._id);
 
@@ -171,6 +187,24 @@ mongoose
             // ) {
             //   user.userInProjects.push(newTask.project);
             // }
+            // console.log(
+            //   "project owner",
+            //   project.owner,
+            //   project.owner.toString()
+            // );
+            // console.log("user._id", user._id);
+            if (project.owner.toString() !== user._id.toString()) {
+              // populate user.userInProject[]:
+              user.userInProjects = user.userInProjects
+                .map((projId) => projId.toString())
+                .concat(project._id.toString())
+                .filter((projId, i, ar) => ar.indexOf(projId) === i);
+              // populate project.users[]:
+              project.users = project.users
+                .map((userId) => userId.toString())
+                .concat(user._id.toString())
+                .filter((userId, i, ar) => ar.indexOf(userId) === i);
+            }
 
             await project.save();
             await user.save();
@@ -180,6 +214,7 @@ mongoose
           }
         }
         await createTasks();
+
         const storedTasks = await Task.find();
         const taskIds = storedTasks.map((task) => task._id);
 

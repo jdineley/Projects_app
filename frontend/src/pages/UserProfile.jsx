@@ -32,17 +32,17 @@ export default function UserProfile() {
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
   const userObj = useLoaderData();
 
-  if (!userObj || userObj.error) return null;
+  // if (!userObj || userObj.error) return null;
 
   const fetcher = useFetcher();
 
-  useEffect(() => {
-    console.log("in UserProfile useEffect");
-    if (fetcher.data) {
-      setVacStartInState("");
-      setVacEndInState("");
-    }
-  }, [fetcher.data]);
+  // useEffect(() => {
+  //   console.log("in UserProfile useEffect");
+  //   if (fetcher.data) {
+  //     setVacStartInState("");
+  //     setVacEndInState("");
+  //   }
+  // }, [fetcher.data]);
 
   const pendingVacationRequests = userObj?.vacationRequests.filter((vacReq) => {
     return vacReq.status === "pending";
@@ -81,6 +81,11 @@ export default function UserProfile() {
 
   useEffect(() => {
     let localDateSelectionErrors = [];
+
+    if (fetcher.data) {
+      setVacStartInState("");
+      setVacEndInState("");
+    }
 
     if (
       vacStartInState &&
@@ -135,7 +140,7 @@ export default function UserProfile() {
       }
     }
     setDateSelectionErrors(localDateSelectionErrors);
-  }, [userObj?.vacationRequests, vacEndInState, vacStartInState]);
+  }, [userObj?.vacationRequests, vacEndInState, vacStartInState, fetcher.data]);
 
   return (
     <>

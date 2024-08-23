@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRevalidator } from "react-router-dom";
 
 import {
   Dialog,
@@ -11,8 +12,11 @@ import {
 
 // icons
 import { MdOutlinePostAdd } from "react-icons/md";
+import { TiVendorMicrosoft } from "react-icons/ti";
 
 import { isBefore, isEqual, isWithinInterval } from "date-fns";
+
+import { toast } from "react-toastify";
 
 const AddProjectDialog = ({
   projectTitle,
@@ -25,11 +29,15 @@ const AddProjectDialog = ({
   projectReviews,
   button,
   submit,
+  user,
 }) => {
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
   const [open, setOpen] = useState(false);
   const [numberOfReviews, setNumberOfReviews] = useState([]);
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
   const [formFieldsCompleted, setFormFieldsCompleted] = useState(true);
+
+  let revalidator = useRevalidator();
 
   let saving = false;
 
@@ -77,6 +85,35 @@ const AddProjectDialog = ({
     if (errorTracker.length === 3) setFormFieldsCompleted(true);
     else setFormFieldsCompleted(false);
   }, [projectEnd, projectStart, projectTitle, projectReviews]);
+
+  function submitMsProject(e) {
+    e.preventDefault();
+    if (
+      window.confirm("Are you sure you want to submit a MS Project .xml file?")
+    ) {
+      let file = e.target.uploadFile.files[0];
+      let formData = new FormData();
+      formData.append("file", file);
+      fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: formData,
+      })
+        .then((resp) => resp.json())
+        .then((data) => {
+          if (data.errors) {
+            alert(data.errors);
+          } else {
+            console.log(data);
+            setOpen(false);
+            toast(`${data.Project.Title[0]} imported from MS Project`);
+            revalidator.revalidate();
+          }
+        });
+    }
+  }
 
   return (
     <Dialog.Root
@@ -247,7 +284,7 @@ const AddProjectDialog = ({
             </Text>
           );
         })}
-        <Flex gap="3" mt="4" justify="end">
+        <Flex gap="3" mt="4" mb="4" justify="end">
           <Dialog.Close>
             <Button variant="soft" color="gray">
               Cancel
@@ -265,6 +302,24 @@ const AddProjectDialog = ({
             )}
           </Dialog.Close>
         </Flex>
+        <hr className="mb-5" />
+        <Flex align="center" gap="2" mb="4">
+          <TiVendorMicrosoft />
+          <Dialog.Title mb="0">Add new MS Project</Dialog.Title>
+        </Flex>
+        <form onSubmit={submitMsProject} method="post" encType="multipart/form">
+          <Text as="div" size="2" mb="1" weight="bold">
+            Import .xml file from MS Project Desktop
+          </Text>
+          <input
+            type="file"
+            name="uploadFile"
+            accept=".xml"
+            id="xml-file"
+            required
+          />
+          <Button mt="2">Upload</Button>
+        </form>
       </Dialog.Content>
     </Dialog.Root>
   );

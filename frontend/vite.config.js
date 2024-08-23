@@ -10,6 +10,9 @@ export default defineConfig({
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "james-dineley",
       project: "projects-frontend",
+      options: {
+        telemetry: "false",
+      },
     }),
     // , sentryVitePlugin({
     //   org: "james-dineley",

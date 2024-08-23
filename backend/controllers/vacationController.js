@@ -12,6 +12,9 @@ const {
   format,
 } = require("date-fns");
 
+// util
+const { correctRemainingVacDays } = require("../util");
+
 const getVacation = async (req, res) => {};
 
 const createVacation = async (req, res) => {
@@ -25,33 +28,29 @@ const createVacation = async (req, res) => {
       user: req.user._id,
     });
     // console.log("User");
-    const user = await User.findById(req.user._id).populate("vacationRequests");
-    const totalNonRejectedVacationsDays =
-      user.vacationRequests.length > 0
-        ? user.vacationRequests.reduce((acc, cur) => {
-            if (cur.status !== "rejected") {
-              acc += differenceInBusinessDays(
-                cur.returnToWorkDate,
-                cur.lastWorkDate
-              );
-            }
-            return acc;
-          }, 0)
-        : 0;
-    // console.log("totalNonRejectedVacationsDays", totalNonRejectedVacationsDays);
-    user.remainingVacationDays =
-      user.vacationAllocation -
-      (differenceInBusinessDays(returnToWorkDate, lastWorkDate) +
-        totalNonRejectedVacationsDays);
-    // const userRemainingVacDays =
-    //   user.remainingVacationDays -
-    //   differenceInBusinessDays(returnToWorkDate, lastWorkDate);
-    // if (userRemainingVacDays >= 0) {
-    //   user.remainingVacationDays = userRemainingVacDays;
-    //   await user.save();
-    // } else {
-    //   throw new Error("User doesnt have sufficient vacation days remaining");
-    // }
+    const user = await User.findById(req.user._id);
+    // .populate("vacationRequests");
+    // const totalNonRejectedVacationsDays =
+    //   user.vacationRequests.length > 0
+    //     ? user.vacationRequests.reduce((acc, cur) => {
+    //         if (cur.status !== "rejected") {
+    //           acc += differenceInBusinessDays(
+    //             cur.returnToWorkDate,
+    //             cur.lastWorkDate
+    //           );
+    //         }
+    //         return acc;
+    //       }, 0)
+    //     : 0;
+    // user.remainingVacationDays =
+    //   user.vacationAllocation -
+    //   (differenceInBusinessDays(returnToWorkDate, lastWorkDate) +
+    //     totalNonRejectedVacationsDays);
+
+    user.vacationRequests.push(vacation._id);
+    await user.save();
+    await correctRemainingVacDays(user._id);
+    // await resyncUserAndVacs(user._id);
 
     for (const projId of user.userInProjects) {
       const proj = await Project.findById(projId);
@@ -75,14 +74,6 @@ const createVacation = async (req, res) => {
             "MM/dd/yyyy"
           )}&intent=vacation-request`
         );
-        // projOwner.recentReceivedVacRequest.push(
-        //   `/user?vacationId=${vacation._id}&user=${
-        //     req.user.email
-        //   }&date=${format(new Date(lastWorkDate), "MM/dd/yyyy")}-${format(
-        //     new Date(returnToWorkDate),
-        //     "MM/dd/yyyy"
-        //   )}&intent=vacation-request`
-        // );
         await projOwner.save();
         channel.publish(
           `/user?vacationId=${vacation._id}&user=${
@@ -100,8 +91,6 @@ const createVacation = async (req, res) => {
       }
     }
 
-    user.vacationRequests.push(vacation._id);
-    await user.save();
     res.status(200).json(vacation);
   } catch (error) {
     res.status(404).json({ error: error.message });
@@ -132,7 +121,7 @@ const updateVacation = async (req, res) => {
     const user = await User.findById(vacationToUpdate.user);
 
     if (vacationApproval) {
-      user.vacStatChange = true;
+      // user.vacStatChange = true;
       vacationToUpdate.approvals.set(projectId, {
         accepted: vacationAccepted,
         reason: vacationAccepted === "false" ? reasonForRejection : null,
@@ -151,18 +140,6 @@ const updateVacation = async (req, res) => {
             "MM/dd/yyyy"
           )}&intent=vacation-accepted`
         );
-        // user.recentReceivedVacAccepted.push(
-        //   `/user?vacationId=${vacationToUpdate._id}&user=${
-        //     req.user.email
-        //   }&date=${format(
-        //     new Date(vacationToUpdate.lastWorkDate),
-        //     "MM/dd/yyyy"
-        //   )}-${format(
-        //     new Date(vacationToUpdate.returnToWorkDate),
-        //     "MM/dd/yyyy"
-        //   )}&intent=vacation-accepted`
-        // );
-        // await user.save();
         channel.publish(
           `/user?vacationId=${vacationToUpdate._id}&user=${
             req.user.email
@@ -181,7 +158,7 @@ const updateVacation = async (req, res) => {
       const approvalValuesArray = Object.values(
         Object.fromEntries(vacationToUpdate.approvals)
       ).map((approv) => approv.accepted);
-      // console.log(approvalValuesArray);
+      console.log("approvalValuesArray", approvalValuesArray);
       if (
         approvalValuesArray.length === vacationToUpdate.projects.length &&
         !approvalValuesArray.includes("false")
@@ -199,16 +176,6 @@ const updateVacation = async (req, res) => {
             "MM/dd/yyyy"
           )}&intent=vacation-approval`
         );
-        // user.recentReceivedVacApproved.push(
-        //   `/user?vacationId=${vacationToUpdate._id}&date=${format(
-        //     new Date(vacationToUpdate.lastWorkDate),
-        //     "MM/dd/yyyy"
-        //   )}-${format(
-        //     new Date(vacationToUpdate.returnToWorkDate),
-        //     "MM/dd/yyyy"
-        //   )}&intent=vacation-approval`
-        // );
-        // await user.save();
 
         channel.publish(
           `/user?vacationId=${vacationToUpdate._id}&date=${format(
@@ -230,15 +197,6 @@ const updateVacation = async (req, res) => {
             "MM/dd/yyyy"
           )}&intent=vacation-rejected`
         );
-        // user.recentReceivedVacRejected.push(
-        //   `/user?vacationId=${vacationToUpdate._id}&date=${format(
-        //     new Date(vacationToUpdate.lastWorkDate),
-        //     "MM/dd/yyyy"
-        //   )}-${format(
-        //     new Date(vacationToUpdate.returnToWorkDate),
-        //     "MM/dd/yyyy"
-        //   )}&intent=vacation-rejected`
-        // );
 
         vacationToUpdate.status = "rejected";
         vacationToUpdate.approved = false;
@@ -260,8 +218,9 @@ const updateVacation = async (req, res) => {
         await vacationToUpdate.save();
       }
       await user.save();
+      await correctRemainingVacDays(user._id);
     }
-    console.log(vacationToUpdate);
+    // console.log(vacationToUpdate);
     res.status(200).json(vacationToUpdate);
   } catch (error) {
     res.status(404).json({ error: error.message });
@@ -281,30 +240,19 @@ const deleteVacation = async (req, res) => {
     const deletedVacation = await Vacation.findByIdAndDelete(
       vacationId
     ).populate("user");
-    console.log(deletedVacation);
+    // console.log(deletedVacation);
 
     const user = await User.findByIdAndUpdate(
-      deletedVacation.user,
+      deletedVacation.user._id,
       {
         $pull: { vacationRequests: deletedVacation._id },
       },
       { new: true }
     );
+    await correctRemainingVacDays(user._id);
 
-    // const totalNonRejectedVacationsDays =
-    //   user.vacationRequests.length > 0
-    //     ? user.vacationRequests.reduce((acc, cur) => {
-    //         return (
-    //           acc +
-    //           differenceInBusinessDays(cur.returnToWorkDate, cur.lastWorkDate)
-    //         );
-    //       }, 0)
-    //     : 0;
-    // console.log("totalNonRejectedVacationsDays", totalNonRejectedVacationsDays);
-    // user.remainingVacationDays =
-    //   user.vacationAllocation - totalNonRejectedVacationsDays;
-    user.vacStatChange = true;
-    await user.save();
+    // user.vacStatChange = true;
+    // await user.save();
 
     if (deletedVacation.projects.length > 0) {
       for (const project of deletedVacation.projects) {
@@ -313,39 +261,30 @@ const deleteVacation = async (req, res) => {
           { $pull: { vacationRequests: deletedVacation._id } }
         );
       }
-    }
 
-    for (const projId of deletedVacation.projects) {
-      const project = await Project.findById(projId).populate("owner");
-      project.owner.recievedNotifications.push(
-        `/user?vacationId=${deletedVacation._id}&date=${format(
-          new Date(deletedVacation.lastWorkDate),
-          "MM/dd/yyyy"
-        )}-${format(
-          new Date(deletedVacation.returnToWorkDate),
-          "MM/dd/yyyy"
-        )}&intent=vacation-deleted&user=${deletedVacation.user.email}`
-      );
-      // project.owner.recentReceivedVacDeleted.push(
-      //   `/user?vacationId=${deletedVacation._id}&date=${format(
-      //     new Date(deletedVacation.lastWorkDate),
-      //     "MM/dd/yyyy"
-      //   )}-${format(
-      //     new Date(deletedVacation.returnToWorkDate),
-      //     "MM/dd/yyyy"
-      //   )}&intent=vacation-deleted&user=${deletedVacation.user.email}`
-      // );
-      await project.owner.save();
-      channel.publish(
-        `/user?vacationId=${deletedVacation._id}&date=${format(
-          new Date(deletedVacation.lastWorkDate),
-          "MM/dd/yyyy"
-        )}-${format(
-          new Date(deletedVacation.returnToWorkDate),
-          "MM/dd/yyyy"
-        )}&intent=vacation-deleted&user=${deletedVacation.user.email}`,
-        `vacation-deleted-notification${project.owner._id}`
-      );
+      for (const projId of deletedVacation.projects) {
+        const project = await Project.findById(projId).populate("owner");
+        project.owner.recievedNotifications.push(
+          `/user?vacationId=${deletedVacation._id}&date=${format(
+            new Date(deletedVacation.lastWorkDate),
+            "MM/dd/yyyy"
+          )}-${format(
+            new Date(deletedVacation.returnToWorkDate),
+            "MM/dd/yyyy"
+          )}&intent=vacation-deleted&user=${deletedVacation.user.email}`
+        );
+        await project.owner.save();
+        channel.publish(
+          `/user?vacationId=${deletedVacation._id}&date=${format(
+            new Date(deletedVacation.lastWorkDate),
+            "MM/dd/yyyy"
+          )}-${format(
+            new Date(deletedVacation.returnToWorkDate),
+            "MM/dd/yyyy"
+          )}&intent=vacation-deleted&user=${deletedVacation.user.email}`,
+          `vacation-deleted-notification${project.owner._id}`
+        );
+      }
     }
     res.status(200).json(deletedVacation);
   } catch (error) {

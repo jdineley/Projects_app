@@ -21,6 +21,7 @@ import ProjectTimeline from "../components/ProjectTimeline";
 import ProjectEditDialog from "../components/ProjectEditDialog";
 
 // icons
+import { TiVendorMicrosoft } from "react-icons/ti";
 
 // radix
 import { Table, Badge, Button, Flex } from "@radix-ui/themes";
@@ -49,8 +50,6 @@ export default function ProjectsDetail() {
     searchedUsers,
     assignUser,
   } = useLoaderData();
-
-  console.log("PROJECT", project);
 
   const json = useActionData();
 
@@ -188,7 +187,8 @@ export default function ProjectsDetail() {
     <div className="projects-detail">
       <div className="project-title-collector">
         <div className="title-icon-collect">
-          <h2>
+          <h2 className="flex items-center gap-2">
+            {project?.msProjectGUID && <TiVendorMicrosoft />}
             {project?.title}
             {project?.owner._id !== user._id && (
               <span className="owner">
@@ -199,7 +199,7 @@ export default function ProjectsDetail() {
             {project?.archived && " *ARCHIVED*"}
           </h2>
         </div>
-        {user._id === project?.owner._id && project?.archived ? (
+        {user._id === project?.owner._id && project?.archived && (
           <Flex gap="3">
             <Form method="POST">
               <input type="hidden" name="projectId" value={project?._id} />
@@ -226,7 +226,8 @@ export default function ProjectsDetail() {
               </Button>
             </fetcher.Form>
           </Flex>
-        ) : (
+        )}{" "}
+        {user._id === project?.owner._id && (
           <>
             <fetcher.Form method="POST" style={{ display: "none" }}>
               <input type="hidden" name="title" value={projectTitle} />
@@ -304,6 +305,7 @@ export default function ProjectsDetail() {
                 `archive-project-button${project?._id}`
               )}
               submit={submit}
+              user={user}
             />
           </>
         )}
