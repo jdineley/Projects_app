@@ -83,9 +83,13 @@ const getProject = async (req, res) => {
           if (err) {
             throw Error("something went wrong downloading the file");
           } else {
-            await fs.unlink(
-              path.join(__dirname + "/msProjectXMLDownloads/" + project.file)
-            );
+            try {
+              await fs.unlink(
+                path.join(__dirname + "/msProjectXMLDownloads/" + project.file)
+              );
+            } catch (error) {
+              throw Error(error.message);
+            }
           }
         }
       );
