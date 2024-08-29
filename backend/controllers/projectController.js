@@ -79,19 +79,28 @@ const getProject = async (req, res) => {
       // );
       return res.download(
         path.join(__dirname + "/msProjectXMLDownloads/" + project.file),
-        async function (err) {
+        function (err) {
           if (err) {
             throw Error("something went wrong downloading the file");
           } else {
-            try {
-              await fs.unlink(
-                path.join(__dirname + "/msProjectXMLDownloads/" + project.file)
-              );
-            } catch (error) {
-              throw Error(error.message);
-            }
+            fs.unlink(
+              path.join(__dirname + "/msProjectXMLDownloads/" + project.file)
+            );
           }
         }
+        // async function (err) {
+        //   if (err) {
+        //     throw Error("something went wrong downloading the file");
+        //   } else {
+        //     try {
+        //       await fs.unlink(
+        //         path.join(__dirname + "/msProjectXMLDownloads/" + project.file)
+        //       );
+        //     } catch (error) {
+        //       throw Error(error.message);
+        //     }
+        //   }
+        // }
       );
     }
 
