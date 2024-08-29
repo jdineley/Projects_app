@@ -77,31 +77,27 @@ const getProject = async (req, res) => {
       //   "content-disposition",
       //   "attachment; filename=" + project.file
       // );
-      // return res.download(
-      //   path.join(__dirname + "/msProjectXMLDownloads/" + project.file),
-      //   function (err) {
-      //     if (err) {
-      //       throw Error("something went wrong downloading the file");
-      //     } else {
-      //       fs.unlink(
-      //         path.join(__dirname + "/msProjectXMLDownloads/" + project.file)
-      //       );
-      //     }
-      //   }
-      //   // async function (err) {
-      //   //   if (err) {
-      //   //     throw Error("something went wrong downloading the file");
-      //   //   } else {
-      //   //     try {
-      //   //       await fs.unlink(
-      //   //         path.join(__dirname + "/msProjectXMLDownloads/" + project.file)
-      //   //       );
-      //   //     } catch (error) {
-      //   //       throw Error(error.message);
-      //   //     }
-      //   //   }
-      //   // }
-      // );
+      return res.download(
+        project.file,
+        // function (err) {
+        //   if (err) {
+        //     throw Error("something went wrong downloading the file");
+        //   } else {
+        //     fs.unlink(project.file);
+        //   }
+        // }
+        async function (err) {
+          if (err) {
+            throw Error("something went wrong downloading the file");
+          } else {
+            try {
+              await fs.unlink(project.file);
+            } catch (error) {
+              throw Error(error.message);
+            }
+          }
+        }
+      );
     }
 
     res.status(200).json({ project, projectTasks });

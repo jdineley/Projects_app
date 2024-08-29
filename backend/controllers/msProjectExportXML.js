@@ -15,8 +15,8 @@ async function msProjectExportXML(project, projectTasks) {
     //   xml
     // );
     // console.log("downloadFile", downloadFile);
-    const data = await fs.readFile(project.file);
-    console.log(data.toString());
+    // const data = await fs.readFile(project.file);
+    // console.log(data.toString());
 
     // return downloadFile
   } catch (err) {
