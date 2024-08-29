@@ -89,6 +89,7 @@ const ProjectTitleEditDialog = ({
       let file = e.target.uploadFile.files[0];
       let formData = new FormData();
       formData.append("file", file);
+      console.log("formData", formData);
       fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}`, {
         method: "PATCH",
         headers: {
@@ -106,6 +107,45 @@ const ProjectTitleEditDialog = ({
             toast(`${project.title} synchronised with MS Project`);
           }
         });
+    }
+  }
+
+  async function exportToMSProject(e) {
+    e.preventDefault();
+    if (
+      window.confirm(
+        "Are you sure you want to export project to MS Project .xml file?"
+      )
+    ) {
+      // window.location = `${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}?intent=exportXML`;
+      try {
+        const resp = await fetch(
+          `${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}?intent=exportXML`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              // "Content-Type": "application/xml",
+            },
+          }
+        );
+        if (!resp.ok) {
+          throw Error("unsucessful download of .xml");
+        }
+        const blob = await resp.blob();
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "project.xml");
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+        // setLoading(false)
+        setOpen(false);
+      } catch (error) {
+        alert(error.message);
+        // throw Error(error.message);
+      }
     }
   }
 
@@ -342,13 +382,40 @@ const ProjectTitleEditDialog = ({
               <TiVendorMicrosoft />
               <Dialog.Title mb="0">Update MS Project</Dialog.Title>
             </Flex>
+
             <form
               onSubmit={submitMsProject}
               method="post"
               encType="multipart/form"
+              className="mb-4"
             >
               <Text as="div" size="2" mb="1" weight="bold">
                 Import .xml file from MS Project Desktop
+              </Text>
+              <Flex gap="4">
+                <input
+                  type="file"
+                  name="uploadFile"
+                  accept=".xml"
+                  id="xml-file"
+                  required
+                />
+                <Button mt="2">Upload</Button>
+              </Flex>
+            </form>
+            <Flex justify="between" align="center" gap="2" mb="4">
+              <Flex align="center" gap="2">
+                <TiVendorMicrosoft />
+                <Dialog.Title mb="0">Export to MS Project .xml</Dialog.Title>
+              </Flex>
+              <form
+                onSubmit={exportToMSProject}
+                method="post"
+                encType="multipart/form"
+                className="mb-4"
+              >
+                {/* <Text as="div" size="2" mb="1" weight="bold">
+                Upload the most recent {project.file}.xml
               </Text>
               <input
                 type="file"
@@ -356,9 +423,10 @@ const ProjectTitleEditDialog = ({
                 accept=".xml"
                 id="xml-file"
                 required
-              />
-              <Button mt="2">Upload</Button>
-            </form>
+              /> */}
+                <Button mt="2">Export</Button>
+              </form>
+            </Flex>
           </>
         )}
       </Dialog.Content>

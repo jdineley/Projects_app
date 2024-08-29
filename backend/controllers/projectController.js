@@ -9,12 +9,14 @@ const Reply = require("../models/Reply");
 const mongoose = require("mongoose");
 
 const fs = require("node:fs/promises");
+const path = require("node:path");
 const xml2js = require("xml2js");
 
 // util
 const { fixReviews } = require("../util");
 const { msProjectUpload } = require("./msProjectUpload");
 const { msProjectUpdate } = require("./msProjectUpdate");
+const { msProjectExportXML } = require("./msProjectExportXML");
 
 const getAllProjects = async (req, res) => {
   console.log("In get all projects..");
@@ -33,6 +35,8 @@ const getAllProjects = async (req, res) => {
 const getProject = async (req, res) => {
   console.log("hit project get project route");
   const { projectId } = req.params;
+  const { intent } = req.query;
+  console.log("intent", intent);
 
   if (!mongoose.Types.ObjectId.isValid(projectId)) {
     return res.status(404).json({ error: "No such Project" });
@@ -48,6 +52,7 @@ const getProject = async (req, res) => {
     if (!project) {
       return res.status(404).json({ error: "No such Project" });
     }
+
     let projectTasks = [];
     for (const task of project.tasks) {
       const populatedTask = await Task.findById(task).populate([
@@ -56,6 +61,34 @@ const getProject = async (req, res) => {
         "dependencies",
       ]);
       projectTasks.push(populatedTask);
+    }
+    if (intent === "exportXML") {
+      await msProjectExportXML(project, projectTasks);
+      // res.download(path.join(__dirname + `${project.file}`));
+      // res.download(`./${project.file}`);
+      console.log("project.file@@@@", project.file);
+      // res.writeHead(200, {
+      //   "Content-Type": "application/xml",
+      //   "Content-disposition": "attachment;filename=" + project.file,
+      //   // "Content-Length": buf.length,
+      // });
+      // res.attachment(project.file);
+      // res.setHeader(
+      //   "content-disposition",
+      //   "attachment; filename=" + project.file
+      // );
+      return res.download(
+        path.join(__dirname + "/msProjectXMLDownloads/" + project.file),
+        async function (err) {
+          if (err) {
+            throw Error("something went wrong downloading the file");
+          } else {
+            await fs.unlink(
+              path.join(__dirname + "/msProjectXMLDownloads/" + project.file)
+            );
+          }
+        }
+      );
     }
 
     res.status(200).json({ project, projectTasks });
@@ -87,8 +120,9 @@ const createProject = async (req, res) => {
       const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
       // console.log(data);
       const msProjObj = await xml2js.parseStringPromise(xml);
+      const originalFileName = req.file.originalname;
 
-      await msProjectUpload(msProjObj, currentUser);
+      await msProjectUpload(msProjObj, currentUser, originalFileName);
 
       return res.status(200).json(msProjObj);
     }
@@ -122,7 +156,7 @@ const updateProject = async (req, res) => {
   const { _id: userId } = req.user;
   console.log("intent", intent);
   console.log("projectId", projectId);
-  console.log(req.file);
+  console.log("req.file", req.file);
   // Add archive project logic starting here:
   // https://www.reddit.com/r/node/comments/9nudkk/update_many_nested_objects_in_mongoose/
   // Set project.archived = true
@@ -140,9 +174,9 @@ const updateProject = async (req, res) => {
 
   try {
     const projectToUpdate = await Project.findById(projectId).populate([
-      "owner",
+      // "owner",
       "tasks",
-      "users",
+      // "users",
     ]);
     const currentUser = await User.findById(userId);
     if (req.file) {
@@ -154,11 +188,18 @@ const updateProject = async (req, res) => {
         throw Error("You are trying to update the wrong project");
       }
 
-      await msProjectUpdate(projectToUpdate, msProjObj, currentUser);
+      const originalFileName = req.file.originalFileName;
+
+      await msProjectUpdate(
+        projectToUpdate,
+        msProjObj,
+        currentUser,
+        originalFileName
+      );
 
       return res.status(200).json(msProjObj);
     }
-    if (projectToUpdate.owner._id.toString() !== req.user._id.toString()) {
+    if (projectToUpdate.owner.toString() !== req.user._id.toString()) {
       return res
         .status(401)
         .json({ error: "Not authorised to update project" });
@@ -472,6 +513,22 @@ const deleteProject = async (req, res) => {
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
+};
+
+const getLocalMSProject = async (req, res) => {
+  console.log("in export local project for MS Project update");
+  // Return object with following format:
+  // {
+  //    projectGUID: String,
+  //    exportDate: Date,
+  //    tasks: [
+  //              {
+  //                GUID: String,
+  //                percentageComplete: Number,
+  //                Description: String
+  //              }, ....
+  //           ]
+  // }
 };
 
 module.exports = {

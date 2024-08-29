@@ -2867,3 +2867,14 @@ let project = {
     ],
   },
 };
+
+const reqFile = {
+  fieldname: "file",
+  originalname: "startup business plan (5).xml",
+  encoding: "7bit",
+  mimetype: "text/xml",
+  destination: "../../public/data/uploads/",
+  filename: "3c7f9b2b7028ba85c7f9bfcf3566fe6e",
+  path: "../../public/data/uploads/3c7f9b2b7028ba85c7f9bfcf3566fe6e",
+  size: 575304,
+};

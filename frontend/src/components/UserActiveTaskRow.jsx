@@ -43,16 +43,17 @@ const UserActiveTaskRow = ({
   const currentPathNoQuery = location.pathname.split("?")[0];
 
   useEffect(() => {
-    if (task._id === newTaskId && notification) {
-      setTimeout(() => {
-        navigate(currentPathNoQuery);
-      }, 1000);
-    }
+    // if (task._id === newTaskId && notification) {
+    //   setTimeout(() => {
+    //     navigate(currentPathNoQuery);
+    //   }, 1000);
+    // }
 
     setIsSettingPercentComplete(true);
 
     setPercentCompleteInState(task.percentageComplete);
-  }, [task, task._id, newTaskId, notification, navigate, currentPathNoQuery]);
+  }, [task]);
+  // [task, task._id, newTaskId, notification, navigate, currentPathNoQuery]);
 
   return (
     <Table.Row

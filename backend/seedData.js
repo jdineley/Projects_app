@@ -6,6 +6,9 @@ const users = [
   { email: "willy@mail.com", password: "Password123!" },
   { email: "hogan@mail.com", password: "Password123!" },
   { email: "pamela@mail.com", password: "Password123!" },
+  { email: "jonny@mail.com", password: "Password123!" },
+  { email: "jenny@mail.com", password: "Password123!" },
+  { email: "sue@mail.com", password: "Password123!" },
 ];
 
 // 10 projects

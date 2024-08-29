@@ -46,7 +46,7 @@ export default function RouteLayout() {
 
   const { userObj, notificationsCleared } = useLoaderData();
 
-  console.log(userObj);
+  // console.log(userObj);
   const path = useActionData();
   if (path) {
     actionDataMonitor.current = true;

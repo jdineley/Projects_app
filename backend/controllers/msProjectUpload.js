@@ -31,7 +31,7 @@ const { resyncUserAndVacs, resyncProjTasksUsersVacs } = require("../util");
 // }]
 // }
 
-async function msProjectUpload(msProjObj, currentUser) {
+async function msProjectUpload(msProjObj, currentUser, originalFileName) {
   if (msProjObj.Project.$.xmlns !== "http://schemas.microsoft.com/project") {
     throw Error("invalid ms Project xml type");
   }
@@ -66,10 +66,13 @@ async function msProjectUpload(msProjObj, currentUser) {
     start,
     end,
     msProjectGUID,
+    file: originalFileName,
+    fileJSON: JSON.stringify(msProjObj),
   };
   // console.log("hello", createProjObj);
   const newProject = await Project.create(createProjObj);
-  console.log("newProject", newProject);
+  // console.log("newProject", newProject);
+  console.log("newProject.owner", newProject.owner);
   currentUser.projects.push(newProject._id);
   await currentUser.save();
 

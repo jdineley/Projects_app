@@ -40,6 +40,18 @@ const projectSchema = new mongoose.Schema(
     msProjectGUID: {
       type: String,
     },
+    file: {
+      type: String,
+      required: function () {
+        if (this.msProjectGUID) return true;
+      },
+    },
+    fileJSON: {
+      type: String,
+      required: function () {
+        if (this.msProjectGUID) return true;
+      },
+    },
   },
   { timestamps: true }
 );

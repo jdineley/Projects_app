@@ -229,6 +229,7 @@ async function correctRemainingVacDays(userId) {
 // if project.tasks[] changes, resychronise project.users[] and update project.vacationRequests[].  This is after project.save()
 async function resyncProjTasksUsersVacs(storedProject) {
   console.log("in resyncProjTasksUsersVacs");
+  // console.log("storedProject.owner", storedProject.owner);
   // const storedProject = await Project.findById(projId).populate(["tasks"]);
   if (storedProject.tasks.length > 0) {
     const projectUsersIds = storedProject.tasks
@@ -238,6 +239,8 @@ async function resyncProjTasksUsersVacs(storedProject) {
         return arr.indexOf(userId) === i;
       });
 
+    console.log("projectUsersIds", projectUsersIds);
+    // console.log("storedProject.users", storedProject.users);
     if (
       (storedProject.users.length === projectUsersIds.length &&
         !storedProject.users.reduce((acc, cur) => {

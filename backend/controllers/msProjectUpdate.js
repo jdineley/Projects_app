@@ -12,14 +12,20 @@ const { resyncUserAndVacs, resyncProjTasksUsersVacs } = require("../util");
 
 const { channel } = require("../routes/v1/sse");
 
-async function msProjectUpdate(projectToUpdate, msProjObj, currentUser) {
+async function msProjectUpdate(
+  projectToUpdate,
+  msProjObj,
+  currentUser,
+  originalFileName
+) {
   const projectMapped = rawMapMsProjToNative(msProjObj, currentUser._id);
   const { title, owner, users, start, end, tasks } = projectMapped;
-  console.log(projectToUpdate);
+  // console.log(projectToUpdate);
   // look up mongoose document.update() method???
   projectToUpdate.title = title;
   projectToUpdate.start = new Date(start);
   projectToUpdate.end = new Date(end);
+  projectToUpdate.file = originalFileName;
 
   //   iterate tasks..
   for (const task of tasks) {
@@ -42,7 +48,7 @@ async function msProjectUpdate(projectToUpdate, msProjObj, currentUser) {
     if (!taskToUpdate) {
       // create new task
       await createTaskUtil(
-        { task, projectToUpdate, storedUser }
+        { task, projectToUpdate, storedUser, currentUser }
         // GUID,
         // UID,
         // title,
@@ -55,12 +61,13 @@ async function msProjectUpdate(projectToUpdate, msProjObj, currentUser) {
       // await updateTaskDepsUtil(task);
       await resyncUserAndVacs(storedUser);
       await storedUser.save();
+      continue;
     }
 
     taskToUpdate.title = title;
     taskToUpdate.description = description;
-    task.daysToComplete = daysToComplete;
-    task.deadline = new Date(deadline);
+    taskToUpdate.daysToComplete = daysToComplete;
+    taskToUpdate.deadline = new Date(deadline);
     await taskToUpdate.save();
 
     // if(projectToUpdate.tasks.map(t => t.msProjectUID).includes(GUID)) {
@@ -78,19 +85,21 @@ async function msProjectUpdate(projectToUpdate, msProjObj, currentUser) {
   // THHIS SHOULD BE HERE!  BUT THE PRESAVE HOOK ISN'T WORKING BACAUSE THE DOCUMENT IN POPULATED, WHICH SCREWS UP THE PREHOOK
   // await projectToUpdate.save();
 
-  for (const user of projectToUpdate.users) {
-    console.log("user", user);
+  for (const userId of projectToUpdate.users) {
+    // console.log("user", user);
     // add general MS Project updated notification logic
-    user.recievedNotifications.push(
-      `/projects/${projectToUpdate._id}?user=${projectToUpdate.owner.email}&projectTitle=${projectToUpdate.title}&intent=MS-Project-Resync`
-    );
-    // user.recentReceivedTasks.push(
-    //   `/projects/${projectId}?taskId=${task._id}&user=${req.user.email}&projectTitle=${project.title}&intent=new-task`
+    const user = await User.findById(userId);
+    // user.recievedNotifications.push(
+    //   `/projects/${projectToUpdate._id}?user=${projectToUpdate.owner.email}&projectTitle=${projectToUpdate.title}&intent=MS-Project-Resync`
     // );
+    user.recievedNotifications.push(
+      `/projects/${projectToUpdate._id}?projectTitle=${projectToUpdate.title}&intent=MS-Project-Resync`
+    );
+
     await user.save();
 
     channel.publish(
-      `/projects/${projectToUpdate._id}?user=${projectToUpdate.owner.email}&projectTitle=${projectToUpdate.title}&intent=MS-Project-Resync`,
+      `/projects/${projectToUpdate._id}?projectTitle=${projectToUpdate.title}&intent=MS-Project-Resync`,
       `ms-project-resync${user._id}`
     );
   }

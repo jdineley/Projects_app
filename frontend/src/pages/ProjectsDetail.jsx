@@ -51,6 +51,8 @@ export default function ProjectsDetail() {
     assignUser,
   } = useLoaderData();
 
+  // console.log("project", project);
+
   const json = useActionData();
 
   const [percentCompleteChanged, setPercentCompleteChanged] = useState(false);

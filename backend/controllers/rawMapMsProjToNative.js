@@ -104,7 +104,7 @@ function rawMapMsProjToNative(msProjObj, userId) {
     .filter((user, i, ar) => ar.indexOf(user) === i);
   projectMapped.users = userMembers;
 
-  console.dir(projectMapped, { depth: null });
+  // console.dir(projectMapped, { depth: null });
 
   return projectMapped;
 }
