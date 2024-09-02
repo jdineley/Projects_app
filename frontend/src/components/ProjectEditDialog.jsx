@@ -117,7 +117,6 @@ const ProjectTitleEditDialog = ({
         "Are you sure you want to export project to MS Project .xml file?"
       )
     ) {
-      // window.location = `${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}?intent=exportXML`;
       try {
         const resp = await fetch(
           `${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}?intent=exportXML`,
@@ -125,18 +124,25 @@ const ProjectTitleEditDialog = ({
             method: "GET",
             headers: {
               Authorization: `Bearer ${user.token}`,
-              // "Content-Type": "application/xml",
             },
           }
         );
         if (!resp.ok) {
           throw Error("unsucessful download of .xml");
         }
+        const filename = resp.headers
+          .get("Content-Disposition")
+          .split("filename=")[1]
+          .split(".")[0];
         const blob = await resp.blob();
+        console.log("filename", filename);
         const url = window.URL.createObjectURL(new Blob([blob]));
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", "project.xml");
+        link.setAttribute(
+          "download",
+          `${filename} ${new Date().getTime()}.xml`
+        );
         document.body.appendChild(link);
         link.click();
         link.parentNode.removeChild(link);

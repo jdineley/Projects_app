@@ -25,7 +25,11 @@ const port = process.env.PORT || 4000;
 // middleware
 app.use(express.json());
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    exposedHeaders: ["Content-Disposition"],
+  })
+);
 
 // routes
 app.use("/api/v1/projects", projectRoutes);

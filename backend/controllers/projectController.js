@@ -64,40 +64,18 @@ const getProject = async (req, res) => {
     }
     if (intent === "exportXML") {
       await msProjectExportXML(project, projectTasks);
-      // res.download(path.join(__dirname + `${project.file}`));
-      // res.download(`./${project.file}`);
-      console.log("project.file@@@@", project.file);
-      // res.writeHead(200, {
-      //   "Content-Type": "application/xml",
-      //   "Content-disposition": "attachment;filename=" + project.file,
-      //   // "Content-Length": buf.length,
-      // });
-      // res.attachment(project.file);
-      // res.setHeader(
-      //   "content-disposition",
-      //   "attachment; filename=" + project.file
-      // );
-      return res.download(
-        project.file,
-        // function (err) {
-        //   if (err) {
-        //     throw Error("something went wrong downloading the file");
-        //   } else {
-        //     fs.unlink(project.file);
-        //   }
-        // }
-        async function (err) {
-          if (err) {
-            throw Error("something went wrong downloading the file");
-          } else {
-            try {
-              await fs.unlink(project.file);
-            } catch (error) {
-              throw Error(error.message);
-            }
+
+      return res.download(project.file, async function (err) {
+        if (err) {
+          throw Error("something went wrong downloading the file");
+        } else {
+          try {
+            await fs.unlink(project.file);
+          } catch (error) {
+            throw Error(error.message);
           }
         }
-      );
+      });
     }
 
     res.status(200).json({ project, projectTasks });
