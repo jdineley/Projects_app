@@ -20,7 +20,7 @@ async function msProjectExportXML(project, projectTasks) {
     if (activeTask) {
       task.PhysicalPercentComplete = [`${activeTask.percentageComplete}`];
       task.Notes = [activeTask.description];
-      task.Finish = [new Date(activeTask.deadline).toISOString()];
+      task.Finish = [new Date(activeTask.deadline).toISOString().split(".")[0]];
     }
   }
 
