@@ -18,8 +18,9 @@ async function msProjectExportXML(project, projectTasks) {
       (el) => el.msProjectGUID === task.GUID[0]
     );
     if (activeTask) {
-      task.PercentWorkComplete = [`${activeTask.percentageComplete}`];
+      task.PhysicalPercentComplete = [`${activeTask.percentageComplete}`];
       task.Notes = [activeTask.description];
+      task.Finish = [new Date(activeTask.deadline).toISOString()];
     }
   }
 
