@@ -19,6 +19,13 @@ const projectSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    // users to only be added to secondary user if not in users
+    // secondaryUsers: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "User",
+    //   },
+    // ],
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
     start: {
       type: Date,

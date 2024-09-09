@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import TaskEditDialog from "../components/TaskEditDialog";
 
 // radix
-import { Table, Badge } from "@radix-ui/themes";
+import { Table, Badge, Flex, Text } from "@radix-ui/themes";
 
 // date-fns
 import { format } from "date-fns";
@@ -86,7 +86,15 @@ const UserActiveTaskRow = ({
                     type="range"
                     name="percentageComplete"
                     min="0"
-                    max="100"
+                    max={
+                      task.dependencies.length === 0 ||
+                      !task.dependencies.some(
+                        (dep) => dep.percentageComplete !== 100
+                      )
+                        ? "100"
+                        : "95"
+                    }
+                    // max="100"
                     step="5"
                     value={percentCompleteInState}
                     onChange={(e) => {
@@ -154,6 +162,12 @@ const UserActiveTaskRow = ({
                       Complete
                     </Badge>
                   )}
+                  {!task.completed &&
+                    new Date(task.deadline).getTime() < Date.now() && (
+                      <Badge color="purple" variant="solid">
+                        Overdue
+                      </Badge>
+                    )}
                 </div>
                 <div id="task-deps">
                   <h5>Task dependencies:</h5>
@@ -192,7 +206,25 @@ const UserActiveTaskRow = ({
         </>
       )}
       {!isMobileResolution && (
-        <Table.Cell>{format(new Date(task.deadline), "dd/MM/yyyy")}</Table.Cell>
+        <>
+          {task.msProjectGUID && (
+            <Table.Cell>
+              {format(new Date(task.startDate), "dd/MM/yyyy")}
+            </Table.Cell>
+          )}
+          <Table.Cell>
+            {format(new Date(task.deadline), "dd/MM/yyyy")}
+          </Table.Cell>
+          <Table.Cell>
+            {task.secondaryUsers.length > 0 && (
+              <Flex direction="column">
+                {task.secondaryUsers.map((u) => (
+                  <Text>{u.email.split("@")[0]}</Text>
+                ))}
+              </Flex>
+            )}
+          </Table.Cell>
+        </>
       )}
       {!task.archived && !taskDetail && (
         <Table.Cell>

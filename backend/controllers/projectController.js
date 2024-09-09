@@ -59,6 +59,7 @@ const getProject = async (req, res) => {
         "user",
         "comments",
         "dependencies",
+        "secondaryUsers",
       ]);
       projectTasks.push(populatedTask);
     }
@@ -162,8 +163,10 @@ const updateProject = async (req, res) => {
   try {
     const projectToUpdate = await Project.findById(projectId).populate([
       // "owner",
-      "tasks",
+      // "tasks",
       // "users",
+      // { path: "tasks", populate: "user" },
+      { path: "tasks", populate: ["secondaryUsers"] },
     ]);
     const currentUser = await User.findById(userId);
     if (req.file) {
@@ -175,7 +178,8 @@ const updateProject = async (req, res) => {
         throw Error("You are trying to update the wrong project");
       }
 
-      const originalFileName = req.file.originalFileName;
+      const originalFileName = req.file.originalname;
+      console.log("originalFileName", originalFileName);
 
       await msProjectUpdate(
         projectToUpdate,

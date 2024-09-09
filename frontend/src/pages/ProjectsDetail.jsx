@@ -89,17 +89,33 @@ export default function ProjectsDetail() {
   let userTasks;
   let otherUsersTasks;
   if (projectTasks) {
-    userTasks = projectTasks
-      .filter((task) => task.user.email === user.email)
-      .sort((a) => {
+    userTasks = projectTasks.filter((task) => task.user.email === user.email);
+    if (project.msProjectGUID) {
+      userTasks.sort((a, b) =>
+        new Date(a.startDate).getTime() > new Date(b.startDate).getTime()
+          ? 1
+          : -1
+      );
+    } else {
+      userTasks.sort((a) => {
         if (!a.completed) return -1;
       });
+    }
 
-    otherUsersTasks = projectTasks
-      .filter((task) => task.user.email !== user.email)
-      .sort((a) => {
+    otherUsersTasks = projectTasks.filter(
+      (task) => task.user.email !== user.email
+    );
+    if (project.msProjectGUID) {
+      otherUsersTasks.sort((a, b) =>
+        new Date(a.startDate).getTime() > new Date(b.startDate).getTime()
+          ? 1
+          : -1
+      );
+    } else {
+      otherUsersTasks.sort((a) => {
         if (!a.completed) return -1;
       });
+    }
   }
 
   function handleSubmitAllPercentFetchers() {
@@ -112,7 +128,13 @@ export default function ProjectsDetail() {
 
   const otherUsersTableRows = otherUsersTasks?.map((task) => {
     return (
-      <Table.Row key={task._id}>
+      <Table.Row
+        key={task._id}
+        id={task._id === newTaskId && notification ? newTaskId : ""}
+        className={
+          task._id === newTaskId && notification ? "new-task-notification" : ""
+        }
+      >
         <Table.Cell>
           <Link to={`tasks/${task._id}`}>{task.title}</Link>
         </Table.Cell>
@@ -139,6 +161,12 @@ export default function ProjectsDetail() {
                         Complete
                       </Badge>
                     )}
+                    {!task.completed &&
+                      new Date(task.deadline).getTime() < Date.now() && (
+                        <Badge color="purple" variant="solid">
+                          Overdue
+                        </Badge>
+                      )}
                   </div>
                   <div id="task-deps">
                     <h5>Task dependencies:</h5>
@@ -180,7 +208,12 @@ export default function ProjectsDetail() {
             {format(new Date(task.deadline), "dd/MM/yyyy")}
           </Table.Cell>
         )}
-        <Table.Cell>{task.user.email.split("@")[0]}</Table.Cell>
+        <Table.Cell>
+          <Flex direction="column">
+            <b>{task.user.email.split("@")[0]}</b>
+            {task.secondaryUsers.map((u) => u.email.split("@")[0])}
+          </Flex>
+        </Table.Cell>
       </Table.Row>
     );
   });
@@ -229,7 +262,7 @@ export default function ProjectsDetail() {
             </fetcher.Form>
           </Flex>
         )}{" "}
-        {user._id === project?.owner._id && (
+        {!project?.archived && user._id === project?.owner._id && (
           <>
             <fetcher.Form method="POST" style={{ display: "none" }}>
               <input type="hidden" name="title" value={projectTitle} />
@@ -369,9 +402,19 @@ export default function ProjectsDetail() {
                       </>
                     )}
                     {!isMobileResolution && (
-                      <Table.ColumnHeaderCell>
-                        Completion date
-                      </Table.ColumnHeaderCell>
+                      <>
+                        {project?.msProjectGUID && (
+                          <Table.ColumnHeaderCell>
+                            Start date
+                          </Table.ColumnHeaderCell>
+                        )}
+                        <Table.ColumnHeaderCell>
+                          Completion date
+                        </Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>
+                          Colaborators
+                        </Table.ColumnHeaderCell>
+                      </>
                     )}
                     {!project.archived && (
                       <Table.ColumnHeaderCell>Edit</Table.ColumnHeaderCell>

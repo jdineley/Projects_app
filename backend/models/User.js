@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
+    secondaryTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
     isAdmin: {
       type: Boolean,
       default: false,

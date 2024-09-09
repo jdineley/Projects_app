@@ -36,6 +36,13 @@ const taskSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    secondaryUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        // default: [],
+      },
+    ],
     project: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Project",
@@ -53,7 +60,7 @@ const taskSchema = new mongoose.Schema(
     },
     msProjectGUID: {
       type: String,
-      // default: "",
+      default: null,
     },
     // isMsProjectTask: {
     //   type: Boolean,
@@ -63,6 +70,12 @@ const taskSchema = new mongoose.Schema(
     // },
     msProjectUID: {
       type: String,
+    },
+    startDate: {
+      type: Date,
+      required: function () {
+        return this.msProjectGUID !== null;
+      },
     },
   },
   { timestamps: true }

@@ -84,7 +84,8 @@ export default function Projects() {
             </Table.Cell>
             {!isMobileResolution && (
               <Table.Cell>
-                {formatDistanceToNow(new Date(project.start))}
+                {/* {formatDistanceToNow(new Date(project.start))} */}
+                {format(new Date(project.start), "dd/MM/yyyy")}
               </Table.Cell>
             )}
             <Table.Cell>
@@ -299,7 +300,9 @@ export default function Projects() {
                   <Table.Row>
                     <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
                     {!isMobileResolution && (
-                      <Table.ColumnHeaderCell>Lifetime</Table.ColumnHeaderCell>
+                      <Table.ColumnHeaderCell>
+                        Start date
+                      </Table.ColumnHeaderCell>
                     )}
                     <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
                     {!isMobileResolution && (

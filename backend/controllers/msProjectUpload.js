@@ -19,6 +19,7 @@ const { resyncUserAndVacs, resyncProjTasksUsersVacs } = require("../util");
 // start: Date,
 // end: Date,
 // msProjectGUID: string
+// secondaryUsers: [emails]
 // tasks: [{
 //  GUID: GUID
 //  UID: UID
@@ -28,6 +29,7 @@ const { resyncUserAndVacs, resyncProjTasksUsersVacs } = require("../util");
 //  user: email,
 //  deadline: Date,
 //  dependencies: [GUID],
+//  secondaryUsers: [emails]
 // }]
 // }
 
@@ -54,11 +56,23 @@ async function msProjectUpload(msProjObj, currentUser, originalFileName) {
     // return msProjectUpdate(existingProject, msProjObj, userId);
   }
 
-  const projectMapped = rawMapMsProjToNative(msProjObj, currentUser._id);
+  const projectMapped = rawMapMsProjToNative(
+    msProjObj,
+    currentUser._id,
+    currentUser.email
+  );
 
   // Loop over projectMapped to create the new project and tasks
-  const { title, owner, users, start, end, tasks, msProjectGUID } =
-    projectMapped;
+  const {
+    title,
+    owner,
+    users,
+    start,
+    end,
+    tasks,
+    msProjectGUID,
+    secondaryUsers,
+  } = projectMapped;
 
   const createProjObj = {
     title,
@@ -72,53 +86,34 @@ async function msProjectUpload(msProjObj, currentUser, originalFileName) {
   // console.log("hello", createProjObj);
   const newProject = await Project.create(createProjObj);
   // console.log("newProject", newProject);
-  console.log("newProject.owner", newProject.owner);
+  // console.log("newProject.owner", newProject.owner);
   currentUser.projects.push(newProject._id);
   await currentUser.save();
 
   // loop project.tasks[] to create task, add task to user.tasks[], add task to newProject.tasks[]
   for (const task of tasks) {
-    const { GUID, UID, title, description, daysToComplete, deadline, user } =
-      task;
+    const {
+      GUID,
+      UID,
+      title,
+      description,
+      daysToComplete,
+      deadline,
+      user,
+      secondaryUsers,
+    } = task;
 
     const storedUser = await User.findOne({ email: user }).populate([
       "tasks",
       "vacationRequests",
+      "secondaryTasks",
     ]);
     if (!storedUser) {
       throw Error(
         `${user} does not currently have an account, please sign up before importing`
       );
     }
-    await createTaskUtil(
-      { task, storedUser, newProject, currentUser }
-      // GUID,
-      // UID,
-      // title,
-      // description,
-      // daysToComplete,
-      // deadline,
-      // storedUser,
-      // newProject,
-      // currentUser
-    );
-    // const newTask = await Task.create({
-    //   title,
-    //   description,
-    //   daysToComplete,
-    //   deadline: new Date(deadline),
-    //   msProjectGUID: GUID,
-    //   msProjectUID: UID,
-    //   user: storedUser._id,
-    //   project: newProject._id,
-    //   description,
-    // });
-    // // All users with new tasks to have these tasks added to their .tasks[]
-    // storedUser.tasks.push(newTask._id);
-    // await storedUser.save();
-    // newProject.tasks.push(newTask._id);
-    await resyncUserAndVacs(storedUser);
-    await storedUser.save();
+    await createTaskUtil({ task, storedUser, newProject, currentUser });
   }
 
   await resyncProjTasksUsersVacs(newProject);

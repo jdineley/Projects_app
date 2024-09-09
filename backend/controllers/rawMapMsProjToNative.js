@@ -1,4 +1,4 @@
-function rawMapMsProjToNative(msProjObj, userId) {
+function rawMapMsProjToNative(msProjObj, userId, userEmail) {
   const projectMapped = {
     title: msProjObj.Project.Title[0],
     owner: userId.toString(),
@@ -25,6 +25,7 @@ function rawMapMsProjToNative(msProjObj, userId) {
       );
       task.daysToComplete = daysToComplete;
       task.deadline = new Date(msTask.Finish[0]);
+      task.startDate = new Date(msTask.Start[0]);
       // populate dependencies with taskUID:
       if (msTask.PredecessorLink?.length > 0) {
         task.dependencies = [];
@@ -32,6 +33,7 @@ function rawMapMsProjToNative(msProjObj, userId) {
           task.dependencies.push(preLink.PredecessorUID[0]);
         });
       }
+      task.secondaryUsers = [];
       projectMapped.tasks.push(task);
       // task = {};
     }
@@ -53,7 +55,8 @@ function rawMapMsProjToNative(msProjObj, userId) {
     }
     // taskToResourceUID = {};
   }
-  console.log("taskToResourceMapUID", taskToResourceMapUID);
+  // console.log("taskToResourceMapUID", taskToResourceMapUID);
+  console.log("@taskToResourceMapUID");
 
   const taskToResourceMapGUIDToEmail = [];
   // [{resourceEmail: 'willy@mail.com', taskGUID: "ffds-454235-%%$566"}]
@@ -73,19 +76,44 @@ function rawMapMsProjToNative(msProjObj, userId) {
     // taskToResourceGUIDToEmail = {};
   }
 
-  console.log("taskToResourceMapGUIDToEmail", taskToResourceMapGUIDToEmail);
+  // console.log("taskToResourceMapGUIDToEmail", taskToResourceMapGUIDToEmail);
+  console.log("@taskToResourceMapGUIDToEmail");
 
   // populate projectMapped.tasks[] with user(email)
   // Change projectMapped.tasks.dependencies[] from UID to GUID
   projectMapped.tasks.forEach((task, i, arr) => {
-    const matchedTask = taskToResourceMapGUIDToEmail.find(
-      (map) => map.taskGUID === task.GUID
-    );
-    arr[i].user = matchedTask.resourceEmail;
-    if (!matchedTask.resourceEmail) {
+    // Check if multiple users on same task:
+    const taskToResourceArray = taskToResourceMapGUIDToEmail.filter((map) => {
+      if (map.taskGUID === task.GUID) return map;
+    });
+
+    // const matchedTask = taskToResourceMapGUIDToEmail.find(
+    //   (map) => map.taskGUID === task.GUID
+    // );
+    // if (!matchedTask.resourceEmail) {
+    //   throw Error(
+    //     `${task.title} has not been assigned a user.  Update MS Project plan so that all tasks are assigned a responsible user`
+    //   );
+    // }
+    if (taskToResourceArray.length === 0) {
       throw Error(
         `${task.title} has not been assigned a user.  Update MS Project plan so that all tasks are assigned a responsible user`
       );
+    }
+    // arr[i].user = matchedTask.resourceEmail;
+    arr[i].user = taskToResourceArray[0].resourceEmail;
+
+    // check if multiple users to one project
+    // then add the secondary users to task.secondaryUsers[]
+    if (taskToResourceArray.length > 1) {
+      taskToResourceArray.shift();
+      taskToResourceArray.forEach((taskRes) => {
+        // arr[i].secondaryUsers.push(taskRes.resourceEmail);
+
+        if (!arr[i].secondaryUsers.includes(taskRes.resourceEmail)) {
+          arr[i].secondaryUsers.push(taskRes.resourceEmail);
+        }
+      });
     }
 
     if (task.dependencies) {
@@ -100,6 +128,7 @@ function rawMapMsProjToNative(msProjObj, userId) {
   // populate projectMapped.users[]
   const userMembers = projectMapped.tasks
     .map((t) => t.user)
+    .filter((u) => u !== userEmail)
     // .filter((user) => user !== undefined)   unecessary with user error handling above
     .filter((user, i, ar) => ar.indexOf(user) === i);
   projectMapped.users = userMembers;

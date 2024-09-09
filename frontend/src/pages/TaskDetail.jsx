@@ -89,6 +89,11 @@ export default function TaskDetail() {
                     <Table.ColumnHeaderCell>
                       Days to complete
                     </Table.ColumnHeaderCell>
+                    {task.msProjectGUID && (
+                      <Table.ColumnHeaderCell>
+                        Start date
+                      </Table.ColumnHeaderCell>
+                    )}
                     <Table.ColumnHeaderCell>
                       Completion date
                     </Table.ColumnHeaderCell>

@@ -214,75 +214,78 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                 }}
               />
             </label>
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                Assign tasks that are parent dependencies
-                <small
-                  style={{
-                    display: "flex",
-                    fontSize: "0.7rem",
-                    justifyContent: "end",
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      submit(searchTaskButtonRef.current);
-                      setTaskSearchActive(true);
+            {!task.msProjectGUID && (
+              <label>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  Assign tasks that are parent dependencies
+                  <small
+                    style={{
+                      display: "flex",
+                      fontSize: "0.7rem",
+                      justifyContent: "end",
                     }}
                   >
-                    Search prerequisite tasks
-                  </button>
-                </small>
-              </Text>
-              <TextField.Input
-                placeholder="Task title search.."
-                id="search-task"
-                onChange={(e) => {
-                  setTaskSearch(e.target.value);
-                  setTaskSearchActive(false);
-                }}
-                defaultValue={taskDep}
-              />
-
-              {selectedDependencies.length > 0 && (
-                <div id="selected-dependencies">
-                  {selectedDependencies.map((dep) => (
-                    <div
-                      key={dep._id}
-                      onClick={(e) => {
-                        setSelectedDependencies(
-                          selectedDependencies.filter((dep) => {
-                            return dep.title !== e.target.textContent;
-                          })
-                        );
-                      }}
-                    >
-                      {dep.title}
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div>
-                {taskSearchActive &&
-                  searchedTasks?.map((task) => (
-                    <p
-                      key={task._id}
-                      id={task._id}
+                    <button
                       onClick={() => {
-                        setSelectedDependencies(
-                          [...selectedDependencies, task].filter(
-                            (dep, i, arr) =>
-                              arr.findIndex((item) => item._id === dep._id) ===
-                              i
-                          )
-                        );
+                        submit(searchTaskButtonRef.current);
+                        setTaskSearchActive(true);
                       }}
                     >
-                      {task.title}
-                    </p>
-                  ))}
-              </div>
-            </label>
+                      Search prerequisite tasks
+                    </button>
+                  </small>
+                </Text>
+                <TextField.Input
+                  placeholder="Task title search.."
+                  id="search-task"
+                  onChange={(e) => {
+                    setTaskSearch(e.target.value);
+                    setTaskSearchActive(false);
+                  }}
+                  defaultValue={taskDep}
+                />
+
+                {selectedDependencies.length > 0 && (
+                  <div id="selected-dependencies">
+                    {selectedDependencies.map((dep) => (
+                      <div
+                        key={dep._id}
+                        onClick={(e) => {
+                          setSelectedDependencies(
+                            selectedDependencies.filter((dep) => {
+                              return dep.title !== e.target.textContent;
+                            })
+                          );
+                        }}
+                      >
+                        {dep.title}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div>
+                  {taskSearchActive &&
+                    searchedTasks?.map((task) => (
+                      <p
+                        key={task._id}
+                        id={task._id}
+                        onClick={() => {
+                          setSelectedDependencies(
+                            [...selectedDependencies, task].filter(
+                              (dep, i, arr) =>
+                                arr.findIndex(
+                                  (item) => item._id === dep._id
+                                ) === i
+                            )
+                          );
+                        }}
+                      >
+                        {task.title}
+                      </p>
+                    ))}
+                </div>
+              </label>
+            )}
           </Flex>
           {selectionErrors.map((msg, i) => {
             return (
@@ -297,16 +300,18 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                 Cancel
               </Button>
             </Dialog.Close>
-            <Dialog.Close>
-              <Button
-                color="tomato"
-                onClick={() => {
-                  deleting = true;
-                }}
-              >
-                Delete Task
-              </Button>
-            </Dialog.Close>
+            {!task.msProjectGUID && (
+              <Dialog.Close>
+                <Button
+                  color="tomato"
+                  onClick={() => {
+                    deleting = true;
+                  }}
+                >
+                  Delete Task
+                </Button>
+              </Dialog.Close>
+            )}
             <Dialog.Close>
               {selectionErrors.length === 0 && formFieldsCompleted && (
                 <Button

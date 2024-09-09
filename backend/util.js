@@ -148,30 +148,54 @@ async function createReviewObjectives(objectives, review, userIds) {
 //user.tasks[] changes - check if userInProjects has changed and correct vacReqs back to pending
 async function resyncUserAndVacs(storedUser) {
   console.log("in resyncUserAndVacs");
+  // console.log("storedUser", storedUser);
   // const storedUser = await User.findById(userId).populate(["tasks"]);
   // console.log("storedUser", storedUser);
-  const userInProjectIds = storedUser.tasks
+  let userInProjectIds = storedUser.tasks
     .map((task) => task.project.toString())
     .filter((projId, i, arr) => arr.indexOf(projId) === i)
     .filter((projId) => !storedUser.projects.includes(projId));
 
+  // console.log("userInProjectIds", userInProjectIds);
+
+  // need to include storedUser.secondaryTasks
+  if (storedUser.secondaryTasks.length > 0) {
+    for (const secondTask of storedUser.secondaryTasks) {
+      if (
+        !userInProjectIds.includes(secondTask.project.toString()) &&
+        !storedUser.projects.includes(secondTask.project.toString())
+      ) {
+        userInProjectIds.push(secondTask.project.toString());
+      }
+    }
+  }
+
+  // console.log("userInProjectIds", userInProjectIds);
+
+  const noNewProject = storedUser.userInProjects.reduce((acc, cur) => {
+    if (!acc) {
+      return false;
+    }
+    if (userInProjectIds.includes(cur.toString())) return true;
+    else {
+      return false;
+    }
+  }, true);
+
+  console.log("noNewProject", noNewProject);
+
+  // if (
+  //   (storedUser.userInProjects.length === userInProjectIds.length &&
+  //     !noNewProject) ||
+  //   storedUser.userInProjects.length !== userInProjectIds.length
+  // ) {
   if (
-    (storedUser.userInProjects.length === userInProjectIds.length &&
-      // check if this.userInProjects !== userInProjectIds:
-      !storedUser.userInProjects.reduce((acc, cur) => {
-        if (!acc) {
-          return false;
-        }
-        if (userInProjectIds.includes(cur.toString())) return true;
-        else {
-          return false;
-        }
-      }, true)) ||
+    !noNewProject ||
     storedUser.userInProjects.length !== userInProjectIds.length
   ) {
     console.log("userInProjects has changed");
     storedUser.userInProjects = userInProjectIds;
-    // await storedUser.save();
+
     let projects = [];
     //must now reset all approved vacationRequests back to pending since a new project must approve the request
     if (storedUser.vacationRequests.length > 0) {
@@ -226,32 +250,48 @@ async function correctRemainingVacDays(userId) {
   await storedUser.save();
 }
 
-// if project.tasks[] changes, resychronise project.users[] and update project.vacationRequests[].  This is after project.save()
+// if project.tasks[] changes, resychronise project.users[] and update project.vacationRequests[].  This is before project.save()
 async function resyncProjTasksUsersVacs(storedProject) {
   console.log("in resyncProjTasksUsersVacs");
   // console.log("storedProject.owner", storedProject.owner);
   // const storedProject = await Project.findById(projId).populate(["tasks"]);
   if (storedProject.tasks.length > 0) {
-    const projectUsersIds = storedProject.tasks
+    let projectUsersIds = storedProject.tasks
       .map((task) => task.user.toString())
       .filter((userId) => userId !== storedProject.owner.toString())
       .filter((userId, i, arr) => {
         return arr.indexOf(userId) === i;
       });
 
+    // have to add storedProject.tasks[task.secondaryUsers] to the projectUsersIds[]
+    for (const task of storedProject.tasks) {
+      if (task.secondaryUsers.length > 0) {
+        task.secondaryUsers.forEach((u) => {
+          if (!projectUsersIds.includes(u._id.toString()))
+            projectUsersIds.push(u._id.toString());
+        });
+      }
+    }
+
     console.log("projectUsersIds", projectUsersIds);
     // console.log("storedProject.users", storedProject.users);
+    const noNewProjectUsers = storedProject.users.reduce((acc, cur) => {
+      if (!acc) {
+        return false;
+      }
+      if (projectUsersIds.includes(cur.toString())) return true;
+      else {
+        return false;
+      }
+    }, true);
+
+    // if (
+    //   (storedProject.users.length === projectUsersIds.length &&
+    //     !noNewProjectUsers) ||
+    //   storedProject.users.length !== projectUsersIds.length
+    // ) {
     if (
-      (storedProject.users.length === projectUsersIds.length &&
-        !storedProject.users.reduce((acc, cur) => {
-          if (!acc) {
-            return false;
-          }
-          if (projectUsersIds.includes(cur.toString())) return true;
-          else {
-            return false;
-          }
-        }, true)) ||
+      !noNewProjectUsers ||
       storedProject.users.length !== projectUsersIds.length
     ) {
       console.log("active users has changed%%%%%%%%%%%%%%%");
