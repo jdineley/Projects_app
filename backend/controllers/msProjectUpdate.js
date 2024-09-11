@@ -74,7 +74,7 @@ async function msProjectUpdate(
 
     taskToUpdate.title = title;
     taskToUpdate.description = description;
-    taskToUpdate.daysToComplete = daysToComplete;
+    // taskToUpdate.daysToComplete = daysToComplete;
     taskToUpdate.deadline = new Date(deadline);
     // update taskToUpdate.user, taskToUpdate.secondaryUsers[]..
     if (taskToUpdate.user.toString() !== storedUser._id.toString()) {

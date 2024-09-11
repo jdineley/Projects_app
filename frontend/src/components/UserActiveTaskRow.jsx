@@ -8,7 +8,7 @@ import TaskEditDialog from "../components/TaskEditDialog";
 import { Table, Badge, Flex, Text } from "@radix-ui/themes";
 
 // date-fns
-import { format } from "date-fns";
+import { format, differenceInBusinessDays } from "date-fns";
 
 // utility
 import { isTaskAtRisk } from "../utility";
@@ -27,7 +27,11 @@ const UserActiveTaskRow = ({
   taskDetail,
   isTabletResolution,
   isMobileResolution,
+  project,
+  user,
 }) => {
+  console.log("project", project);
+  console.log("user", user);
   const [percentCompleteInState, setPercentCompleteInState] = useState(
     task.percentageComplete
   );
@@ -107,6 +111,7 @@ const UserActiveTaskRow = ({
                       setPercentCompleteInState(e.target.value);
                       setPercentCompleteChanged(true);
                     }}
+                    disabled={user?._id !== task.user._id}
                   />
                   <input type="hidden" name="editPercent" value="true" />
                   <input type="hidden" name="taskId" value={task._id} />
@@ -199,9 +204,21 @@ const UserActiveTaskRow = ({
           </Table.Cell>
           {taskDetail && !isMobileResolution && (
             <Table.Cell>{task.daysToComplete}</Table.Cell>
+            // <Table.Cell>
+            //   {differenceInBusinessDays(
+            //     new Date(task.deadline),
+            //     new Date(task.startDate)
+            //   )}
+            // </Table.Cell>
           )}
           {!taskDetail && !isTabletResolution && (
             <Table.Cell>{task.daysToComplete}</Table.Cell>
+            // <Table.Cell>
+            //   {differenceInBusinessDays(
+            //     new Date(task.deadline),
+            //     new Date(task.startDate)
+            //   )}
+            // </Table.Cell>
           )}
         </>
       )}
@@ -216,24 +233,25 @@ const UserActiveTaskRow = ({
             {format(new Date(task.deadline), "dd/MM/yyyy")}
           </Table.Cell>
           <Table.Cell>
-            {task.secondaryUsers.length > 0 && (
-              <Flex direction="column">
-                {task.secondaryUsers.map((u) => (
-                  <Text>{u.email.split("@")[0]}</Text>
-                ))}
-              </Flex>
-            )}
+            <Flex direction="column">
+              <b>{task.user.email.split("@")[0]}</b>
+              {task.secondaryUsers.map((u) => (
+                <Text key={u._id}>{u.email.split("@")[0]}</Text>
+              ))}
+            </Flex>
           </Table.Cell>
         </>
       )}
-      {!task.archived && !taskDetail && (
+      {!taskDetail && !task.archived && (
         <Table.Cell>
-          <TaskEditDialog
-            task={task}
-            searchedTasks={searchedTasks}
-            taskDep={taskDep}
-            taskDetail={taskDetail}
-          />
+          {user?._id === task.user._id && (
+            <TaskEditDialog
+              task={task}
+              searchedTasks={searchedTasks}
+              taskDep={taskDep}
+              taskDetail={taskDetail}
+            />
+          )}
         </Table.Cell>
       )}
     </Table.Row>

@@ -17,11 +17,11 @@ function rawMapMsProjToNative(msProjObj, userId, userEmail) {
       task.UID = msTask.UID[0];
       task.title = msTask.Name[0];
       task.description = msTask.Notes ? msTask.Notes[0] : "TBD";
-      // Work: ['PT160H0M0S']:
+      // Duration: ['PT160H0M0S']:
       // extract hours -
-      const workHIndex = msTask.Work[0].indexOf("H");
+      const workHIndex = msTask.Duration[0].indexOf("H");
       const daysToComplete = Math.ceil(
-        Number(msTask.Work[0].slice(2, workHIndex)) / 8
+        Number(msTask.Duration[0].slice(2, workHIndex)) / 8
       );
       task.daysToComplete = daysToComplete;
       task.deadline = new Date(msTask.Finish[0]);

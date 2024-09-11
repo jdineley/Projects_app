@@ -87,16 +87,19 @@ export default function TaskDetail() {
                 {!isMobileResolution && (
                   <>
                     <Table.ColumnHeaderCell>
-                      Days to complete
+                      <Flex direction="column">
+                        Estimated duration (days)
+                        <small>(with assigned resource)</small>
+                      </Flex>
                     </Table.ColumnHeaderCell>
                     {task.msProjectGUID && (
                       <Table.ColumnHeaderCell>
                         Start date
                       </Table.ColumnHeaderCell>
                     )}
-                    <Table.ColumnHeaderCell>
-                      Completion date
-                    </Table.ColumnHeaderCell>
+                    <Table.ColumnHeaderCell>Finish date</Table.ColumnHeaderCell>
+                    <Table.ColumnHeaderCell>Owner(s)</Table.ColumnHeaderCell>
+                    {/* <Table.ColumnHeaderCell>Edit</Table.ColumnHeaderCell> */}
                   </>
                 )}
               </Table.Row>
@@ -109,6 +112,7 @@ export default function TaskDetail() {
                 taskDep={taskDep}
                 isTabletResolution={isTabletResolution}
                 isMobileResolution={isMobileResolution}
+                user={user}
               />
             </Table.Body>
           </Table.Root>
@@ -127,7 +131,7 @@ export default function TaskDetail() {
           <Card size="1" style={{ width: "200px" }}>
             <Flex justify="between">
               <Text size="1" weight="bold">
-                Completion date
+                Finish date
               </Text>
               <Text size="1">
                 {format(new Date(task.deadline), "MM/dd/yyyy")}

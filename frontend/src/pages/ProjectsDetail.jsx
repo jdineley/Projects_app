@@ -351,8 +351,9 @@ export default function ProjectsDetail() {
             <ProjectTimeline project={project} />
             <div className="title-icon-collect">
               {/* <h3>My {!project?.archived && "Active"} Tasks</h3> */}
-              <h3>My Tasks</h3>
-              {!project?.archived &&
+              <h3>{project?.msProjectGUID ? "Tasks" : "My Tasks"}</h3>
+              {!project?.msProjectGUID &&
+                !project?.archived &&
                 (project?.users.includes(user._id) ||
                   project?.owner._id === user._id) && (
                   <AddTaskDialog
@@ -396,7 +397,10 @@ export default function ProjectsDetail() {
                         </Table.ColumnHeaderCell>
                         {!isTabletResolution && (
                           <Table.ColumnHeaderCell>
-                            Days to complete
+                            <Flex direction="column">
+                              Estimated duration (days)
+                              <small>(with assigned resource)</small>
+                            </Flex>
                           </Table.ColumnHeaderCell>
                         )}
                       </>
@@ -409,10 +413,10 @@ export default function ProjectsDetail() {
                           </Table.ColumnHeaderCell>
                         )}
                         <Table.ColumnHeaderCell>
-                          Completion date
+                          Finish date
                         </Table.ColumnHeaderCell>
                         <Table.ColumnHeaderCell>
-                          Colaborators
+                          Owner(s)
                         </Table.ColumnHeaderCell>
                       </>
                     )}
@@ -422,71 +426,105 @@ export default function ProjectsDetail() {
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {userTasks?.map((task) => (
-                    <UserActiveTaskRow
-                      key={task._id}
-                      task={task}
-                      newTaskId={newTaskId}
-                      notification={notification}
-                      setPercentCompleteChanged={setPercentCompleteChanged}
-                      searchedTasks={searchedTasks}
-                      taskDep={taskDep}
-                      percentChangeButtonsRef={percentChangeButtonsRef}
-                      taskDetail={false}
-                      isTabletResolution={isTabletResolution}
-                      isMobileResolution={isMobileResolution}
-                    />
-                  ))}
+                  {!project.msProjectGUID
+                    ? userTasks?.map((task) => (
+                        <UserActiveTaskRow
+                          key={task._id}
+                          task={task}
+                          newTaskId={newTaskId}
+                          notification={notification}
+                          setPercentCompleteChanged={setPercentCompleteChanged}
+                          searchedTasks={searchedTasks}
+                          taskDep={taskDep}
+                          percentChangeButtonsRef={percentChangeButtonsRef}
+                          taskDetail={false}
+                          isTabletResolution={isTabletResolution}
+                          isMobileResolution={isMobileResolution}
+                          user={user}
+                        />
+                      ))
+                    : projectTasks
+                        .sort((a, b) =>
+                          new Date(a.startDate).getTime() >
+                          new Date(b.startDate).getTime()
+                            ? 1
+                            : -1
+                        )
+                        .map((task) => (
+                          <UserActiveTaskRow
+                            key={task._id}
+                            task={task}
+                            newTaskId={newTaskId}
+                            notification={notification}
+                            setPercentCompleteChanged={
+                              setPercentCompleteChanged
+                            }
+                            searchedTasks={searchedTasks}
+                            taskDep={taskDep}
+                            percentChangeButtonsRef={percentChangeButtonsRef}
+                            taskDetail={false}
+                            isTabletResolution={isTabletResolution}
+                            isMobileResolution={isMobileResolution}
+                            project={project}
+                            user={user}
+                          />
+                        ))}
                 </Table.Body>
               </Table.Root>
             )}
           </div>
         )}
-        <div className="other-users-container">
-          <div className="title-icon-collect">
-            <h3>Other users Tasks</h3>
-            {user._id === project?.owner._id && !project?.archived && (
-              <AddTaskDialog
-                userTask={false}
-                searchedTasks={searchedTasks}
-                taskDep={taskDep}
-                assignUser={assignUser}
-                searchedUsers={searchedUsers}
-                project={project}
-              />
+
+        {!project?.msProjectGUID && (
+          <div className="other-users-container">
+            <div className="title-icon-collect">
+              <h3>Other users Tasks</h3>
+              {user._id === project?.owner._id && !project?.archived && (
+                <AddTaskDialog
+                  userTask={false}
+                  searchedTasks={searchedTasks}
+                  taskDep={taskDep}
+                  assignUser={assignUser}
+                  searchedUsers={searchedUsers}
+                  project={project}
+                />
+              )}
+            </div>
+            {otherUsersTasks?.length > 0 && (
+              <Table.Root variant="surface">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeaderCell>Task</Table.ColumnHeaderCell>
+                    {!project?.archived && (
+                      <>
+                        <Table.ColumnHeaderCell>
+                          {isTabletResolution
+                            ? "Percentage complete"
+                            : "Completion status"}
+                        </Table.ColumnHeaderCell>
+                        {!isTabletResolution && (
+                          <Table.ColumnHeaderCell>
+                            <Flex direction="column">
+                              Estimated duration (days)
+                              <small>(with assigned resource)</small>
+                            </Flex>
+                          </Table.ColumnHeaderCell>
+                        )}
+                      </>
+                    )}
+                    {!isMobileResolution && (
+                      <Table.ColumnHeaderCell>
+                        Finish date
+                      </Table.ColumnHeaderCell>
+                    )}
+                    <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>{otherUsersTableRows}</Table.Body>
+              </Table.Root>
             )}
           </div>
-          {otherUsersTasks?.length > 0 && (
-            <Table.Root variant="surface">
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeaderCell>Task</Table.ColumnHeaderCell>
-                  {!project?.archived && (
-                    <>
-                      <Table.ColumnHeaderCell>
-                        {isTabletResolution
-                          ? "Percentage complete"
-                          : "Completion status"}
-                      </Table.ColumnHeaderCell>
-                      {!isTabletResolution && (
-                        <Table.ColumnHeaderCell>
-                          Days to complete
-                        </Table.ColumnHeaderCell>
-                      )}
-                    </>
-                  )}
-                  {!isMobileResolution && (
-                    <Table.ColumnHeaderCell>
-                      Completion date
-                    </Table.ColumnHeaderCell>
-                  )}
-                  <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>{otherUsersTableRows}</Table.Body>
-            </Table.Root>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
