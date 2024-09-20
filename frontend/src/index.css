@@ -66,9 +66,9 @@ div.error {
 a {
   color: var(--logo);
 }
-a:visited {
+/* a:visited {
   color: var(--logo);
-}
+} */
 
 label {
   margin-bottom: 12px;
@@ -618,6 +618,7 @@ progress {
 .review-marker > * {
   position: relative;
   top: -5px;
+  /* z-index: 1; */
   /* display: flex; */
   /* min-width: 200px; */
 }

@@ -285,6 +285,8 @@ async function resyncProjTasksUsersVacs(storedProject) {
       }
     }, true);
 
+    console.log("noNewProjectUsers", noNewProjectUsers);
+
     // if (
     //   (storedProject.users.length === projectUsersIds.length &&
     //     !noNewProjectUsers) ||

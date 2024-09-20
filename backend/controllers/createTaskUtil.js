@@ -18,6 +18,7 @@ async function createTaskUtil({ task, ...rest }) {
     deadline,
     startDate,
     secondaryUsers,
+    milestone,
   } = task;
   const { storedUser, newProject, currentUser, projectToUpdate } = rest;
   const secondaryUsersIds = [];
@@ -44,6 +45,7 @@ async function createTaskUtil({ task, ...rest }) {
     description,
     startDate: new Date(startDate),
     secondaryUsers: secondaryUsersIds,
+    milestone,
   });
   // All users with new tasks to have these tasks added to their .tasks[]
   storedUser.tasks.push(newTask);

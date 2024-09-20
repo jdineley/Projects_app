@@ -4,6 +4,7 @@ import {
   useFetcher,
   useSubmit,
   useActionData,
+  useSearchParams,
   // useOutletContext
 } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
@@ -18,7 +19,7 @@ import ImportProjectDialog from "../components/ImportProjectDialog";
 import { TiVendorMicrosoft } from "react-icons/ti";
 
 // radix
-import { Table, Flex } from "@radix-ui/themes";
+import { Table, Flex, Tooltip } from "@radix-ui/themes";
 
 import { toast } from "react-toastify";
 
@@ -53,6 +54,8 @@ export default function Projects() {
   const [projectEnd, setProjectEnd] = useState("");
   const [projectReviews, setProjectReviews] = useState([]); //{title: '...', date: '...'}
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   useEffect(() => {
     console.log("in Project useEffect");
     if (json) {
@@ -61,6 +64,8 @@ export default function Projects() {
     }
     if (projectDeleted) {
       toast(projectDeleted);
+      searchParams.delete("projectDeleted");
+      setSearchParams(searchParams);
     }
   }, [json, projectDeleted]);
 
@@ -77,10 +82,32 @@ export default function Projects() {
         return (
           <Table.Row key={project._id}>
             <Table.Cell>
-              <Link to={project._id} className="flex items-center gap-2">
+              <Link
+                to={project._id}
+                className={`flex items-center gap-2 ${
+                  !project.inWork && "text-slate-500"
+                } ${project?.owner._id !== user._id && "pointer-events-none"}`}
+              >
                 {project.msProjectGUID && <TiVendorMicrosoft />}
                 {project.title}
               </Link>
+              {/* {project.inWork ? (
+                <Link to={project._id} className={`flex items-center gap-2`}>
+                  {project.msProjectGUID && <TiVendorMicrosoft />}
+                  {project.title}
+                </Link>
+              ) : (
+                <Tooltip content="Not in work">
+                  <Link
+                    to={null}
+                    className={`flex items-center gap-2  text-slate-500 
+                `}
+                  >
+                    {project.msProjectGUID && <TiVendorMicrosoft />}
+                    {project.title}
+                  </Link>
+                </Tooltip>
+              )} */}
             </Table.Cell>
             {!isMobileResolution && (
               <Table.Cell>
@@ -157,6 +184,30 @@ export default function Projects() {
                   ref={archiveButtonRef}
                 ></button>
               </fetcher.Form>
+              <fetcher.Form method="POST" style={{ display: "none" }}>
+                <input type="hidden" name="freeze" value="true" />
+                <input type="hidden" name="projectId" value={project._id} />
+                <button
+                  mt="2"
+                  id={`freezeProjectButton${project._id}`}
+                  type="submit"
+                  name="intent"
+                  value="change-freeze-state"
+                  // ref={freezeProjectButtonRef}
+                ></button>
+              </fetcher.Form>
+              <fetcher.Form method="POST" style={{ display: "none" }}>
+                <input type="hidden" name="freeze" value="false" />
+                <input type="hidden" name="projectId" value={project._id} />
+                <button
+                  mt="2"
+                  id={`unFreezeProjectButton${project._id}`}
+                  type="submit"
+                  name="intent"
+                  value="change-freeze-state"
+                  // ref={unFreezeProjectButtonRef}
+                ></button>
+              </fetcher.Form>
 
               <ProjectEditDialog
                 projectTitle={projectTitle}
@@ -171,6 +222,12 @@ export default function Projects() {
                 editProjectButton={document.getElementById(project._id)}
                 archiveProjectButton={document.getElementById(
                   `archive-project-button${project._id}`
+                )}
+                freezeProjectButton={document.getElementById(
+                  `freezeProjectButton${project._id}`
+                )}
+                unFreezeProjectButton={document.getElementById(
+                  `unFreezeProjectButton${project._id}`
                 )}
                 submit={submit}
                 user={user}
@@ -201,7 +258,12 @@ export default function Projects() {
           return (
             <Table.Row key={project._id}>
               <Table.Cell>
-                <Link to={project._id} className="flex items-center gap-2">
+                <Link
+                  to={project._id}
+                  className={`flex items-center gap-2 ${
+                    !project.inWork && "text-slate-500 pointer-events-none"
+                  }`}
+                >
                   {project.msProjectGUID && <TiVendorMicrosoft />}
                   {project.title}
                 </Link>
@@ -241,137 +303,125 @@ export default function Projects() {
   }
 
   return (
-    <div>
-      <main>
-        {user && (
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <h3>My Active Projects</h3>
-                <fetcher.Form method="POST" style={{ display: "none" }}>
-                  <input type="hidden" name="title" value={projectTitle} />
-                  <input type="hidden" name="start" value={projectStart} />
-                  <input type="hidden" name="end" value={projectEnd} />
-                  {projectReviews.map((reviewObj, i) => {
-                    return (
-                      <div key={i}>
-                        <input
-                          type="hidden"
-                          name={`title${i}`}
-                          value={reviewObj.title}
-                        />
-                        <input
-                          type="hidden"
-                          name={`date${i}`}
-                          value={reviewObj.date}
-                        />
-                      </div>
-                    );
-                  })}
-                  <button
-                    id="create-project"
-                    type="submit"
-                    name="intent"
-                    value="create-new-project"
-                  ></button>
-                </fetcher.Form>
-                <AddProjectDialog
-                  projectTitle={projectTitle}
-                  projectStart={projectStart}
-                  projectEnd={projectEnd}
-                  setProjectTitle={setProjectTitle}
-                  setProjectStart={setProjectStart}
-                  setProjectEnd={setProjectEnd}
-                  setProjectReviews={setProjectReviews}
-                  projectReviews={projectReviews}
-                  button={document.getElementById("create-project")}
-                  submit={submit}
-                  user={user}
-                />
-              </div>
-              {/* <div className="flex">
-                <TiVendorMicrosoft />
-                <ImportProjectDialog className="ml-auto" />
-              </div> */}
-            </div>
-            {hasSomeUnArchivedProjects && (
-              <Table.Root variant="surface">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
-                    {!isMobileResolution && (
-                      <Table.ColumnHeaderCell>
-                        Start date
-                      </Table.ColumnHeaderCell>
-                    )}
-                    <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
-                    {!isMobileResolution && (
-                      <Table.ColumnHeaderCell>
-                        Active tasks
-                      </Table.ColumnHeaderCell>
-                    )}
-                    <Table.ColumnHeaderCell>Edit</Table.ColumnHeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>{userTableRows}</Table.Body>
-              </Table.Root>
-            )}
+    <main>
+      <div>
+        <div className="flex items-center gap-2">
+          <h3>My Active Projects</h3>
+          <fetcher.Form method="POST" style={{ display: "none" }}>
+            <input type="hidden" name="title" value={projectTitle} />
+            <input type="hidden" name="start" value={projectStart} />
+            <input type="hidden" name="end" value={projectEnd} />
+            {projectReviews.map((reviewObj, i) => {
+              return (
+                <div key={i}>
+                  <input
+                    type="hidden"
+                    name={`title${i}`}
+                    value={reviewObj.title}
+                  />
+                  <input
+                    type="hidden"
+                    name={`date${i}`}
+                    value={reviewObj.date}
+                  />
+                </div>
+              );
+            })}
+            <button
+              id="create-project"
+              type="submit"
+              name="intent"
+              value="create-new-project"
+            ></button>
+          </fetcher.Form>
+          <AddProjectDialog
+            projectTitle={projectTitle}
+            projectStart={projectStart}
+            projectEnd={projectEnd}
+            setProjectTitle={setProjectTitle}
+            setProjectStart={setProjectStart}
+            setProjectEnd={setProjectEnd}
+            setProjectReviews={setProjectReviews}
+            projectReviews={projectReviews}
+            button={document.getElementById("create-project")}
+            submit={submit}
+            user={user}
+          />
+        </div>
+
+        {hasSomeUnArchivedProjects && (
+          <Table.Root variant="surface" className="mb-7">
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
+                {!isMobileResolution && (
+                  <Table.ColumnHeaderCell>Start date</Table.ColumnHeaderCell>
+                )}
+                <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
+                {!isMobileResolution && (
+                  <Table.ColumnHeaderCell>Active tasks</Table.ColumnHeaderCell>
+                )}
+                <Table.ColumnHeaderCell>Edit</Table.ColumnHeaderCell>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>{userTableRows}</Table.Body>
+          </Table.Root>
+        )}
+      </div>
+
+      {otherUsersTableRows?.length > 0 && (
+        <>
+          <h3>Other Active Projects</h3>
+          {userObj.userInProjects.length > 0 && (
+            <Table.Root variant="surface" className="mb-7">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
+                  {!isMobileResolution && (
+                    <Table.ColumnHeaderCell>
+                      Active tasks
+                    </Table.ColumnHeaderCell>
+                  )}
+                  <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>{otherUsersTableRows}</Table.Body>
+            </Table.Root>
+          )}
+        </>
+      )}
+      <Flex gap="5">
+        {userObj?.archivedProjects?.length > 0 && (
+          <div className="flex-1">
+            <h3>My Archived Projects</h3>
+            <Table.Root variant="surface">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>{userTableRowsArchived}</Table.Body>
+            </Table.Root>
           </div>
         )}
-        {otherUsersTableRows?.length > 0 && (
-          <div className="other-users-container">
-            <h3>Other Active Projects</h3>
-            {userObj.userInProjects.length > 0 && (
-              <Table.Root variant="surface">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
-                    {!isMobileResolution && (
-                      <Table.ColumnHeaderCell>
-                        Active tasks
-                      </Table.ColumnHeaderCell>
-                    )}
-                    <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>{otherUsersTableRows}</Table.Body>
-              </Table.Root>
-            )}
+        {otherUsersTableRowsArchived?.length > 0 && (
+          <div className="flex-1">
+            <h3>Other Archived Projects</h3>
+            <Table.Root variant="surface">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>{otherUsersTableRowsArchived}</Table.Body>
+            </Table.Root>
           </div>
         )}
-        <Flex gap="5">
-          {userObj?.archivedProjects?.length > 0 && (
-            <div className="flex-1">
-              <h3>My Archived Projects</h3>
-              <Table.Root variant="surface">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>{userTableRowsArchived}</Table.Body>
-              </Table.Root>
-            </div>
-          )}
-          {otherUsersTableRowsArchived?.length > 0 && (
-            <div className="flex-1">
-              <h3>Other Archived Projects</h3>
-              <Table.Root variant="surface">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>{otherUsersTableRowsArchived}</Table.Body>
-              </Table.Root>
-            </div>
-          )}
-        </Flex>
-      </main>
-    </div>
+      </Flex>
+    </main>
   );
 }

@@ -36,6 +36,7 @@ const AddProjectDialog = ({
   const [numberOfReviews, setNumberOfReviews] = useState([]);
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
   const [formFieldsCompleted, setFormFieldsCompleted] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   let revalidator = useRevalidator();
 
@@ -88,6 +89,7 @@ const AddProjectDialog = ({
 
   function submitMsProject(e) {
     e.preventDefault();
+    setLoading(true);
     if (
       window.confirm("Are you sure you want to submit a MS Project .xml file?")
     ) {
@@ -109,6 +111,7 @@ const AddProjectDialog = ({
             console.log(data);
             setOpen(false);
             toast(`${data.Project.Title[0]} imported from MS Project`);
+            setLoading(false);
             revalidator.revalidate();
           }
         });
@@ -119,6 +122,7 @@ const AddProjectDialog = ({
     <Dialog.Root
       open={open}
       onOpenChange={() => {
+        if (loading) return;
         if (open) {
           if (saving) {
             if (window.confirm("Are you sure you want to save?")) {
@@ -286,7 +290,7 @@ const AddProjectDialog = ({
         })}
         <Flex gap="3" mt="4" mb="4" justify="end">
           <Dialog.Close>
-            <Button variant="soft" color="gray">
+            <Button variant="soft" color="gray" disabled={loading}>
               Cancel
             </Button>
           </Dialog.Close>
@@ -318,7 +322,9 @@ const AddProjectDialog = ({
             id="xml-file"
             required
           />
-          <Button mt="2">Upload</Button>
+          <Button mt="2" disabled={loading}>
+            Upload
+          </Button>
         </form>
       </Dialog.Content>
     </Dialog.Root>

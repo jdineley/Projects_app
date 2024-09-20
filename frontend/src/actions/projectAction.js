@@ -109,6 +109,31 @@ const projectAction =
         throw Error(error.message);
       }
     }
+    if (intent === "change-freeze-state") {
+      try {
+        const { freeze, projectId } = list;
+        console.log("freeze", freeze);
+        const res = await fetch(
+          `${VITE_REACT_APP_API_URL}/api/v1/projects/${projectId}`,
+          {
+            method: "PATCH",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: JSON.stringify({ intent, freeze }),
+          }
+        );
+        const json = await res.json();
+        if (!res.ok) {
+          throw Error(json.error);
+        }
+        return json;
+      } catch (error) {
+        throw Error(error.message);
+      }
+    }
     // if (intent === "import-ms-project") {
     // try {
     //   const res = await fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects`, {

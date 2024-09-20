@@ -24,13 +24,13 @@ export default function UserComment({
 
   const { user } = useAuthContext();
 
-  useEffect(() => {
-    if (comment._id === newCommentId && notification) {
-      setTimeout(() => {
-        navigate(currentPathNoQuery);
-      }, 1000);
-    }
-  }, [comment._id, newCommentId, notification, navigate, currentPathNoQuery]);
+  // useEffect(() => {
+  //   if (comment._id === newCommentId && notification) {
+  //     setTimeout(() => {
+  //       navigate(currentPathNoQuery);
+  //     }, 1000);
+  //   }
+  // }, [comment._id, newCommentId, notification, navigate, currentPathNoQuery]);
 
   async function handleReplySubmit(e) {
     e.preventDefault();

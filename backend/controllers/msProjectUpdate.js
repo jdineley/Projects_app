@@ -18,7 +18,11 @@ async function msProjectUpdate(
   currentUser,
   originalFileName
 ) {
-  const projectMapped = rawMapMsProjToNative(msProjObj, currentUser._id);
+  const projectMapped = rawMapMsProjToNative(
+    msProjObj,
+    currentUser._id,
+    currentUser.email
+  );
   const { title, owner, users, start, end, tasks } = projectMapped;
   // console.log(projectToUpdate);
   // look up mongoose document.update() method???
@@ -26,6 +30,8 @@ async function msProjectUpdate(
   projectToUpdate.start = new Date(start);
   projectToUpdate.end = new Date(end);
   projectToUpdate.file = originalFileName;
+  projectToUpdate.inWork = true;
+  projectToUpdate.fileJSON = JSON.stringify(msProjObj);
 
   //   iterate tasks..
   for (const task of tasks) {
@@ -36,18 +42,23 @@ async function msProjectUpdate(
       description,
       daysToComplete,
       deadline,
+      startDate,
       user,
       secondaryUsers,
+      milestone,
     } = task;
 
-    const storedUser = await User.findOne({ email: user }).populate([
+    let storedUser = await User.findOne({ email: user }).populate([
       "tasks",
       "vacationRequests",
+      "secondaryTasks",
     ]);
-    if (!storedUser) {
+    if (!storedUser && !milestone) {
       throw Error(
         `${user} does not currently have an account, please sign up before importing`
       );
+    } else if (!storedUser && milestone) {
+      storedUser = currentUser;
     }
     const taskToUpdate = projectToUpdate.tasks.find(
       (t) => t.msProjectGUID === GUID
@@ -76,6 +87,8 @@ async function msProjectUpdate(
     taskToUpdate.description = description;
     // taskToUpdate.daysToComplete = daysToComplete;
     taskToUpdate.deadline = new Date(deadline);
+    taskToUpdate.startDate = new Date(startDate);
+    taskToUpdate.milestone = milestone;
     // update taskToUpdate.user, taskToUpdate.secondaryUsers[]..
     if (taskToUpdate.user.toString() !== storedUser._id.toString()) {
       console.log(`task ${taskToUpdate.title} has changed user`);
@@ -169,48 +182,9 @@ async function msProjectUpdate(
         await resyncUserAndVacs(user);
         await user.save();
       }
-      // await taskToUpdate.save();
     }
 
-    // if (
-    //   taskToUpdate.secondaryUsers.length !== task.secondaryUsers.length ||
-    //   (taskToUpdate.secondaryUsers.length === task.secondaryUsers.length &&
-    //     !noNewSecondaryUsers)
-    // ) {
-    //   console.log(`task ${taskToUpdate.title} has changed secondary users`);
-    //   // loop taskToUpdate.secondayUsers[]...
-    //   // - reset taskToUpdate.secondayUsers[]
-    //   // - to add or remove relevant task from user.secondaryTasks[]
-    //   let secdUsrs = [];
-    //   for (const secondUser of task.secondaryUsers) {
-    //     const user = await User.find({ email: secondUser });
-    //     secdUsrs.push(user);
-    //     if (
-    //       // new secondary users added..
-    //       !taskToUpdate.secondaryUsers.map((u) => u.email).includes(secondUser)
-    //     ) {
-    //       // remove task from user.secondaryTasks[]
-    //       // user.secondaryTasks = user.secondaryTasks.filter(
-    //       //   (t) => t.toString() !== taskToUpdate._id.toString()
-    //       // );
-    //       console.log(`secondary users added: ${secondUser}`);
-    //       user.secondaryTasks.push(taskToUpdate._id);
-    //     }
-    //     await resyncUserAndVacs(user);
-    //     await user.save();
-
-    //     // notify user of their removal from the task collaboration
-    //     console.log(
-    //       `${secondUser.email} has been removed from task ${taskToUpdate.title}`
-    //     );
-    //   }
-    //   taskToUpdate.secondaryUsers = secdUsrs;
-    // }
-
     await taskToUpdate.save();
-
-    // if(projectToUpdate.tasks.map(t => t.msProjectUID).includes(GUID)) {
-    // }
   }
 
   await resyncProjTasksUsersVacs(projectToUpdate);
@@ -225,9 +199,7 @@ async function msProjectUpdate(
     // console.log("user", user);
     // add general MS Project updated notification logic
     const user = await User.findById(userId);
-    // user.recievedNotifications.push(
-    //   `/projects/${projectToUpdate._id}?user=${projectToUpdate.owner.email}&projectTitle=${projectToUpdate.title}&intent=MS-Project-Resync`
-    // );
+    console.log("user", user);
     user.recievedNotifications.push(
       `/projects/${projectToUpdate._id}?projectTitle=${projectToUpdate.title}&intent=MS-Project-Resync`
     );

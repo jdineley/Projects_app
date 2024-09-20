@@ -17,6 +17,9 @@ const { fixReviews } = require("../util");
 const { msProjectUpload } = require("./msProjectUpload");
 const { msProjectUpdate } = require("./msProjectUpdate");
 const { msProjectExportXML } = require("./msProjectExportXML");
+// const { channel } = require("node:diagnostics_channel");
+
+const { channel } = require("../routes/v1/sse");
 
 const getAllProjects = async (req, res) => {
   console.log("In get all projects..");
@@ -46,7 +49,7 @@ const getProject = async (req, res) => {
       "owner",
       // "tasks",
       "reviews",
-      // "users",
+      "users",
       { path: "vacationRequests", populate: "user" },
     ]);
     if (!project) {
@@ -63,21 +66,23 @@ const getProject = async (req, res) => {
       ]);
       projectTasks.push(populatedTask);
     }
-    if (intent === "exportXML") {
-      await msProjectExportXML(project, projectTasks);
+    // if (intent === "exportXML") {
+    //   await msProjectExportXML(project, projectTasks);
 
-      return res.download(project.file, async function (err) {
-        if (err) {
-          throw Error("something went wrong downloading the file");
-        } else {
-          try {
-            await fs.unlink(project.file);
-          } catch (error) {
-            throw Error(error.message);
-          }
-        }
-      });
-    }
+    //   return res.download(project.file, async function (err) {
+    //     if (err) {
+    //       throw Error("something went wrong downloading the file");
+    //     } else {
+    //       try {
+    //         await fs.unlink(project.file);
+    //         project.inWork = false;
+    //         await project.save();
+    //       } catch (error) {
+    //         throw Error(error.message);
+    //       }
+    //     }
+    //   });
+    // }
 
     res.status(200).json({ project, projectTasks });
   } catch (error) {
@@ -102,7 +107,11 @@ const createProject = async (req, res) => {
   const [reviewArray] = fixReviews(reviews, intent);
 
   try {
-    const currentUser = await User.findById(userId);
+    const currentUser = await User.findById(userId).populate([
+      "tasks",
+      "vacationRequests",
+      "secondaryTasks",
+    ]);
     if (req.file) {
       console.log("trying to import MS Project xml file..");
       const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
@@ -139,7 +148,7 @@ const createProject = async (req, res) => {
 
 const updateProject = async (req, res) => {
   console.log("Hit update project handler");
-  const { intent, title, start, end, ...reviews } = req.body;
+  const { intent, title, start, end, freeze, ...reviews } = req.body;
   const { projectId } = req.params;
   const { _id: userId } = req.user;
   console.log("intent", intent);
@@ -168,7 +177,18 @@ const updateProject = async (req, res) => {
       // { path: "tasks", populate: "user" },
       { path: "tasks", populate: ["secondaryUsers"] },
     ]);
-    const currentUser = await User.findById(userId);
+
+    if (projectToUpdate.owner.toString() !== req.user._id.toString()) {
+      return res
+        .status(401)
+        .json({ error: "Not authorised to update project" });
+    }
+
+    const currentUser = await User.findById(userId).populate([
+      "tasks",
+      "vacationRequests",
+      "secondaryTasks",
+    ]);
     if (req.file) {
       console.log("trying to import MS Project xml file..");
       const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
@@ -189,11 +209,6 @@ const updateProject = async (req, res) => {
       );
 
       return res.status(200).json(msProjObj);
-    }
-    if (projectToUpdate.owner.toString() !== req.user._id.toString()) {
-      return res
-        .status(401)
-        .json({ error: "Not authorised to update project" });
     }
 
     if (intent === "edit-project") {
@@ -436,10 +451,42 @@ const updateProject = async (req, res) => {
       });
 
       res.status(200).json({ projectToUnarchive, result: intent });
+    } else if (intent === "change-freeze-state") {
+      if (freeze === "true") {
+        projectToUpdate.inWork = false;
+        for (const userId of projectToUpdate.users) {
+          const user = await User.findById(userId);
+          user.recievedNotifications.push(
+            `/projects?intent=project:${projectToUpdate.title}-freeze`
+          );
+          await user.save();
+          channel.publish(
+            `/projects?intent=project:${projectToUpdate.title}-freeze`,
+            `project-freeze-notification${user._id}`
+          );
+        }
+      } else {
+        projectToUpdate.inWork = true;
+        for (const userId of projectToUpdate.users) {
+          const user = await User.findById(userId);
+          user.recievedNotifications.push(
+            `/projects?intent=project:${projectToUpdate.title}-unfreeze`
+          );
+          await user.save();
+          channel.publish(
+            `/projects?intent=project:${projectToUpdate.title}-unfreeze`,
+            `project-unfreeze-notification${user._id}`
+          );
+        }
+      }
+      await projectToUpdate.save();
+      // Notifications to send to all users of the project to highligh that the project is not in work
+
+      res.status(200).json({ projectToUpdate, result: intent });
     }
   } catch (error) {
     console.log("patch error", error.message);
-    res.status(error.status || 400).json({ error: error.message });
+    res.status(error.status || 400).json({ errors: error.message });
   }
 };
 

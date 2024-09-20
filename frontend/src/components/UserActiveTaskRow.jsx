@@ -30,8 +30,6 @@ const UserActiveTaskRow = ({
   project,
   user,
 }) => {
-  console.log("project", project);
-  console.log("user", user);
   const [percentCompleteInState, setPercentCompleteInState] = useState(
     task.percentageComplete
   );
@@ -224,11 +222,17 @@ const UserActiveTaskRow = ({
       )}
       {!isMobileResolution && (
         <>
-          {task.msProjectGUID && (
+          <Table.Cell>
+            {task.startDate
+              ? format(new Date(task.startDate), "dd/MM/yyyy")
+              : null}
+          </Table.Cell>
+
+          {/* {task.msProjectGUID && (
             <Table.Cell>
               {format(new Date(task.startDate), "dd/MM/yyyy")}
             </Table.Cell>
-          )}
+          )} */}
           <Table.Cell>
             {format(new Date(task.deadline), "dd/MM/yyyy")}
           </Table.Cell>

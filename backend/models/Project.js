@@ -59,6 +59,10 @@ const projectSchema = new mongoose.Schema(
         if (this.msProjectGUID) return true;
       },
     },
+    inWork: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

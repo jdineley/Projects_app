@@ -36,7 +36,7 @@ const editTaskAction =
 
       return redirect(`/projects/${projectId}`);
     } catch (error) {
-      throw Error("Failed to edit task");
+      throw Error(error.message);
     }
   };
 

@@ -8,6 +8,7 @@ import { useAuthContext } from "../hooks/useAuthContext";
 import VacationRequestDialog from "./VacationRequestDialog";
 
 //icons
+import { FaDiamond } from "react-icons/fa6";
 
 import {
   Box,
@@ -34,7 +35,12 @@ import {
   intervalToDuration,
 } from "date-fns";
 
-const ProjectTimeline = ({ project, dashCardElement, userProfile }) => {
+const ProjectTimeline = ({
+  project,
+  dashCardElement,
+  userProfile,
+  projectTasks,
+}) => {
   const [showApprovedVacs, setShowApprovedVacs] = useState(false);
 
   const { user } = useAuthContext();
@@ -204,7 +210,7 @@ const ProjectTimeline = ({ project, dashCardElement, userProfile }) => {
                             <Badge color="orange">Pending</Badge>
                           )}
                           <Text as="div" size="2" color="gray">
-                            {format(new Date(review.date), "MM/dd/yyyy")}
+                            {format(new Date(review.date), "dd/MM/yyyy")}
                           </Text>
                         </Flex>
                         <Text as="div" size="2">
@@ -229,6 +235,46 @@ const ProjectTimeline = ({ project, dashCardElement, userProfile }) => {
               </Text>
             </div>
           ))}
+          {/* 2025-01-21T17:00:00.000+00:00 */}
+          {projectTasks
+            ?.filter((t) => t.milestone)
+            .map((t) => (
+              <div
+                key={t._id}
+                className="review-marker"
+                style={{
+                  left: `${datePercentBetweenDates(
+                    project.start,
+                    project.end,
+                    t.startDate.split("T")[0]
+                  )}%`,
+                  top: "15px",
+                }}
+              >
+                <Text>
+                  <HoverCard.Root>
+                    <HoverCard.Trigger>
+                      <div>
+                        <FaDiamond className="opacity-50 text-slate-500 text-xs" />
+                      </div>
+                    </HoverCard.Trigger>
+                    <HoverCard.Content maxWidth="300px">
+                      <Flex gap="4">
+                        <Box>
+                          <Heading size="3" as="h3" mb="1">
+                            Milestone- {t.title}
+                          </Heading>
+
+                          <Text as="div" size="2" color="gray">
+                            {format(new Date(t.startDate), "dd/MM/yyyy")}
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </HoverCard.Content>
+                  </HoverCard.Root>{" "}
+                </Text>
+              </div>
+            ))}
           {createMonthScaleArray(project?.start, project?.end).map((el) => {
             return (
               <div
@@ -353,7 +399,9 @@ const ProjectTimeline = ({ project, dashCardElement, userProfile }) => {
                         approvedVacationRequestsUiObjs.find(
                           (usr) => usr.user === vac.user._id
                         )
-                      ) * 12
+                      ) *
+                        12 +
+                      30
                     }px`,
                     backgroundColor:
                       approvedVacationRequestsUiObjs.find(

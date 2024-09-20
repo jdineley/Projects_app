@@ -149,20 +149,6 @@ mongoose
             const project = await Project.findById(project_id);
             const user = await User.findById(user_id);
 
-            const newTask = await Task.create({
-              ...task,
-              user: user_id,
-              project: project_id,
-              // percentageComplete: generateRandomElement([
-              //   0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-              // ]),
-              createdAt: addMonths(
-                new Date(project.start),
-                generateRandomNumberBetweenMinMax(2, 9)
-              ),
-              daysToComplete: generateRandomNumberBetweenMinMax(5, 90),
-            });
-
             // add dynamic deadline:
             let deadline = addMonths(
               new Date(Date.now()),
@@ -174,8 +160,42 @@ mongoose
                 generateRandomNumberBetweenMinMax(2, 6)
               );
             }
-            newTask.deadline = new Date(deadline);
-            await newTask.save();
+
+            // newTask.deadline = new Date(deadline);
+
+            // add dynamic startDate:
+            let startDate = addMonths(
+              new Date(project.start),
+              generateRandomNumberBetweenMinMax(0, 14)
+            );
+            if (isAfter(new Date(startDate), new Date(deadline))) {
+              deadline = subMonths(
+                new Date(deadline),
+                generateRandomNumberBetweenMinMax(2, 6)
+              );
+            }
+            // newTask.startDate = new Date(startDate);
+
+            // await newTask.save();
+
+            // console.log("deadline", deadline);
+            // console.log("startDate", startDate);
+
+            const newTask = await Task.create({
+              ...task,
+              user: user_id,
+              project: project_id,
+              // percentageComplete: generateRandomElement([
+              //   0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+              // ]),
+              // createdAt: addMonths(
+              //   new Date(project.start),
+              //   generateRandomNumberBetweenMinMax(2, 9)
+              // ),
+              daysToComplete: generateRandomNumberBetweenMinMax(5, 90),
+              startDate,
+              deadline,
+            });
 
             project.tasks.push(newTask._id);
             user.tasks.push(newTask._id);

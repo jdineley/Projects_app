@@ -1,6 +1,6 @@
 import { useLoaderData, Link } from "react-router-dom";
 
-import { Table, Badge, Grid } from "@radix-ui/themes";
+import { Table, Badge, Grid, Flex } from "@radix-ui/themes";
 
 // util
 import { goBackToStartOfArrayIndex, isTaskAtRisk } from "../utility";
@@ -13,6 +13,9 @@ import useMatchMedia from "../hooks/useMatchMedia";
 
 // constants
 import { tabletScreenWidth } from "../utility";
+
+// icons
+import { TiVendorMicrosoft } from "react-icons/ti";
 
 export default function Home() {
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
@@ -45,6 +48,7 @@ export default function Home() {
       let newObj = {
         projectId: cur._id,
         projectTitle: cur.title,
+        msProjectGUID: cur.msProjectGUID || null,
         incompleteTasks: incompleteTasks.length,
         completeTasks: completeTasks.length,
       };
@@ -56,7 +60,12 @@ export default function Home() {
       return (
         <Table.Row key={proj.projectId}>
           <Table.Cell>
-            <Link to={`/projects/${proj.projectId}`}>{proj.projectTitle}</Link>
+            <Link to={`/projects/${proj.projectId}`}>
+              <Flex align="center" gap="2">
+                {proj?.msProjectGUID && <TiVendorMicrosoft />}
+                {proj.projectTitle}
+              </Flex>
+            </Link>
           </Table.Cell>
           <Table.Cell>{proj.incompleteTasks}</Table.Cell>
           <Table.Cell>{proj.completeTasks}</Table.Cell>
@@ -73,7 +82,7 @@ export default function Home() {
       return (
         <Table.Row key={task._id}>
           <Table.Cell>
-            <Link to={`/projects/${task.project._id}/tasks/${task._id}`}>
+            <Link to={`/projects/${task.project?._id}/tasks/${task._id}`}>
               {task.title.slice(0, 15)}...
             </Link>
           </Table.Cell>

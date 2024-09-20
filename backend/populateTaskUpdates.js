@@ -21,10 +21,10 @@ mongoose
       const createRandTaskCompHistHandler = async (task) => {
         // console.log(task);
         //need a random task increase profile from the task creation to now.
-        const currentLife = Date.now() - new Date(task.createdAt).getTime();
+        const currentLife = Date.now() - new Date(task.startDate).getTime();
         const lifespan =
           new Date(task.deadline).getTime() -
-          new Date(task.createdAt).getTime();
+          new Date(task.startDate).getTime();
 
         const fractionOfTimeDone = currentLife / lifespan;
         // console.log("fraction of time complete", fractionOfTimeDone);
@@ -50,10 +50,10 @@ mongoose
         let percentageUpdateProfile = [];
         let taskPercentIncProfile = new Map();
 
-        let i = new Date(task.createdAt).getTime();
+        let i = new Date(task.startDate).getTime();
         while (i < Date.now()) {
           const randTimeInc = randTimeIncrement(
-            new Date(task.createdAt).getTime(),
+            new Date(task.startDate).getTime(),
             Date.now(),
             realNumberOfUpdates
           );
@@ -62,15 +62,15 @@ mongoose
         }
         timePercentUpdateProfile.pop();
         // for (
-        //   let i = new Date(task.createdAt).getTime();
+        //   let i = new Date(task.startDate).getTime();
         //   i < Date.now();
         //   i += randTimeIncrement(
-        //     new Date(task.createdAt).getTime(),
+        //     new Date(task.startDate).getTime(),
         //     Date.now(),
         //     realNumberOfUpdates
         //   )
         // ) {
-        //   timePercentUpdateProfile.push(new Date(task.createdAt).getTime() + i);
+        //   timePercentUpdateProfile.push(new Date(task.startDate).getTime() + i);
         // }
 
         timePercentUpdateProfile.forEach((time, i) => {
@@ -91,7 +91,7 @@ mongoose
 
           taskPercentIncProfile.set(
             format(
-              new Date(new Date(task.createdAt).getTime() + accumTime),
+              new Date(new Date(task.startDate).getTime() + accumTime),
               "MM/dd/yyyy"
             ),
             // new Date(Date.now() + accumTime).toLocaleString(),

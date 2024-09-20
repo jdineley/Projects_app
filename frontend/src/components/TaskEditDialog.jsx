@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { useFetcher, Form, useSubmit } from "react-router-dom";
 import { Dialog, Button, Flex, Text, TextField } from "@radix-ui/themes";
 
-import { isPast, isToday } from "date-fns";
+import { isPast, isToday, isBefore, isAfter } from "date-fns";
 
 // icons
 import { MdOutlinePostAdd } from "react-icons/md";
@@ -11,6 +11,7 @@ import { FaEdit } from "react-icons/fa";
 const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskStartDate, setNewTaskStartDate] = useState("");
   const [newTaskDeadline, setNewTaskDeadline] = useState("");
   const [taskSearch, setTaskSearch] = useState("");
   const [taskSearchActive, setTaskSearchActive] = useState(false);
@@ -65,6 +66,7 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
       <fetcher.Form method="POST" style={{ display: "none" }}>
         <input type="hidden" name="title" value={newTaskTitle} />
         <input type="hidden" name="description" value={newTaskDescription} />
+        <input type="hidden" name="startDate" value={newTaskStartDate} />
         <input type="hidden" name="deadline" value={newTaskDeadline} />
         <input type="hidden" name="daysToComplete" value={daysToCompleteTask} />
         <input type="hidden" name="taskId" value={task._id} />
@@ -111,6 +113,7 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                 submit(editTaskRef.current);
                 setNewTaskTitle("");
                 setNewTaskDescription("");
+                setNewTaskStartDate("");
                 setNewTaskDeadline("");
                 setDaysToCompleteTask(null);
                 setTaskSearch("");
@@ -127,6 +130,7 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
               if (window.confirm("Are you sure you want to cancel?")) {
                 setNewTaskTitle("");
                 setNewTaskDescription("");
+                setNewTaskStartDate("");
                 setNewTaskDeadline("");
                 setDaysToCompleteTask(null);
                 setTaskSearch("");
@@ -138,6 +142,9 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
           } else {
             setNewTaskTitle(task.title);
             setNewTaskDescription(task.description);
+            setNewTaskStartDate(
+              new Date(task.startDate).toISOString().split("T")[0]
+            );
             setNewTaskDeadline(
               new Date(task.deadline).toISOString().split("T")[0]
             );
@@ -189,9 +196,27 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                 }}
               />
             </label>
+            {!task.msProjectGUID && (
+              <label>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  Start date
+                </Text>
+                <input
+                  type="date"
+                  value={newTaskStartDate}
+                  onChange={(e) => {
+                    setNewTaskStartDate(e.target.value);
+                  }}
+                />
+              </label>
+            )}
             <label>
               <Text as="div" size="2" mb="1" weight="bold">
-                Completion date
+                Finish date{" "}
+                {!(
+                  isAfter(new Date(), new Date(task.startDate)) &&
+                  isBefore(new Date(), new Date(task.deadline))
+                ) && <small>(Edits during task life only)</small>}
               </Text>
               <input
                 type="date"
@@ -199,21 +224,29 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                 onChange={(e) => {
                   setNewTaskDeadline(e.target.value);
                 }}
+                disabled={
+                  !(
+                    isAfter(new Date(), new Date(task.startDate)) &&
+                    isBefore(new Date(), new Date(task.deadline))
+                  )
+                }
               />
             </label>
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                Number of days to complete task
-              </Text>
-              <input
-                type="number"
-                min="0"
-                value={daysToCompleteTask}
-                onChange={(e) => {
-                  setDaysToCompleteTask(e.target.value);
-                }}
-              />
-            </label>
+            {!task.msProjectGUID && (
+              <label>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  Number of days to complete task
+                </Text>
+                <input
+                  type="number"
+                  min="0"
+                  value={daysToCompleteTask}
+                  onChange={(e) => {
+                    setDaysToCompleteTask(e.target.value);
+                  }}
+                />
+              </label>
+            )}
             {!task.msProjectGUID && (
               <label>
                 <Text as="div" size="2" mb="1" weight="bold">

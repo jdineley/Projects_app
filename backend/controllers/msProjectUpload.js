@@ -101,17 +101,20 @@ async function msProjectUpload(msProjObj, currentUser, originalFileName) {
       deadline,
       user,
       secondaryUsers,
+      milestone,
     } = task;
 
-    const storedUser = await User.findOne({ email: user }).populate([
+    let storedUser = await User.findOne({ email: user }).populate([
       "tasks",
       "vacationRequests",
       "secondaryTasks",
     ]);
-    if (!storedUser) {
+    if (!storedUser && !milestone) {
       throw Error(
         `${user} does not currently have an account, please sign up before importing`
       );
+    } else if (!storedUser && milestone) {
+      storedUser = currentUser;
     }
     await createTaskUtil({ task, storedUser, newProject, currentUser });
   }

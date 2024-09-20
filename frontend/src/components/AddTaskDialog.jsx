@@ -15,7 +15,7 @@ import {
 
 import { MdOutlinePostAdd } from "react-icons/md";
 
-import { isPast, isToday, isWithinInterval } from "date-fns";
+import { isBefore, isPast, isToday, isWithinInterval } from "date-fns";
 
 export const AddTaskDialog = ({
   userTask,
@@ -24,10 +24,12 @@ export const AddTaskDialog = ({
   taskDep,
   assignUser,
   project,
+  user,
 }) => {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [newTaskDeadline, setNewTaskDeadline] = useState("");
+  const [newTaskStartDate, setNewTaskStartDate] = useState("");
   const [assignee, setAssignee] = useState({});
   const [userSearch, setUserSearch] = useState("");
   const [userSearchActive, setUserSearchActive] = useState(false);
@@ -45,6 +47,8 @@ export const AddTaskDialog = ({
   const searchUserButtonRef = useRef(null);
 
   // console.log(taskSearch);
+  console.log("newTaskStartDate", newTaskStartDate);
+  console.log("selectedDependencies", selectedDependencies);
 
   let saving = false;
 
@@ -54,16 +58,37 @@ export const AddTaskDialog = ({
   useEffect(() => {
     let userInputErrorMessages = [];
 
-    if (
-      newTaskDeadline &&
-      (isPast(new Date(newTaskDeadline)) || isToday(new Date(newTaskDeadline)))
-    ) {
-      userInputErrorMessages.push("task completion date must be in the future");
-    }
+    // if (
+    //   newTaskDeadline &&
+    //   (isPast(new Date(newTaskDeadline)) || isToday(new Date(newTaskDeadline)))
+    // ) {
+    //   userInputErrorMessages.push("task completion date must be in the future");
+    // }
 
     if (daysToCompleteTask === "0") {
       userInputErrorMessages.push(
         "Days to complete task must be greater than 0"
+      );
+    }
+
+    if (
+      newTaskStartDate &&
+      !isWithinInterval(new Date(newTaskStartDate), {
+        start: new Date(project.start),
+        end: new Date(project.end),
+      })
+    ) {
+      userInputErrorMessages.push(
+        "Enter a start date that is within the project timescale"
+      );
+    }
+    if (
+      newTaskStartDate &&
+      newTaskDeadline &&
+      !isBefore(new Date(newTaskStartDate), new Date(newTaskDeadline))
+    ) {
+      userInputErrorMessages.push(
+        "Enter a start date that is before the finish"
       );
     }
 
@@ -75,9 +100,18 @@ export const AddTaskDialog = ({
       })
     ) {
       userInputErrorMessages.push(
-        "Task deadline must fall within the project timescale"
+        "Enter a deadline that is within the project timescale"
       );
     }
+    // if (
+    //   newTaskStartDate &&
+    //   newTaskDeadline &&
+    //   !isBefore(new Date(newTaskStartDate), new Date(newTaskDeadline))
+    // ) {
+    //   userInputErrorMessages.push(
+    //     "Enter a start date that is before the task deadline"
+    //   );
+    // }
 
     setSelectionErrors(userInputErrorMessages);
 
@@ -86,6 +120,7 @@ export const AddTaskDialog = ({
       : [
           newTaskTitle,
           newTaskDescription,
+          newTaskStartDate,
           newTaskDeadline,
           daysToCompleteTask,
           assignee,
@@ -95,11 +130,12 @@ export const AddTaskDialog = ({
     });
     if (errorTracker.length === 4 && userTask) {
       setFormFieldsCompleted(true);
-    } else if (errorTracker.length === 5 && !userTask) {
+    } else if (errorTracker.length === 6 && !userTask) {
       setFormFieldsCompleted(true);
     } else setFormFieldsCompleted(false);
   }, [
     newTaskDeadline,
+    newTaskStartDate,
     daysToCompleteTask,
     newTaskDescription,
     newTaskTitle,
@@ -113,6 +149,7 @@ export const AddTaskDialog = ({
         <input type="hidden" name="title" value={newTaskTitle} />
         <input type="hidden" name="description" value={newTaskDescription} />
         <input type="hidden" name="deadline" value={newTaskDeadline} />
+        <input type="hidden" name="startDate" value={newTaskStartDate} />
         <input type="hidden" name="daysToComplete" value={daysToCompleteTask} />
         <input type="hidden" name="projectId" value={project?._id} />
         {assignee._id && (
@@ -160,6 +197,7 @@ export const AddTaskDialog = ({
                 setNewTaskTitle("");
                 setNewTaskDescription("");
                 setNewTaskDeadline("");
+                setNewTaskStartDate("");
                 setDaysToCompleteTask(null);
                 setUserSearch("");
                 setTaskSearch("");
@@ -172,6 +210,7 @@ export const AddTaskDialog = ({
                 setNewTaskTitle("");
                 setNewTaskDescription("");
                 setNewTaskDeadline("");
+                setNewTaskStartDate("");
                 setDaysToCompleteTask(null);
                 setUserSearch("");
                 setTaskSearch("");
@@ -230,7 +269,19 @@ export const AddTaskDialog = ({
             </label>
             <label>
               <Text as="div" size="2" mb="1" weight="bold">
-                Completion date
+                Start date
+              </Text>
+              <input
+                type="date"
+                value={newTaskStartDate}
+                onChange={(e) => {
+                  setNewTaskStartDate(e.target.value);
+                }}
+              />
+            </label>
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                Finish date
               </Text>
               <input
                 type="date"
@@ -257,7 +308,7 @@ export const AddTaskDialog = ({
             {!userTask && (
               <label>
                 <Text as="div" size="2" mb="1" weight="bold">
-                  Assign User
+                  Assign User <small>(default {user.email})</small>
                   <small
                     style={{
                       display: "flex",

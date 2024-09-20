@@ -198,6 +198,32 @@ export const AuthContextProvider = ({ children }) => {
           )}`
         );
       });
+      ssEvents.addEventListener(
+        `project-freeze-notification${user._id}`,
+        (e) => {
+          console.log("in notification dispatch");
+          notificationDispatch({
+            type: "NEW_NOTIFICATION",
+            payload: {
+              url: e.data,
+            },
+          });
+          toast(`${e.data.split("=")[1]}`);
+        }
+      );
+      ssEvents.addEventListener(
+        `project-unfreeze-notification${user._id}`,
+        (e) => {
+          console.log("in notification dispatch");
+          notificationDispatch({
+            type: "NEW_NOTIFICATION",
+            payload: {
+              url: e.data,
+            },
+          });
+          toast(`${e.data.split("=")[1]}`);
+        }
+      );
       ssEvents.addEventListener("open", () => {
         console.log("Connection opened");
       });

@@ -26,6 +26,7 @@ function rawMapMsProjToNative(msProjObj, userId, userEmail) {
       task.daysToComplete = daysToComplete;
       task.deadline = new Date(msTask.Finish[0]);
       task.startDate = new Date(msTask.Start[0]);
+      task.milestone = msTask.Milestone[0] === "0" ? false : true;
       // populate dependencies with taskUID:
       if (msTask.PredecessorLink?.length > 0) {
         task.dependencies = [];
@@ -38,20 +39,27 @@ function rawMapMsProjToNative(msProjObj, userId, userEmail) {
       // task = {};
     }
   }
-
+  // console.log("projectMapped", projectMapped);
+  const taskUIDArray = projectMapped.tasks.map((task) => task.UID);
   const taskToResourceMapUID = [];
   // [{TaskUID: '2', ResourceUID: '1'}]
   for (const assignment of msProjObj.Project.Assignments[0].Assignment) {
     const taskToResourceUID = {};
-    if (
-      projectMapped.tasks
-        .map((task) => task.UID)
-        .includes(assignment.TaskUID[0])
-    ) {
-      taskToResourceUID.TaskUID = assignment.TaskUID[0];
-      taskToResourceUID.ResourceUID = assignment.ResourceUID[0];
-      // console.log("£££££", taskToResourceUID);
-      taskToResourceMapUID.push(taskToResourceUID);
+    if (taskUIDArray.includes(assignment.TaskUID[0])) {
+      if (assignment.ResourceUID[0] !== "-65535") {
+        taskToResourceUID.TaskUID = assignment.TaskUID[0];
+        taskToResourceUID.ResourceUID = assignment.ResourceUID[0];
+        // console.log("£££££", taskToResourceUID);
+        taskToResourceMapUID.push(taskToResourceUID);
+      } else {
+        // task hasn't been assigned a resource
+        const unAssignedTask = projectMapped.tasks.find(
+          (el) => el.UID === assignment.TaskUID[0]
+        );
+        throw Error(
+          `TASK: ${unAssignedTask.title} has not been assigned a user.  Update MS Project plan so that all tasks are assigned a responsible user`
+        );
+      }
     }
     // taskToResourceUID = {};
   }
@@ -86,7 +94,7 @@ function rawMapMsProjToNative(msProjObj, userId, userEmail) {
     const taskToResourceArray = taskToResourceMapGUIDToEmail.filter((map) => {
       if (map.taskGUID === task.GUID) return map;
     });
-
+    // console.log("taskToResourceArray", taskToResourceArray);
     // const matchedTask = taskToResourceMapGUIDToEmail.find(
     //   (map) => map.taskGUID === task.GUID
     // );
@@ -95,11 +103,11 @@ function rawMapMsProjToNative(msProjObj, userId, userEmail) {
     //     `${task.title} has not been assigned a user.  Update MS Project plan so that all tasks are assigned a responsible user`
     //   );
     // }
-    if (taskToResourceArray.length === 0) {
-      throw Error(
-        `${task.title} has not been assigned a user.  Update MS Project plan so that all tasks are assigned a responsible user`
-      );
-    }
+    // if (taskToResourceArray.length === 0) {
+    //   throw Error(
+    //     `${task.title} has not been assigned a user.  Update MS Project plan so that all tasks are assigned a responsible user`
+    //   );
+    // }
     // arr[i].user = matchedTask.resourceEmail;
     arr[i].user = taskToResourceArray[0].resourceEmail;
 

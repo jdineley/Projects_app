@@ -77,6 +77,7 @@ const getTask = async (req, res) => {
 // create a task
 const createTask = async (req, res) => {
   console.log("hit create task route");
+  console.log("req.body", req.body);
   const { projectId } = req.params;
   const { assigneeId } = req.body;
 
@@ -92,6 +93,9 @@ const createTask = async (req, res) => {
     if (assigneeId) {
       const assignee = await User.findById(assigneeId);
       req.body.user = assignee._id;
+    } else {
+      const { _id } = req.user;
+      req.body.user = _id;
     }
     const task = await Task.create({
       user: req.user._id,
@@ -101,6 +105,7 @@ const createTask = async (req, res) => {
     const user = await User.findById(task.user).populate([
       "tasks",
       "vacationRequests",
+      "secondaryTasks",
     ]);
 
     project.tasks.push(task);
@@ -159,12 +164,17 @@ const updateTask = async (req, res) => {
   }
 
   try {
-    const taskToUpdate = await Task.findById(taskId);
+    const taskToUpdate = await Task.findById(taskId).populate("project");
     if (!taskToUpdate) {
       return res.status(404).json({ error: "No such task" });
     }
     if (taskToUpdate.user._id.toString() !== req.user._id.toString()) {
       return res.status(401).json({ error: "Not authorised to update task" });
+    }
+    if (!taskToUpdate.project.inWork) {
+      return res
+        .status(401)
+        .json({ error: "This project is currently locked for Scheduling" });
     }
     if (editPercent === "true") {
       taskToUpdate.percentageCompleteHistory.set(

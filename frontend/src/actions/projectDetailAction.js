@@ -13,6 +13,7 @@ const projectDetailAction =
       const {
         title,
         description,
+        startDate,
         deadline,
         taskId,
         percentageComplete,
@@ -37,6 +38,7 @@ const projectDetailAction =
             body: JSON.stringify({
               title,
               description,
+              startDate,
               deadline,
               percentageComplete,
               completed,
@@ -52,13 +54,14 @@ const projectDetailAction =
         }
         return json;
       } catch (error) {
-        throw Error("Failed to edit task");
+        throw Error(error.message);
       }
     }
     if (intent === "create-task") {
       const {
         title,
         description,
+        startDate,
         deadline,
         projectId,
         assigneeId,
@@ -82,6 +85,7 @@ const projectDetailAction =
             body: JSON.stringify({
               title,
               description,
+              startDate,
               deadline,
               assigneeId,
               daysToComplete,
@@ -255,6 +259,31 @@ const projectDetailAction =
           throw Error(json.error);
         }
         return redirect(`/projects`);
+      } catch (error) {
+        throw Error(error.message);
+      }
+    }
+    if (intent === "change-freeze-state") {
+      try {
+        const { freeze } = list;
+        console.log("freeze", freeze);
+        const res = await fetch(
+          `${VITE_REACT_APP_API_URL}/api/v1/projects/${projectId}`,
+          {
+            method: "PATCH",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: JSON.stringify({ intent, freeze }),
+          }
+        );
+        const json = await res.json();
+        if (!res.ok) {
+          throw Error(json.error);
+        }
+        return json;
       } catch (error) {
         throw Error(error.message);
       }

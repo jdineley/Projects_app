@@ -49,7 +49,10 @@ const taskSchema = new mongoose.Schema(
       required: true,
     },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
-    deadline: Date,
+    deadline: {
+      type: Date,
+      required: true,
+    },
     dependencies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
     // createdAt: {
     //   type: Date,
@@ -73,9 +76,11 @@ const taskSchema = new mongoose.Schema(
     },
     startDate: {
       type: Date,
-      required: function () {
-        return this.msProjectGUID !== null;
-      },
+      required: true,
+    },
+    milestone: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
