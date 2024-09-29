@@ -11,29 +11,12 @@ const { createTaskUtil } = require("./createTaskUtil");
 // util
 const { resyncUserAndVacs, resyncProjTasksUsersVacs } = require("../util");
 
-// I need to map the xml object into a useable form:
-// project: {
-// title: string,
-// owner: _id,
-// users: [emails], ****could get this from tasks[]*****
-// start: Date,
-// end: Date,
-// msProjectGUID: string
-// secondaryUsers: [emails]
-// tasks: [{
-//  GUID: GUID
-//  UID: UID
-//  title: string,
-//  description: string,
-//  daysToComplete: Number,
-//  user: email,
-//  deadline: Date,
-//  dependencies: [GUID],
-//  secondaryUsers: [emails]
-// }]
-// }
-
-async function msProjectUpload(msProjObj, currentUser, originalFileName) {
+async function msProjectUpload(
+  msProjObj,
+  projectMapped,
+  currentUser,
+  originalFileName
+) {
   if (msProjObj.Project.$.xmlns !== "http://schemas.microsoft.com/project") {
     throw Error("invalid ms Project xml type");
   }
@@ -41,26 +24,27 @@ async function msProjectUpload(msProjObj, currentUser, originalFileName) {
   const existingProject = await Project.findOne({
     msProjectGUID: msProjObj.Project.GUID[0],
   }).populate(["owner", "tasks"]);
+  // console.log(existingProject);
   // console.log("existing Project ID", existingProject.owner._id, currentUser);
   if (existingProject) {
     //logic to update the existing project
     // console.log("the imported file has previously been added to Projects");
-    if (existingProject.owner._id.toString() !== currentUser._id) {
-      throw Error(
-        `This MS Project is already being actively managed by ${existingProject.owner.email}`
-      );
+    if (existingProject.owner._id.toString() !== currentUser._id.toString()) {
+      throw {
+        errors: `This MS Project is already being actively managed by ${existingProject.owner.email}`,
+      };
     }
-    throw Error(
-      `You have already uploaded ${existingProject.title}.  If you wish to update changes use edit project`
-    );
+    throw {
+      errors: `You have already uploaded ${existingProject.title}.  If you wish to update changes use edit project`,
+    };
     // return msProjectUpdate(existingProject, msProjObj, userId);
   }
 
-  const projectMapped = rawMapMsProjToNative(
-    msProjObj,
-    currentUser._id,
-    currentUser.email
-  );
+  // const projectMapped = await rawMapMsProjToNative(
+  //   msProjObj,
+  //   currentUser._id,
+  //   currentUser.email
+  // );
 
   // Loop over projectMapped to create the new project and tasks
   const {
@@ -81,7 +65,7 @@ async function msProjectUpload(msProjObj, currentUser, originalFileName) {
     end,
     msProjectGUID,
     file: originalFileName,
-    fileJSON: JSON.stringify(msProjObj),
+    // fileJSON: JSON.stringify(msProjObj),
   };
   // console.log("hello", createProjObj);
   const newProject = await Project.create(createProjObj);
@@ -104,18 +88,18 @@ async function msProjectUpload(msProjObj, currentUser, originalFileName) {
       milestone,
     } = task;
 
-    let storedUser = await User.findOne({ email: user }).populate([
+    const storedUser = await User.findOne({ email: user }).populate([
       "tasks",
       "vacationRequests",
       "secondaryTasks",
     ]);
-    if (!storedUser && !milestone) {
-      throw Error(
-        `${user} does not currently have an account, please sign up before importing`
-      );
-    } else if (!storedUser && milestone) {
-      storedUser = currentUser;
+    if (!storedUser) {
+      throw {
+        errors: `${user} does not currently have an account, please sign up before importing`,
+        newProjectId: newProject._id,
+      };
     }
+
     await createTaskUtil({ task, storedUser, newProject, currentUser });
   }
 
@@ -124,7 +108,18 @@ async function msProjectUpload(msProjObj, currentUser, originalFileName) {
 
   // create dependencies array with _ids
   for (const task of tasks) {
-    updateTaskDepsUtil(task);
+    const unknownDepGUID = await updateTaskDepsUtil(task);
+    if (unknownDepGUID) {
+      // newProject.archived = true;
+      // await newProject.save();
+      const unknownDepTitle = msProjObj.Project.Tasks[0].Task.find(
+        (t) => t.GUID[0] === unknownDepGUID
+      ).Name[0];
+      throw {
+        errors: `Predecessor task with name: ${unknownDepTitle} was not found, the likely cause is this task is a summary task.  Please ensure summary tasks are not used as predecessors.`,
+        newProjectId: newProject._id,
+      };
+    }
     // const taskStored = await Task.findOne({ msProjectGUID: task.GUID });
     // const { dependencies } = task;
     // if (dependencies?.length > 0) {
@@ -136,7 +131,7 @@ async function msProjectUpload(msProjObj, currentUser, originalFileName) {
     //   await taskStored.save();
     // }
   }
-
+  return newProject;
   // The project manager (current user) .projects[newProject._id]
   // const projOwner = await User.findById(userId.toString());
 }

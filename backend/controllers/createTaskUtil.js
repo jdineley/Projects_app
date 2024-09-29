@@ -9,6 +9,7 @@ const { resyncUserAndVacs } = require("../util");
 
 async function createTaskUtil({ task, ...rest }) {
   console.log("in create task utility");
+  console.log(task, rest);
   const {
     GUID,
     UID,
@@ -26,9 +27,20 @@ async function createTaskUtil({ task, ...rest }) {
     for (const secondUser of secondaryUsers) {
       const storedSecondUser = await User.findOne({ email: secondUser });
       if (!storedSecondUser) {
-        throw Error(
-          `A user with email address ${secondUser} was not found, register the user before importing the msProject`
-        );
+        if (projectToUpdate) {
+          throw Error(
+            `A user with email address ${secondUser} was not found, register the user before importing the msProject`
+          );
+        }
+        // else if(newProject) = remove entire project and start again...
+        else if (newProject) {
+          // newProject.archived = true;
+          // await newProject.save();
+          throw {
+            errors: `A user with email address ${secondUser} was not found, register the user before importing the msProject`,
+            newProjectId: newProject._id,
+          };
+        }
       }
       secondaryUsersIds.push(storedSecondUser._id);
     }
@@ -42,7 +54,7 @@ async function createTaskUtil({ task, ...rest }) {
     msProjectUID: UID,
     user: storedUser._id,
     project: projectToUpdate?._id || newProject?._id,
-    description,
+    // description,
     startDate: new Date(startDate),
     secondaryUsers: secondaryUsersIds,
     milestone,
@@ -81,9 +93,18 @@ async function createTaskUtil({ task, ...rest }) {
       ]);
       // console.log("secondaryUser", secondaryUser);
       if (!secondaryUser) {
-        throw Error(
-          `Something went wrong trying to find a user with id: ${secondaryUserId}`
-        );
+        if (projectToUpdate) {
+          throw Error(
+            `Something went wrong trying to find a user with id: ${secondaryUserId}`
+          );
+        } else if (newProject) {
+          // newProject.archived = true;
+          // await newProject.save();
+          throw {
+            errors: `Something went wrong trying to find a user with id: ${secondaryUserId}`,
+            newProjectId: newProject._id,
+          };
+        }
       }
       if (
         !secondaryUser.secondaryTasks

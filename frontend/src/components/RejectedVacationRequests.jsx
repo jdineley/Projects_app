@@ -46,24 +46,26 @@ const RejectedVacationRequests = ({ vac, userObj }) => {
               <Heading size="3" as="h3" mb="1">
                 Vacation request summary: {vac._id}
               </Heading>
-              {userObj.userInProjects.map((proj) => {
-                return (
-                  <Box key={proj._id}>
-                    <Heading size="1" as="h4" mb="1">
-                      {proj.title}(PM:{proj.owner.email})
-                    </Heading>
-                    {vac.approvals[proj._id] &&
-                      (vac.approvals[proj._id].accepted === "true" ? (
-                        <Badge>Accepted</Badge>
-                      ) : (
-                        <>
-                          <Badge color="red">Rejected </Badge>{" "}
-                          <small>{vac.approvals[proj._id].reason}</small>
-                        </>
-                      ))}
-                  </Box>
-                );
-              })}
+              {userObj.userInProjects
+                .filter((proj) => !proj.archived)
+                .map((proj) => {
+                  return (
+                    <Box key={proj._id}>
+                      <Heading size="1" as="h4" mb="1">
+                        {proj.title}(PM:{proj.owner.email})
+                      </Heading>
+                      {vac.approvals[proj._id] &&
+                        (vac.approvals[proj._id].accepted === "true" ? (
+                          <Badge>Accepted</Badge>
+                        ) : (
+                          <>
+                            <Badge color="red">Rejected </Badge>{" "}
+                            <small>{vac.approvals[proj._id].reason}</small>
+                          </>
+                        ))}
+                    </Box>
+                  );
+                })}
             </Box>
           </Flex>
         </HoverCard.Content>

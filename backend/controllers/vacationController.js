@@ -55,39 +55,41 @@ const createVacation = async (req, res) => {
     for (const projId of user.userInProjects) {
       const proj = await Project.findById(projId);
       const projOwner = await User.findById(proj.owner);
-      if (
-        isWithinInterval(new Date(lastWorkDate), {
-          start: new Date(proj.start),
-          end: new Date(proj.end),
-        }) ||
-        isWithinInterval(new Date(returnToWorkDate), {
-          start: new Date(proj.start),
-          end: new Date(proj.end),
-        })
-      ) {
-        // console.log(projOwner.email);
-        projOwner.recievedNotifications.push(
-          `/user?vacationId=${vacation._id}&user=${
-            req.user.email
-          }&date=${format(new Date(lastWorkDate), "MM/dd/yyyy")}-${format(
-            new Date(returnToWorkDate),
-            "MM/dd/yyyy"
-          )}&intent=vacation-request`
-        );
-        await projOwner.save();
-        channel.publish(
-          `/user?vacationId=${vacation._id}&user=${
-            req.user.email
-          }&date=${format(new Date(lastWorkDate), "MM/dd/yyyy")}-${format(
-            new Date(returnToWorkDate),
-            "MM/dd/yyyy"
-          )}&intent=vacation-request`,
-          `new-vacation-notification${proj.owner}`
-        );
-        proj.vacationRequests.push(vacation._id);
-        await proj.save();
-        vacation.projects.push(projId);
-        await vacation.save();
+      if (!proj.archived) {
+        if (
+          isWithinInterval(new Date(lastWorkDate), {
+            start: new Date(proj.start),
+            end: new Date(proj.end),
+          }) ||
+          isWithinInterval(new Date(returnToWorkDate), {
+            start: new Date(proj.start),
+            end: new Date(proj.end),
+          })
+        ) {
+          // console.log(projOwner.email);
+          projOwner.recievedNotifications.push(
+            `/user?vacationId=${vacation._id}&user=${
+              req.user.email
+            }&date=${format(new Date(lastWorkDate), "MM/dd/yyyy")}-${format(
+              new Date(returnToWorkDate),
+              "MM/dd/yyyy"
+            )}&intent=vacation-request`
+          );
+          await projOwner.save();
+          channel.publish(
+            `/user?vacationId=${vacation._id}&user=${
+              req.user.email
+            }&date=${format(new Date(lastWorkDate), "MM/dd/yyyy")}-${format(
+              new Date(returnToWorkDate),
+              "MM/dd/yyyy"
+            )}&intent=vacation-request`,
+            `new-vacation-notification${proj.owner}`
+          );
+          proj.vacationRequests.push(vacation._id);
+          await proj.save();
+          vacation.projects.push(projId);
+          await vacation.save();
+        }
       }
     }
 
@@ -160,7 +162,8 @@ const updateVacation = async (req, res) => {
       ).map((approv) => approv.accepted);
       console.log("approvalValuesArray", approvalValuesArray);
       if (
-        approvalValuesArray.length === vacationToUpdate.projects.length &&
+        approvalValuesArray.length ===
+          vacationToUpdate.projects.filter((p) => !p.archived).length &&
         !approvalValuesArray.includes("false")
       ) {
         vacationToUpdate.status = "approved";

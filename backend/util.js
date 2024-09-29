@@ -148,18 +148,19 @@ async function createReviewObjectives(objectives, review, userIds) {
 //user.tasks[] changes - check if userInProjects has changed and correct vacReqs back to pending
 async function resyncUserAndVacs(storedUser) {
   console.log("in resyncUserAndVacs");
-  // console.log("storedUser", storedUser);
-  // const storedUser = await User.findById(userId).populate(["tasks"]);
-  // console.log("storedUser", storedUser);
-  let userInProjectIds = storedUser.tasks
-    .map((task) => task.project.toString())
-    .filter((projId, i, arr) => arr.indexOf(projId) === i)
-    .filter((projId) => !storedUser.projects.includes(projId));
+  console.log("storedUser.email", storedUser.email);
+  let userInProjectIds =
+    storedUser.tasks?.length > 0
+      ? storedUser.tasks
+          .map((task) => task.project.toString())
+          .filter((projId, i, arr) => arr.indexOf(projId) === i)
+          .filter((projId) => !storedUser.projects.includes(projId))
+      : [];
 
   // console.log("userInProjectIds", userInProjectIds);
 
   // need to include storedUser.secondaryTasks
-  if (storedUser.secondaryTasks.length > 0) {
+  if (storedUser.secondaryTasks?.length > 0) {
     for (const secondTask of storedUser.secondaryTasks) {
       if (
         !userInProjectIds.includes(secondTask.project.toString()) &&
@@ -170,41 +171,37 @@ async function resyncUserAndVacs(storedUser) {
     }
   }
 
-  // console.log("userInProjectIds", userInProjectIds);
+  // console.log("2userInProjectIds2", userInProjectIds);
 
-  const noNewProject = storedUser.userInProjects.reduce((acc, cur) => {
+  const noNewUserInProjects = userInProjectIds.reduce((acc, cur) => {
     if (!acc) {
       return false;
     }
-    if (userInProjectIds.includes(cur.toString())) return true;
+    if (storedUser.userInProjects.includes(cur.toString())) return true;
     else {
       return false;
     }
   }, true);
 
-  console.log("noNewProject", noNewProject);
-
-  // if (
-  //   (storedUser.userInProjects.length === userInProjectIds.length &&
-  //     !noNewProject) ||
-  //   storedUser.userInProjects.length !== userInProjectIds.length
-  // ) {
   if (
-    !noNewProject ||
+    !noNewUserInProjects ||
     storedUser.userInProjects.length !== userInProjectIds.length
   ) {
     console.log("userInProjects has changed");
     storedUser.userInProjects = userInProjectIds;
 
-    let projects = [];
+    let projectIds = [];
+    // let projects = [];
     //must now reset all approved vacationRequests back to pending since a new project must approve the request
     if (storedUser.vacationRequests.length > 0) {
       for (const userVacReq of storedUser.vacationRequests) {
         // const vac = await Vacation.findById(vacId);
-        if (userVacReq.status === "approved") {
-          userVacReq.status = "pending";
-          // await vac.save();
-        }
+        // only reset vacations if:
+        // if (!noNewUserInProjects) {
+        //   if (userVacReq.status === "approved") {
+        //     userVacReq.status = "pending";
+        //   }
+        // }
         for (const userInProjectId of userInProjectIds) {
           const userInProject = await Project.findById(userInProjectId);
 
@@ -218,10 +215,48 @@ async function resyncUserAndVacs(storedUser) {
               end: new Date(userInProject.end),
             })
           ) {
-            projects.push(userInProject._id);
+            projectIds.push(userInProject._id);
+            // projects.push(userInProject);
           }
         }
-        userVacReq.projects = projects;
+        // console.log("projectIds", projectIds);
+        userVacReq.projects = projectIds;
+        const projects = [];
+        for (const projId of projectIds) {
+          const project = await Project.findById(projId);
+          projects.push(project);
+        }
+        // userVacReq = await userVacReq.populate("projects");
+        // console.log("userVacReq", userVacReq);
+
+        const vacApprovalMap = new Map();
+        for (const projectId of projectIds) {
+          const existingApproval = userVacReq.approvals.get(projectId);
+          if (existingApproval) {
+            vacApprovalMap.set(projectId, existingApproval);
+          }
+        }
+        // console.log("vacApprovalMap", vacApprovalMap);
+        userVacReq.approvals = vacApprovalMap;
+
+        const approvalValuesArray = Object.values(
+          Object.fromEntries(userVacReq.approvals)
+        ).map((approv) => approv.accepted);
+
+        if (
+          approvalValuesArray.length ===
+            projects.filter((p) => !p.archived).length &&
+          !approvalValuesArray.includes("false")
+        ) {
+          userVacReq.status = "approved";
+          userVacReq.approved = true;
+        } else if (approvalValuesArray.includes("false")) {
+          userVacReq.status = "rejected";
+          userVacReq.approved = false;
+        } else {
+          userVacReq.status = "pending";
+          userVacReq.approved = false;
+        }
         await userVacReq.save();
       }
     }
@@ -267,7 +302,10 @@ async function resyncProjTasksUsersVacs(storedProject) {
     for (const task of storedProject.tasks) {
       if (task.secondaryUsers.length > 0) {
         task.secondaryUsers.forEach((u) => {
-          if (!projectUsersIds.includes(u._id.toString()))
+          if (
+            !projectUsersIds.includes(u._id.toString()) &&
+            u._id !== storedProject.owner.toString()
+          )
             projectUsersIds.push(u._id.toString());
         });
       }
@@ -275,11 +313,11 @@ async function resyncProjTasksUsersVacs(storedProject) {
 
     console.log("projectUsersIds", projectUsersIds);
     // console.log("storedProject.users", storedProject.users);
-    const noNewProjectUsers = storedProject.users.reduce((acc, cur) => {
+    const noNewProjectUsers = projectUsersIds.reduce((acc, cur) => {
       if (!acc) {
         return false;
       }
-      if (projectUsersIds.includes(cur.toString())) return true;
+      if (storedProject.users.includes(cur.toString())) return true;
       else {
         return false;
       }

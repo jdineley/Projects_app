@@ -2,12 +2,28 @@ import { useState, useEffect, useRef } from "react";
 
 import { useRevalidator, useFetcher } from "react-router-dom";
 
-import { Dialog, Button, Flex, TextField, Text, Badge } from "@radix-ui/themes";
+import {
+  Dialog,
+  Button,
+  Flex,
+  TextField,
+  Text,
+  Badge,
+  HoverCard,
+  Box,
+  Heading,
+} from "@radix-ui/themes";
+
+import { submitMsProject } from "../utility";
 
 // icons
 import { CiTrash } from "react-icons/ci";
 import { FaEdit } from "react-icons/fa";
 import { TiVendorMicrosoft } from "react-icons/ti";
+import { IoIosInformationCircleOutline } from "react-icons/io";
+import { RxCheckCircled } from "react-icons/rx";
+import { RxCrossCircled } from "react-icons/rx";
+import { RxCircle } from "react-icons/rx";
 
 import { isBefore, isEqual, isWithinInterval } from "date-fns";
 
@@ -35,7 +51,18 @@ const ProjectTitleEditDialog = ({
   const [open, setOpen] = useState(false);
   const [formFieldsCompleted, setFormFieldsCompleted] = useState(true);
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
-  console.log(projectReviews);
+
+  const [loading, setLoading] = useState(false);
+  const [validEmailError, setValidEmailError] = useState("");
+  const [validEmailCheck, setValidEmailCheck] = useState(false);
+  const [summaryPredecessorError, setSummaryPredecessorError] = useState("");
+  const [summaryPredecessorCheck, setSummaryPredecessorCheck] = useState(false);
+  const [workTasksResourceError, setWorkTasksResourceError] = useState("");
+  const [workTaskResourceCheck, setWorkTaskResourceCheck] = useState(false);
+
+  const uploadError =
+    validEmailError || summaryPredecessorError || workTasksResourceError;
+
   let saving = false;
   // let deleting = false;
   let archiving = false;
@@ -93,82 +120,6 @@ const ProjectTitleEditDialog = ({
     else setFormFieldsCompleted(false);
   }, [projectEnd, projectStart, projectTitle, projectReviews]);
 
-  function submitMsProject(e) {
-    e.preventDefault();
-    if (
-      window.confirm("Are you sure you want to submit a MS Project .xml file?")
-    ) {
-      let file = e.target.uploadFile.files[0];
-      let formData = new FormData();
-      formData.append("file", file);
-      console.log("formData", formData);
-      fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: formData,
-      })
-        .then((resp) => resp.json())
-        .then((data) => {
-          if (data.errors) {
-            alert(data.errors);
-          } else {
-            console.log(data);
-            setOpen(false);
-            toast(`${project.title} synchronised with MS Project`);
-            revalidator.revalidate();
-          }
-        });
-    }
-  }
-
-  // async function exportToMSProject(e) {
-  //   e.preventDefault();
-  //   if (
-  //     window.confirm(
-  //       "Are you sure you want to export project to MS Project .xml file?"
-  //     )
-  //   ) {
-  //     try {
-  //       const resp = await fetch(
-  //         `${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}?intent=exportXML`,
-  //         {
-  //           method: "GET",
-  //           headers: {
-  //             Authorization: `Bearer ${user.token}`,
-  //           },
-  //         }
-  //       );
-  //       if (!resp.ok) {
-  //         throw Error("unsucessful download of .xml");
-  //       }
-  //       const filename = resp.headers
-  //         .get("Content-Disposition")
-  //         .split("filename=")[1]
-  //         .split(".")[0];
-  //       const blob = await resp.blob();
-  //       console.log("filename", filename);
-  //       const url = window.URL.createObjectURL(new Blob([blob]));
-  //       const link = document.createElement("a");
-  //       link.href = url;
-  //       link.setAttribute(
-  //         "download",
-  //         `${filename} ${new Date().getTime()}.xml`
-  //       );
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       link.parentNode.removeChild(link);
-  //       // setLoading(false)
-  //       setOpen(false);
-  //       revalidator.revalidate();
-  //     } catch (error) {
-  //       alert(error.message);
-  //       // throw Error(error.message);
-  //     }
-  //   }
-  // }
-
   return (
     <>
       <Dialog.Root
@@ -214,6 +165,12 @@ const ProjectTitleEditDialog = ({
             // }
             else {
               if (window.confirm("Are you sure you want to cancel?")) {
+                setValidEmailError("");
+                setValidEmailCheck(false);
+                setSummaryPredecessorError("");
+                setSummaryPredecessorCheck(false);
+                setWorkTasksResourceError("");
+                setWorkTaskResourceCheck(false);
                 setOpen(false);
               }
             }
@@ -224,6 +181,12 @@ const ProjectTitleEditDialog = ({
               new Date(project.start).toISOString().split("T")[0]
             );
             setProjectEnd(new Date(project.end).toISOString().split("T")[0]);
+            setValidEmailError("");
+            setValidEmailCheck(false);
+            setSummaryPredecessorError("");
+            setSummaryPredecessorCheck(false);
+            setWorkTasksResourceError("");
+            setWorkTaskResourceCheck(false);
             setOpen(true);
           }
         }}
@@ -456,9 +419,66 @@ const ProjectTitleEditDialog = ({
                     <Flex align="center" gap="2" mb="4">
                       <TiVendorMicrosoft />
                       <Dialog.Title mb="0">Update MS Project</Dialog.Title>
+                      <Text>
+                        <HoverCard.Root>
+                          <HoverCard.Trigger>
+                            <div>
+                              <IoIosInformationCircleOutline />
+                            </div>
+                          </HoverCard.Trigger>
+                          <HoverCard.Content className="max-w-80">
+                            <Flex gap="4">
+                              <Box>
+                                <Heading size="3" as="h3" mb="1">
+                                  Importing Ms Project Guidance:
+                                </Heading>
+                                <Text as="div" size="2" color="gray" mt="3">
+                                  <ul>
+                                    <li>
+                                      If a project is already uploaded and you
+                                      wish to update the project, use Update
+                                      instead.
+                                    </li>
+                                    <li>No Summary Tasks as Predecessors</li>
+                                    <li>
+                                      All non-summary work based tasks should be
+                                      assigned a work resource. Projects will
+                                      assign the PM as task owner if the
+                                      resource is absent.
+                                    </li>
+                                    <li>
+                                      All work resources must have a valid email
+                                      with an existing account.
+                                    </li>
+                                    <li>
+                                      Cost based resources MUST be assigned to
+                                      summary tasks only.
+                                    </li>
+                                  </ul>
+                                </Text>
+                              </Box>
+                            </Flex>
+                          </HoverCard.Content>
+                        </HoverCard.Root>{" "}
+                      </Text>
                     </Flex>
                     <form
-                      onSubmit={submitMsProject}
+                      onSubmit={(e) => {
+                        submitMsProject(
+                          e,
+                          setLoading,
+                          setValidEmailError,
+                          setValidEmailCheck,
+                          setSummaryPredecessorError,
+                          setSummaryPredecessorCheck,
+                          setWorkTasksResourceError,
+                          setWorkTaskResourceCheck,
+                          revalidator,
+                          user,
+                          setOpen,
+                          project
+                        );
+                      }}
                       method="post"
                       encType="multipart/form"
                       className="mb-4"
@@ -477,6 +497,82 @@ const ProjectTitleEditDialog = ({
                         <Button mt="2">Upload</Button>
                       </Flex>
                     </form>
+                    <Heading size="3" as="h3" mb="2">
+                      Pre-Checks:{" "}
+                      <small className="text-red-500">
+                        {uploadError && "Correct errors and resubmit"}
+                      </small>
+                    </Heading>
+                    <Flex direction="column" gap="8">
+                      <Flex gap="3">
+                        {validEmailError ? (
+                          <RxCrossCircled className="text-3xl text-red-500 min-w-7" />
+                        ) : validEmailCheck ? (
+                          <RxCheckCircled className="text-3xl min-w-7 text-green-500" />
+                        ) : (
+                          <RxCircle className="text-3xl min-w-7" />
+                        )}
+                        <Box className="relative w-full">
+                          <Text className="absolute">
+                            All work resources must have a valid email with an
+                            existing account.
+                          </Text>
+                          {validEmailError && (
+                            <Text
+                              className="absolute top-12  text-red-500"
+                              size="1"
+                            >
+                              {validEmailError}
+                            </Text>
+                          )}
+                        </Box>
+                      </Flex>
+                      <Flex gap="3">
+                        {workTasksResourceError ? (
+                          <RxCrossCircled className="text-3xl text-red-500 min-w-7" />
+                        ) : workTaskResourceCheck ? (
+                          <RxCheckCircled className="text-3xl min-w-7 text-green-500" />
+                        ) : (
+                          <RxCircle className="text-3xl min-w-7" />
+                        )}
+                        <Box className="relative w-full">
+                          <Text className="absolute">
+                            All work based tasks should be assigned a work
+                            resource.
+                          </Text>
+                          {workTasksResourceError && (
+                            <Text
+                              className="absolute top-12  text-red-500"
+                              size="1"
+                            >
+                              {workTasksResourceError}
+                            </Text>
+                          )}
+                        </Box>
+                      </Flex>
+                      <Flex gap="3">
+                        {summaryPredecessorError ? (
+                          <RxCrossCircled className="text-3xl text-red-500 min-w-7" />
+                        ) : summaryPredecessorCheck ? (
+                          <RxCheckCircled className="text-3xl min-w-7 text-green-500" />
+                        ) : (
+                          <RxCircle className="text-3xl min-w-7" />
+                        )}
+                        <Box className="relative w-full">
+                          <Text className="absolute">
+                            No Summary Tasks as Predecessors.
+                          </Text>
+                          {summaryPredecessorError && (
+                            <Text
+                              className="absolute top-6  text-red-500"
+                              size="1"
+                            >
+                              {summaryPredecessorError}
+                            </Text>
+                          )}
+                        </Box>
+                      </Flex>
+                    </Flex>
                   </>
                 ) : (
                   <Flex justify="between" align="center" gap="2" mb="4">
@@ -515,3 +611,79 @@ const ProjectTitleEditDialog = ({
 };
 
 export default ProjectTitleEditDialog;
+
+// function submitMsProject(e) {
+//   e.preventDefault();
+//   if (
+//     window.confirm("Are you sure you want to submit a MS Project .xml file?")
+//   ) {
+//     let file = e.target.uploadFile.files[0];
+//     let formData = new FormData();
+//     formData.append("file", file);
+//     console.log("formData", formData);
+//     fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}`, {
+//       method: "PATCH",
+//       headers: {
+//         Authorization: `Bearer ${user.token}`,
+//       },
+//       body: formData,
+//     })
+//       .then((resp) => resp.json())
+//       .then((data) => {
+//         if (data.errors) {
+//           alert(data.errors);
+//         } else {
+//           console.log(data);
+//           setOpen(false);
+//           toast(`${project.title} synchronised with MS Project`);
+//           revalidator.revalidate();
+//         }
+//       });
+//   }
+// }
+
+// async function exportToMSProject(e) {
+//   e.preventDefault();
+//   if (
+//     window.confirm(
+//       "Are you sure you want to export project to MS Project .xml file?"
+//     )
+//   ) {
+//     try {
+//       const resp = await fetch(
+//         `${VITE_REACT_APP_API_URL}/api/v1/projects/${project._id}?intent=exportXML`,
+//         {
+//           method: "GET",
+//           headers: {
+//             Authorization: `Bearer ${user.token}`,
+//           },
+//         }
+//       );
+//       if (!resp.ok) {
+//         throw Error("unsucessful download of .xml");
+//       }
+//       const filename = resp.headers
+//         .get("Content-Disposition")
+//         .split("filename=")[1]
+//         .split(".")[0];
+//       const blob = await resp.blob();
+//       console.log("filename", filename);
+//       const url = window.URL.createObjectURL(new Blob([blob]));
+//       const link = document.createElement("a");
+//       link.href = url;
+//       link.setAttribute(
+//         "download",
+//         `${filename} ${new Date().getTime()}.xml`
+//       );
+//       document.body.appendChild(link);
+//       link.click();
+//       link.parentNode.removeChild(link);
+//       // setLoading(false)
+//       setOpen(false);
+//       revalidator.revalidate();
+//     } catch (error) {
+//       alert(error.message);
+//       // throw Error(error.message);
+//     }
+//   }
+// }

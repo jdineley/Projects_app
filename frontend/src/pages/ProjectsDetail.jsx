@@ -496,7 +496,7 @@ export default function ProjectsDetail() {
                                 <Select.Item value="all-members">
                                   <Strong>All members</Strong>
                                 </Select.Item>
-                                {[...project.users, project.owner].map((u) => (
+                                {project.users.map((u) => (
                                   <Select.Item key={u._id} value={u._id}>
                                     <Strong>{u.email}</Strong>
                                   </Select.Item>

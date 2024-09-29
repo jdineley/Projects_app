@@ -512,7 +512,7 @@ form button {
   align-items: center;
 }
 
-main.loading {
+.loading {
   opacity: 0.25;
   transition: opacity 200ms;
   transition-delay: 200ms;

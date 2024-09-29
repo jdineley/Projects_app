@@ -7,6 +7,7 @@ const {
   logoutUser,
   getUser,
   updateUser,
+  readUser,
 } = require("../../controllers/userController");
 
 const requireAuth = require("../../middleware/requireAuth");
@@ -20,6 +21,8 @@ router.post("/signup", signUpUser);
 router.get("/getUsers", requireAuth, getUsers);
 
 router.get("/getUser", requireAuth, getUser);
+
+router.get("/readUser", requireAuth, readUser);
 
 router.get("/logout", requireAuth, logoutUser);
 

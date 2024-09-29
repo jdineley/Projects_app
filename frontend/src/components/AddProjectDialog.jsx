@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useRevalidator } from "react-router-dom";
+// import xml2js from "xml2js";
+
+import { submitMsProject } from "../utility";
 
 import {
   Dialog,
@@ -8,11 +11,18 @@ import {
   TextField,
   Text,
   Select,
+  HoverCard,
+  Box,
+  Heading,
 } from "@radix-ui/themes";
 
 // icons
 import { MdOutlinePostAdd } from "react-icons/md";
 import { TiVendorMicrosoft } from "react-icons/ti";
+import { IoIosInformationCircleOutline } from "react-icons/io";
+import { RxCheckCircled } from "react-icons/rx";
+import { RxCrossCircled } from "react-icons/rx";
+import { RxCircle } from "react-icons/rx";
 
 import { isBefore, isEqual, isWithinInterval } from "date-fns";
 
@@ -31,12 +41,21 @@ const AddProjectDialog = ({
   submit,
   user,
 }) => {
-  const { VITE_REACT_APP_API_URL } = import.meta.env;
+  // const { VITE_REACT_APP_API_URL } = import.meta.env;
   const [open, setOpen] = useState(false);
   const [numberOfReviews, setNumberOfReviews] = useState([]);
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
   const [formFieldsCompleted, setFormFieldsCompleted] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [validEmailError, setValidEmailError] = useState("");
+  const [validEmailCheck, setValidEmailCheck] = useState(false);
+  const [summaryPredecessorError, setSummaryPredecessorError] = useState("");
+  const [summaryPredecessorCheck, setSummaryPredecessorCheck] = useState(false);
+  const [workTasksResourceError, setWorkTasksResourceError] = useState("");
+  const [workTaskResourceCheck, setWorkTaskResourceCheck] = useState(false);
+
+  const uploadError =
+    validEmailError || summaryPredecessorError || workTasksResourceError;
 
   let revalidator = useRevalidator();
 
@@ -87,37 +106,6 @@ const AddProjectDialog = ({
     else setFormFieldsCompleted(false);
   }, [projectEnd, projectStart, projectTitle, projectReviews]);
 
-  function submitMsProject(e) {
-    e.preventDefault();
-    setLoading(true);
-    if (
-      window.confirm("Are you sure you want to submit a MS Project .xml file?")
-    ) {
-      let file = e.target.uploadFile.files[0];
-      let formData = new FormData();
-      formData.append("file", file);
-      fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: formData,
-      })
-        .then((resp) => resp.json())
-        .then((data) => {
-          if (data.errors) {
-            alert(data.errors);
-          } else {
-            console.log(data);
-            setOpen(false);
-            toast(`${data.Project.Title[0]} imported from MS Project`);
-            setLoading(false);
-            revalidator.revalidate();
-          }
-        });
-    }
-  }
-
   return (
     <Dialog.Root
       open={open}
@@ -131,6 +119,12 @@ const AddProjectDialog = ({
             }
           } else {
             if (window.confirm("Are you sure you want to cancel?")) {
+              setValidEmailError("");
+              setValidEmailCheck(false);
+              setSummaryPredecessorError("");
+              setSummaryPredecessorCheck(false);
+              setWorkTasksResourceError("");
+              setWorkTaskResourceCheck(false);
               setOpen(false);
             }
           }
@@ -140,6 +134,12 @@ const AddProjectDialog = ({
           setProjectEnd("");
           setNumberOfReviews([]);
           setProjectReviews([]);
+          setValidEmailError("");
+          setValidEmailCheck(false);
+          setSummaryPredecessorError("");
+          setSummaryPredecessorCheck(false);
+          setWorkTasksResourceError("");
+          setWorkTaskResourceCheck(false);
           setOpen(true);
         }
       }}
@@ -150,7 +150,11 @@ const AddProjectDialog = ({
           className="cursor-pointer text-blue-600"
         />
       </Dialog.Trigger>
-      <Dialog.Content style={{ maxWidth: 450 }}>
+      <Dialog.Content
+        style={{ maxWidth: 450, paddingBottom: "80px" }}
+
+        // className={loading ? "loading" : ""}
+      >
         <Dialog.Title>Add new Project</Dialog.Title>
         <Flex direction="column" gap="3">
           <label>
@@ -310,8 +314,68 @@ const AddProjectDialog = ({
         <Flex align="center" gap="2" mb="4">
           <TiVendorMicrosoft />
           <Dialog.Title mb="0">Add new MS Project</Dialog.Title>
+          <Text>
+            <HoverCard.Root>
+              <HoverCard.Trigger>
+                <div>
+                  <IoIosInformationCircleOutline />
+                </div>
+              </HoverCard.Trigger>
+              <HoverCard.Content className="max-w-80">
+                <Flex gap="4">
+                  <Box>
+                    <Heading size="3" as="h3" mb="1">
+                      Importing Ms Project Guidance:
+                    </Heading>
+                    <Text as="div" size="2" color="gray" mt="3">
+                      <ul>
+                        <li>
+                          If a project is already uploaded and you wish to
+                          update the project, use Update instead.
+                        </li>
+                        <li>No Summary Tasks as Predecessors</li>
+                        <li>
+                          All non-summary work based tasks should be assigned a
+                          work resource. Projects will assign the PM as task
+                          owner if the resource is absent.
+                        </li>
+                        <li>
+                          All work resources must have a valid email with an
+                          existing account.
+                        </li>
+                        <li>
+                          Cost based resources MUST be assigned to summary tasks
+                          only.
+                        </li>
+                      </ul>
+                    </Text>
+                  </Box>
+                </Flex>
+              </HoverCard.Content>
+            </HoverCard.Root>{" "}
+          </Text>
         </Flex>
-        <form onSubmit={submitMsProject} method="post" encType="multipart/form">
+        <form
+          onSubmit={(e) => {
+            // document.getElementById("submitMSProjectTrig").click();
+            submitMsProject(
+              e,
+              setLoading,
+              setValidEmailError,
+              setValidEmailCheck,
+              setSummaryPredecessorError,
+              setSummaryPredecessorCheck,
+              setWorkTasksResourceError,
+              setWorkTaskResourceCheck,
+              revalidator,
+              user,
+              setOpen
+            );
+          }}
+          method="post"
+          encType="multipart/form"
+          className="mb-6"
+        >
           <Text as="div" size="2" mb="1" weight="bold">
             Import .xml file from MS Project Desktop
           </Text>
@@ -326,6 +390,72 @@ const AddProjectDialog = ({
             Upload
           </Button>
         </form>
+        <Heading size="3" as="h3" mb="2">
+          Pre-Checks:{" "}
+          <small className="text-red-500">
+            {uploadError && "Correct errors and resubmit"}
+          </small>
+        </Heading>
+        <Flex direction="column" gap="8">
+          <Flex gap="3">
+            {validEmailError ? (
+              <RxCrossCircled className="text-3xl text-red-500 min-w-7" />
+            ) : validEmailCheck ? (
+              <RxCheckCircled className="text-3xl min-w-7 text-green-500" />
+            ) : (
+              <RxCircle className="text-3xl min-w-7" />
+            )}
+            <Box className="relative w-full">
+              <Text className="absolute">
+                All work resources must have a valid email with an existing
+                account.
+              </Text>
+              {validEmailError && (
+                <Text className="absolute top-12  text-red-500" size="1">
+                  {validEmailError}
+                </Text>
+              )}
+            </Box>
+          </Flex>
+          <Flex gap="3">
+            {workTasksResourceError ? (
+              <RxCrossCircled className="text-3xl text-red-500 min-w-7" />
+            ) : workTaskResourceCheck ? (
+              <RxCheckCircled className="text-3xl min-w-7 text-green-500" />
+            ) : (
+              <RxCircle className="text-3xl min-w-7" />
+            )}
+            <Box className="relative w-full">
+              <Text className="absolute">
+                All work based tasks should be assigned a work resource.
+              </Text>
+              {workTasksResourceError && (
+                <Text className="absolute top-12  text-red-500" size="1">
+                  {workTasksResourceError}
+                </Text>
+              )}
+            </Box>
+          </Flex>
+          <Flex gap="3">
+            {summaryPredecessorError ? (
+              <RxCrossCircled className="text-3xl text-red-500 min-w-7" />
+            ) : summaryPredecessorCheck ? (
+              <RxCheckCircled className="text-3xl min-w-7 text-green-500" />
+            ) : (
+              <RxCircle className="text-3xl min-w-7" />
+            )}
+            <Box className="relative w-full">
+              <Text className="absolute">
+                No Summary Tasks as Predecessors.
+              </Text>
+              {summaryPredecessorError && (
+                <Text className="absolute top-6  text-red-500" size="1">
+                  {summaryPredecessorError}
+                </Text>
+              )}
+            </Box>
+          </Flex>
+        </Flex>
       </Dialog.Content>
     </Dialog.Root>
   );

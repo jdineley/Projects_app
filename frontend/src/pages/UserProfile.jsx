@@ -269,14 +269,18 @@ export default function UserProfile() {
         <Card className="flex-1">
           <h2>Project vacation management</h2>
           <div className="flex flex-col gap-9">
-            {userObj?.projects.map((proj) => (
-              <div key={proj._id}>
-                <h3>{proj.title}</h3>
-                <div>
-                  <ProjectTimeline project={proj} userProfile={true} />
-                </div>
-              </div>
-            ))}
+            {userObj?.projects.map((proj) => {
+              if (!proj.archived) {
+                return (
+                  <div key={proj._id}>
+                    <h3>{proj.title}</h3>
+                    <div>
+                      <ProjectTimeline project={proj} userProfile={true} />
+                    </div>
+                  </div>
+                );
+              }
+            })}
           </div>
         </Card>
       </Grid>

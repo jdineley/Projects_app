@@ -173,7 +173,7 @@ const UserActiveTaskRow = ({
                     )}
                 </div>
                 <div id="task-deps">
-                  <h5>Task dependencies:</h5>
+                  <h5>Task predecessors:</h5>
                   {task.dependencies?.length > 0 ? (
                     task.dependencies.map((dep) => (
                       <Badge

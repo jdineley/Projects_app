@@ -192,11 +192,14 @@ export const AuthContextProvider = ({ children }) => {
             url: e.data,
           },
         });
-        toast(
-          `MS Project Resynchronisation of ${new URLSearchParams(e.data).get(
-            "projectTitle"
-          )}`
-        );
+        toast(`MS Project Resynchronisation of ....`);
+        // toast(
+        //   `MS Project Resynchronisation of ${
+        //     e.data[
+        //       e.data.split(new RegExp("?|=|&", "g").indexOf("projectTitle")) + 1
+        //     ]
+        //   }`
+        // );
       });
       ssEvents.addEventListener(
         `project-freeze-notification${user._id}`,
@@ -224,6 +227,16 @@ export const AuthContextProvider = ({ children }) => {
           toast(`${e.data.split("=")[1]}`);
         }
       );
+      ssEvents.addEventListener(`task-owner-change${user._id}`, (e) => {
+        console.log("in notification dispatch");
+        notificationDispatch({
+          type: "NEW_NOTIFICATION",
+          payload: {
+            url: e.data,
+          },
+        });
+        toast(`task-owner-change`);
+      });
       ssEvents.addEventListener("open", () => {
         console.log("Connection opened");
       });

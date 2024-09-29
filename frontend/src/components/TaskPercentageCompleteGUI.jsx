@@ -79,7 +79,7 @@ const TaskPercentageCompleteGUI = ({ task }) => {
           dataKey="date"
           type="number"
           domain={[
-            new Date(task?.createdAt).getTime(),
+            new Date(task?.startDate).getTime(),
             new Date(task?.deadline).getTime(),
           ]}
           tick={renderCustomAxisTick}

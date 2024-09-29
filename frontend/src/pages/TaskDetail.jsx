@@ -92,11 +92,9 @@ export default function TaskDetail() {
                         <small>(with assigned resource)</small>
                       </Flex>
                     </Table.ColumnHeaderCell>
-                    {task.msProjectGUID && (
-                      <Table.ColumnHeaderCell>
-                        Start date
-                      </Table.ColumnHeaderCell>
-                    )}
+
+                    <Table.ColumnHeaderCell>Start date</Table.ColumnHeaderCell>
+
                     <Table.ColumnHeaderCell>Finish date</Table.ColumnHeaderCell>
                     <Table.ColumnHeaderCell>Owner(s)</Table.ColumnHeaderCell>
                     {/* <Table.ColumnHeaderCell>Edit</Table.ColumnHeaderCell> */}

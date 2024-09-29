@@ -6,6 +6,7 @@ const ReviewObjective = require("../models/ReviewObjective");
 const ReviewAction = require("../models/ReviewAction");
 const Comment = require("../models/Comment");
 const Reply = require("../models/Reply");
+const Vacation = require("../models/Vacation");
 const mongoose = require("mongoose");
 
 const fs = require("node:fs/promises");
@@ -18,6 +19,7 @@ const { msProjectUpload } = require("./msProjectUpload");
 const { msProjectUpdate } = require("./msProjectUpdate");
 const { msProjectExportXML } = require("./msProjectExportXML");
 // const { channel } = require("node:diagnostics_channel");
+const { resyncUserAndVacs, resyncProjTasksUsersVacs } = require("../util");
 
 const { channel } = require("../routes/v1/sse");
 
@@ -97,7 +99,16 @@ const createProject = async (req, res) => {
   // const folderPath = "../public/data/uploads/";
   // console.log(fs.readdirSync(folderPath));
 
-  const { intent, title, start, end, ...reviews } = req.body;
+  const {
+    intent,
+    title,
+    start,
+    end,
+    originalFileName,
+    projectMapped,
+    msProjObj,
+    ...reviews
+  } = req.body;
   const { _id: userId } = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -107,22 +118,38 @@ const createProject = async (req, res) => {
   const [reviewArray] = fixReviews(reviews, intent);
 
   try {
-    const currentUser = await User.findById(userId).populate([
-      "tasks",
-      "vacationRequests",
-      "secondaryTasks",
-    ]);
-    if (req.file) {
+    const currentUser = await User.findById(userId);
+    // .populate([
+    //   "tasks",
+    //   "vacationRequests",
+    //   "secondaryTasks",
+    // ]);
+    if (originalFileName) {
       console.log("trying to import MS Project xml file..");
-      const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
-      // console.log(data);
-      const msProjObj = await xml2js.parseStringPromise(xml);
-      const originalFileName = req.file.originalname;
-
-      await msProjectUpload(msProjObj, currentUser, originalFileName);
-
-      return res.status(200).json(msProjObj);
+      const newProject = await msProjectUpload(
+        msProjObj,
+        projectMapped,
+        currentUser,
+        originalFileName
+      );
+      return res.status(200).json(newProject);
     }
+    // if (req.file) {
+    //   console.log("trying to import MS Project xml file..");
+    //   const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
+    //   // console.log(data);
+    //   const msProjObj = await xml2js.parseStringPromise(xml);
+    //   const originalFileName = req.file.originalname;
+    //   console.log(msProjObj);
+    //   const newProject = await msProjectUpload(
+    //     msProjObj,
+    //     currentUser,
+    //     originalFileName
+    //   );
+
+    //   // return res.status(200).json(msProjObj);
+    //   return res.status(200).json({ newProject });
+    // }
     const project = await Project.create({
       title,
       start,
@@ -142,13 +169,25 @@ const createProject = async (req, res) => {
     await currentUser.save();
     res.status(200).json({ project, result: intent });
   } catch (error) {
-    res.status(error.status || 400).json({ errors: error.message });
+    res
+      .status(error.status || 400)
+      .json({ errors: error.errors, newProjectId: error.newProjectId });
   }
 };
 
 const updateProject = async (req, res) => {
   console.log("Hit update project handler");
-  const { intent, title, start, end, freeze, ...reviews } = req.body;
+  const {
+    intent,
+    title,
+    start,
+    end,
+    freeze,
+    originalFileName,
+    projectMapped,
+    msProjObj,
+    ...reviews
+  } = req.body;
   const { projectId } = req.params;
   const { _id: userId } = req.user;
   console.log("intent", intent);
@@ -184,32 +223,50 @@ const updateProject = async (req, res) => {
         .json({ error: "Not authorised to update project" });
     }
 
-    const currentUser = await User.findById(userId).populate([
-      "tasks",
-      "vacationRequests",
-      "secondaryTasks",
-    ]);
-    if (req.file) {
+    const currentUser = await User.findById(userId);
+    // .populate([
+    //   "tasks",
+    //   "vacationRequests",
+    //   "secondaryTasks",
+    // ]);
+
+    if (originalFileName) {
       console.log("trying to import MS Project xml file..");
-      const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
-      // console.log(data);
-      const msProjObj = await xml2js.parseStringPromise(xml);
-      if (msProjObj.Project.GUID[0] !== projectToUpdate.msProjectGUID) {
-        throw Error("You are trying to update the wrong project");
-      }
-
-      const originalFileName = req.file.originalname;
-      console.log("originalFileName", originalFileName);
-
       await msProjectUpdate(
         projectToUpdate,
-        msProjObj,
+        // msProjObj,
+        projectMapped,
         currentUser,
         originalFileName
       );
-
-      return res.status(200).json(msProjObj);
+      return res.status(200).json(projectToUpdate);
     }
+
+    // if (req.file) {
+    //   console.log("trying to import MS Project xml file..");
+    //   const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
+    //   // console.log(data);
+    //   const msProjObj = await xml2js.parseStringPromise(xml);
+    //   if (msProjObj.Project.GUID[0] !== projectToUpdate.msProjectGUID) {
+    //     throw Error("You are trying to update the wrong project");
+    //   }
+    //   console.log(
+    //     msProjObj.Project.Assignments[0].Assignment.find(
+    //       (el) => el.TaskUID[0] === "421"
+    //     )
+    //   );
+    //   const originalFileName = req.file.originalname;
+    //   console.log("originalFileName", originalFileName);
+
+    //   await msProjectUpdate(
+    //     projectToUpdate,
+    //     msProjObj,
+    //     currentUser,
+    //     originalFileName
+    //   );
+
+    //   return res.status(200).json(msProjObj);
+    // }
 
     if (intent === "edit-project") {
       console.log("in edit project, thingy");
@@ -369,6 +426,42 @@ const updateProject = async (req, res) => {
           }
         }
       }
+      if (archivedProject.vacationRequests.length > 0) {
+        // check if project had passed an acceptance/rejection to vacReq
+        // If it had then this instance should be removed from the approval map
+        // The project should remain everywhere is was before but as an archived project
+        for (const vacReqId of archivedProject.vacationRequests) {
+          const vacReq = await Vacation.findById(vacReqId).populate("projects");
+          // .populate({
+          //   path: "user",
+          //   populate: ["tasks", "vacationRequests", "secondaryTasks"],
+          // });
+          if (vacReq.approvals.get(archivedProject._id)) {
+            vacReq.approvals.delete(archivedProject._id);
+          }
+          const approvalValuesArray = Object.values(
+            Object.fromEntries(vacReq.approvals)
+          ).map((approv) => approv.accepted);
+          console.log("approvalValuesArray", approvalValuesArray);
+          if (
+            approvalValuesArray.length ===
+              vacReq.projects.filter((p) => !p.archived).length &&
+            !approvalValuesArray.includes("false")
+          ) {
+            vacReq.status = "approved";
+            vacReq.approved = true;
+          } else if (approvalValuesArray.includes("false")) {
+            vacReq.status = "rejected";
+            vacReq.approved = false;
+          } else {
+            vacReq.status = "pending";
+            vacReq.approved = false;
+          }
+          await vacReq.save();
+
+          // await resyncUserAndVacs(vacReq.user);
+        }
+      }
       archivedProject.descendentsAtArchive = allArchivedProjectDescendentIds;
       await archivedProject.save();
       console.log(
@@ -444,6 +537,31 @@ const updateProject = async (req, res) => {
         }
       }
       await projectToUnarchive.save();
+      if (projectToUnarchive.vacationRequests.length > 0) {
+        for (const vacReqId of projectToUnarchive.vacationRequests) {
+          const vacReq = await Vacation.findById(vacReqId).populate("projects");
+          const approvalValuesArray = Object.values(
+            Object.fromEntries(vacReq.approvals)
+          ).map((approv) => approv.accepted);
+          console.log("approvalValuesArray", approvalValuesArray);
+          if (
+            approvalValuesArray.length ===
+              vacReq.projects.filter((p) => !p.archived).length &&
+            !approvalValuesArray.includes("false")
+          ) {
+            vacReq.status = "approved";
+            vacReq.approved = true;
+          } else if (approvalValuesArray.includes("false")) {
+            vacReq.status = "rejected";
+            vacReq.approved = false;
+          } else {
+            vacReq.status = "pending";
+            vacReq.approved = false;
+          }
+          await vacReq.save();
+        }
+      }
+
       const user = await User.findByIdAndUpdate(req.user._id, {
         $pull: {
           archivedProjects: projectToUnarchive._id,
@@ -531,6 +649,35 @@ const deleteProject = async (req, res) => {
           Task,
           Reply,
         }[decendentGroup];
+        // if (decendentGroup === "Task") {
+        //   const task = await Task.findById(docId).populate([
+        //     // "user",
+        //     "secondaryUsers",
+        //   ]);
+        //   // await task.user.updateOne({ $pull: { tasks: docId } });
+        //   // const user = await task.user.populate([
+        //   //   "tasks",
+        //   //   "vacationRequests",
+        //   //   "secondaryTasks",
+        //   // ]);
+        //   // await resyncUserAndVacs(user);
+        //   // await user.save();
+        //   if (task.secondaryUsers?.length > 0) {
+        //     for (let secUser of task.secondaryUsers) {
+        //       await secUser
+        //         .updateOne({ $pull: { secondaryTasks: docId } })
+        //         .populate(["tasks", "vacationRequests", "secondaryTasks"]);
+
+        //       // const storedSecUser = await User.findById(secUser._id).populate([
+        //       //   "tasks",
+        //       //   "vacationRequests",
+        //       //   "secondaryTasks",
+        //       // ]);
+        //       await resyncUserAndVacs(storedSecUser);
+        //       await secUser.save();
+        //     }
+        //   }
+        // }
         await Model.findByIdAndDelete(docId);
       }
     }

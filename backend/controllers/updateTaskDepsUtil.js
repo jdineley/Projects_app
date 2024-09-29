@@ -4,14 +4,17 @@ const Task = require("../models/Task");
 async function updateTaskDepsUtil(task) {
   console.log("in updateTaskDepsUtil");
   const taskStored = await Task.findOne({ msProjectGUID: task.GUID });
-  console.log("taskStored", taskStored);
+  // console.log("taskStored", taskStored);
   const { dependencies } = task;
   // could reset dependencies first
   taskStored.dependencies = [];
   if (dependencies?.length > 0) {
     for (const dep of dependencies) {
       const precedingTask = await Task.findOne({ msProjectGUID: dep });
-      console.log("precedingTask", precedingTask);
+      // console.log("precedingTask", precedingTask);
+      if (!precedingTask) {
+        return dep;
+      }
       taskStored.dependencies.push(precedingTask._id);
       // or...
       // (this might need .map.toString() to get the dependencies array in shap for the includes method)

@@ -53,12 +53,12 @@ const projectSchema = new mongoose.Schema(
         if (this.msProjectGUID) return true;
       },
     },
-    fileJSON: {
-      type: String,
-      required: function () {
-        if (this.msProjectGUID) return true;
-      },
-    },
+    // fileJSON: {
+    //   type: String,
+    //   required: function () {
+    //     if (this.msProjectGUID) return true;
+    //   },
+    // },
     inWork: {
       type: Boolean,
       default: true,

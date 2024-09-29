@@ -242,7 +242,10 @@ export default function Projects() {
         return (
           <Table.Row key={project._id}>
             <Table.Cell>
-              <Link to={project._id}>{project.title}</Link>
+              <Link className="flex items-center gap-2" to={project._id}>
+                {project.msProjectGUID && <TiVendorMicrosoft />}
+                {project.title}
+              </Link>
             </Table.Cell>
             <Table.Cell>
               {format(new Date(project.end), "dd/MM/yyyy")}
@@ -286,7 +289,10 @@ export default function Projects() {
           return (
             <Table.Row key={project._id}>
               <Table.Cell>
-                <Link to={project._id}>{project.title}</Link>
+                <Link className="flex items-center gap-2" to={project._id}>
+                  {project.msProjectGUID && <TiVendorMicrosoft />}
+                  {project.title}
+                </Link>
               </Table.Cell>
               <Table.Cell>
                 {format(new Date(project.end), "dd/MM/yyyy")}

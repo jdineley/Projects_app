@@ -14,15 +14,16 @@ const { channel } = require("../routes/v1/sse");
 
 async function msProjectUpdate(
   projectToUpdate,
-  msProjObj,
+  // msProjObj,
+  projectMapped,
   currentUser,
   originalFileName
 ) {
-  const projectMapped = rawMapMsProjToNative(
-    msProjObj,
-    currentUser._id,
-    currentUser.email
-  );
+  // const projectMapped = rawMapMsProjToNative(
+  //   msProjObj,
+  //   currentUser._id,
+  //   currentUser.email
+  // );
   const { title, owner, users, start, end, tasks } = projectMapped;
   // console.log(projectToUpdate);
   // look up mongoose document.update() method???
@@ -31,7 +32,7 @@ async function msProjectUpdate(
   projectToUpdate.end = new Date(end);
   projectToUpdate.file = originalFileName;
   projectToUpdate.inWork = true;
-  projectToUpdate.fileJSON = JSON.stringify(msProjObj);
+  // projectToUpdate.fileJSON = JSON.stringify(msProjObj);
 
   //   iterate tasks..
   for (const task of tasks) {
@@ -48,38 +49,24 @@ async function msProjectUpdate(
       milestone,
     } = task;
 
-    let storedUser = await User.findOne({ email: user }).populate([
+    const storedUser = await User.findOne({ email: user }).populate([
       "tasks",
       "vacationRequests",
       "secondaryTasks",
     ]);
-    if (!storedUser && !milestone) {
+    if (!storedUser) {
       throw Error(
         `${user} does not currently have an account, please sign up before importing`
       );
-    } else if (!storedUser && milestone) {
-      storedUser = currentUser;
     }
+
     const taskToUpdate = projectToUpdate.tasks.find(
       (t) => t.msProjectGUID === GUID
     );
 
     if (!taskToUpdate) {
       // create new task
-      await createTaskUtil(
-        { task, projectToUpdate, storedUser, currentUser }
-        // GUID,
-        // UID,
-        // title,
-        // description,
-        // daysToComplete,
-        // deadline,
-        // storedUser,
-        // projectToUpdate
-      );
-      // await updateTaskDepsUtil(task);
-      // await resyncUserAndVacs(storedUser);
-      // await storedUser.save();
+      await createTaskUtil({ task, projectToUpdate, storedUser, currentUser });
       continue;
     }
 
@@ -92,23 +79,43 @@ async function msProjectUpdate(
     // update taskToUpdate.user, taskToUpdate.secondaryUsers[]..
     if (taskToUpdate.user.toString() !== storedUser._id.toString()) {
       console.log(`task ${taskToUpdate.title} has changed user`);
-      const prevUser = await User.findById(taskToUpdate.user).populate("tasks");
+      const prevUser = await User.findById(taskToUpdate.user).populate([
+        "tasks",
+        "vacationRequests",
+        "secondaryTasks",
+      ]);
       prevUser.tasks = prevUser.tasks.filter(
         (t) => t._id.toString() !== taskToUpdate._id.toString()
       );
       taskToUpdate.user = storedUser._id;
+      storedUser.tasks.push(taskToUpdate);
       // NOTIFICATION here:
+      // prev user:
+      if (projectToUpdate.owner.toString() !== prevUser._id.toString()) {
+        prevUser.recievedNotifications.push(
+          `/projects/${projectToUpdate._id}?taskId=${taskToUpdate._id}&projectTitle=${projectToUpdate.title}&intent=task-owner-change`
+        );
+        channel.publish(
+          `/projects/${projectToUpdate._id}?taskId=${taskToUpdate._id}&projectTitle=${projectToUpdate.title}&intent=task-owner-change`,
+          `task-owner-change${prevUser._id}`
+        );
+      }
+      // storedUser:
+      if (projectToUpdate.owner.toString() !== storedUser._id.toString()) {
+        storedUser.recievedNotifications.push(
+          `/projects/${projectToUpdate._id}?taskId=${taskToUpdate._id}&projectTitle=${projectToUpdate.title}&intent=new-task`
+        );
+        channel.publish(
+          `/projects/${projectToUpdate._id}?taskId=${taskToUpdate._id}&projectTitle=${projectToUpdate.title}&intent=new-task`,
+          `new-task-notification${storedUser._id}`
+        );
+      }
+
       await resyncUserAndVacs(prevUser);
       await prevUser.save();
+      await resyncUserAndVacs(storedUser);
+      await storedUser.save();
     }
-
-    // console.log(
-    //   `task ${title}; secondaryUsers ${
-    //     secondaryUsers.length > 0 ? secondaryUsers.map((u) => `${u}`) : "none"
-    //   }`
-    // );
-
-    // console.log("taskToUpdate", taskToUpdate);
 
     const noNewSecondaryUsers =
       taskToUpdate.secondaryUsers.length > 0
@@ -134,7 +141,7 @@ async function msProjectUpdate(
           .reduce((acc, cur) => {
             if (!task.secondaryUsers.includes(cur)) {
               console.log(
-                `${cur} has been removed as a sondary users to task ${taskToUpdate.title}`
+                `${cur} has been removed as a secondary users to task ${taskToUpdate.title}`
               );
               acc.push(cur);
             }
@@ -142,9 +149,11 @@ async function msProjectUpdate(
           }, []);
         // update each secondaryUser.secondaryTasks[]
         for (const secondaryUser of removedSecondaryUsersArry) {
-          const user = await User.find({ email: secondaryUser }).populate(
-            "secondaryTasks"
-          );
+          const user = await User.find({ email: secondaryUser }).populate([
+            "tasks",
+            "vacationRequests",
+            "secondaryTasks",
+          ]);
           user.secondaryTasks = user.secondaryTasks.filter(
             (t) => t._id.toString() !== taskToUpdate._id.toString()
           );
@@ -171,14 +180,16 @@ async function msProjectUpdate(
       // update taskToUpdate.secondaryUsers[]
       // update each secondaryUser.secondaryTasks[]
       for (const secondaryUser of newSecondaryUsersArray) {
-        const user = await User.findOne({ email: secondaryUser }).populate(
-          "tasks"
-        );
-        console.log("user", user);
+        const user = await User.findOne({ email: secondaryUser }).populate([
+          "tasks",
+          "vacationRequests",
+          "secondaryTasks",
+        ]);
+        // console.log("user", user);
         taskToUpdate.secondaryUsers = taskToUpdate.secondaryUsers || [];
         taskToUpdate.secondaryUsers.push(user._id);
         user.secondaryTasks = user.secondaryTasks || [];
-        user.secondaryTasks.push(taskToUpdate._id);
+        user.secondaryTasks.push(taskToUpdate);
         await resyncUserAndVacs(user);
         await user.save();
       }

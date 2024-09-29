@@ -67,9 +67,7 @@ const getUser = async (req, res) => {
     const user = await User.findById(req.user._id).populate([
       {
         path: "tasks",
-        populate: {
-          path: "project",
-        },
+        populate: "project",
       },
       {
         path: "projects",
@@ -95,6 +93,22 @@ const getUser = async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     res.status(400).json(error.message);
+  }
+};
+
+const readUser = async (req, res) => {
+  console.log("hit readUser route");
+  const { userEmail } = req.query;
+
+  try {
+    const user = await User.findOne({ email: userEmail });
+
+    if (!user) {
+      throw Error(`User with that ID not found`);
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(404).json(error.message);
   }
 };
 
@@ -161,4 +175,5 @@ module.exports = {
   logoutUser,
   getUser,
   updateUser,
+  readUser,
 };
