@@ -228,10 +228,11 @@ async function rawMapMsProjToNative(msProjObj, userId, userEmail, userToken) {
           // throw Error(
           //   `TASK: ${unAssignedTask.title} has not been assigned a user.  Update MS Project plan so that all tasks are assigned a responsible user`
           // );
+        } else {
+          taskToResourceUID.TaskUID = assignment.TaskUID[0];
+          taskToResourceUID.ResourceUID = "PM";
+          taskToResourceMapUID.push(taskToResourceUID);
         }
-        taskToResourceUID.TaskUID = assignment.TaskUID[0];
-        taskToResourceUID.ResourceUID = "PM";
-        taskToResourceMapUID.push(taskToResourceUID);
       }
     }
     // taskToResourceUID = {};
@@ -442,6 +443,12 @@ function submitMsProject(
 
       try {
         const result = await xml2js.parseStringPromise(reader.result);
+        if (result.Project.$.xmlns !== "http://schemas.microsoft.com/project") {
+          throw { errors: "invalid ms Project xml type" };
+        }
+        if (project && project.msProjectGUID !== result.Project.GUID[0]) {
+          throw { errors: "You are uploading the wrong .xml" };
+        }
         const data = await rawMapMsProjToNative(
           result,
           user._id,
@@ -577,6 +584,13 @@ function submitMsProject(
   }
 }
 
+const msProjectGuidance = [
+  "No Summary Tasks as Predecessors",
+  "All work based tasks should be assigned a work resource.",
+  "All work resources must have a valid email with an existing account.",
+  "Tasks with 0 days duration will be appear as milestones on the project timeline",
+];
+
 export {
   calculatePercentProjectComplete,
   uxFriendlyRemaimingDuration,
@@ -594,6 +608,7 @@ export {
   tabletScreenWidth,
   rawMapMsProjToNative,
   submitMsProject,
+  msProjectGuidance,
 };
 
 // function submitMsProject(e) {

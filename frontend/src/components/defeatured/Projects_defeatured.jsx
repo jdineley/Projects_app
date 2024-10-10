@@ -8,35 +8,38 @@ import {
   // useOutletContext
 } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { useAuthContext } from "../hooks/useAuthContext";
+// import { useAuthContext } from "../hooks/useAuthContext";
 
 import { formatDistanceToNow, format } from "date-fns";
 
 // components
-import ProjectEditDialog from "../components/ProjectEditDialog";
-import AddProjectDialog from "../components/AddProjectDialog";
-import ImportProjectDialog from "../components/ImportProjectDialog";
+// import ProjectEditDialog from "../components/ProjectEditDialog";
+// import AddProjectDialog from "../components/AddProjectDialog";
+// import ImportProjectDialog from "../components/ImportProjectDialog";
 import { TiVendorMicrosoft } from "react-icons/ti";
-
+import AddProjectDialog_defeatured from "./AddProjectDialog_defeatured";
 // radix
 import { Table, Flex, Tooltip } from "@radix-ui/themes";
 
 import { toast } from "react-toastify";
 
 // hooks
-import useMatchMedia from "../hooks/useMatchMedia";
+import useMatchMedia from "../../hooks/useMatchMedia";
 
 // constants
-import { mobileScreenWidth } from "../utility";
+import { mobileScreenWidth } from "../../utility";
 
-export default function Projects() {
+// components
+import ProjectTitleEditDialogDefeatured from "./ProjectEditDialog_defeatured";
+
+export default function ProjectsDefeatured({ userObj }) {
   const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
 
   // const projects = useLoaderData();
   // const userObj = useOutletContext();
 
-  const loaderJson = useLoaderData();
-  let userObj;
+  // const loaderJson = useLoaderData();
+  // let userObj;
   let projectDeleted;
   let userTableRows;
   let userTableRowsArchived;
@@ -44,37 +47,37 @@ export default function Projects() {
   let otherUsersTableRowsArchived;
   let hasSomeUnArchivedProjects;
 
-  if (loaderJson) {
-    ({ userObj, projectDeleted } = loaderJson);
-  }
-  console.log("userObj", userObj);
-  const json = useActionData();
-  const [projectTitle, setProjectTitle] = useState("");
-  const [projectStart, setProjectStart] = useState("");
-  const [projectEnd, setProjectEnd] = useState("");
-  const [projectReviews, setProjectReviews] = useState([]); //{title: '...', date: '...'}
+  // if (loaderJson) {
+  //   ({ userObj, projectDeleted } = loaderJson);
+  // }
+  // console.log("userObj", userObj);
+  // const json = useActionData();
+  // const [projectTitle, setProjectTitle] = useState("");
+  // const [projectStart, setProjectStart] = useState("");
+  // const [projectEnd, setProjectEnd] = useState("");
+  // const [projectReviews, setProjectReviews] = useState([]); //{title: '...', date: '...'}
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  // const [searchParams, setSearchParams] = useSearchParams();
 
-  useEffect(() => {
-    console.log("in Project useEffect");
-    if (json) {
-      const { result } = json;
-      toast(result);
-    }
-    if (projectDeleted) {
-      toast(projectDeleted);
-      searchParams.delete("projectDeleted");
-      setSearchParams(searchParams);
-    }
-  }, [json, projectDeleted]);
+  // useEffect(() => {
+  //   console.log("in Project useEffect");
+  //   if (json) {
+  //     const { result } = json;
+  //     toast(result);
+  //   }
+  //   if (projectDeleted) {
+  //     toast(projectDeleted);
+  //     searchParams.delete("projectDeleted");
+  //     setSearchParams(searchParams);
+  //   }
+  // }, [json, projectDeleted]);
 
-  const submit = useSubmit();
-  const fetcher = useFetcher();
+  // const submit = useSubmit();
+  // const fetcher = useFetcher();
 
-  const { user } = useAuthContext();
+  // const { user } = useAuthContext();
 
-  const archiveButtonRef = useRef(null);
+  // const archiveButtonRef = useRef(null);
 
   if (userObj) {
     userTableRows = userObj.projects.map((project) => {
@@ -84,9 +87,9 @@ export default function Projects() {
             <Table.Cell>
               <Link
                 to={project._id}
-                className={`flex items-center gap-2 ${
+                className={`flex items-center gap-2 pointer-events-none ${
                   !project.inWork && "text-slate-500"
-                } ${project?.owner._id !== user._id && "pointer-events-none"}`}
+                } `}
               >
                 {project.msProjectGUID && <TiVendorMicrosoft />}
                 {project.title}
@@ -112,23 +115,17 @@ export default function Projects() {
             {!isMobileResolution && (
               <Table.Cell>
                 {/* {formatDistanceToNow(new Date(project.start))} */}
-                {format(
-                  new Date(project.start).toISOString().split("T")[0],
-                  "dd/MM/yyyy"
-                )}
+                {format(new Date(project.start), "dd/MM/yyyy")}
               </Table.Cell>
             )}
             <Table.Cell>
-              {format(
-                new Date(project.end).toISOString().split("T")[0],
-                "dd/MM/yyyy"
-              )}
+              {format(new Date(project.end), "dd/MM/yyyy")}
             </Table.Cell>
             {!isMobileResolution && (
               <Table.Cell>{project.tasks.length}</Table.Cell>
             )}
             <Table.Cell>
-              <fetcher.Form method="POST" style={{ display: "none" }}>
+              {/* <fetcher.Form method="POST" style={{ display: "none" }}>
                 <input type="hidden" name="title" value={projectTitle} />
                 <input type="hidden" name="start" value={projectStart} />
                 <input type="hidden" name="end" value={projectEnd} />
@@ -178,9 +175,9 @@ export default function Projects() {
                   name="intent"
                   value="edit-project"
                 ></button>
-              </fetcher.Form>
+              </fetcher.Form> */}
 
-              <fetcher.Form method="POST" style={{ display: "none" }}>
+              {/* <fetcher.Form method="POST" style={{ display: "none" }}>
                 <input type="hidden" name="projectId" value={project._id} />
                 <button
                   id={`archive-project-button${project._id}`}
@@ -213,30 +210,30 @@ export default function Projects() {
                   value="change-freeze-state"
                   // ref={unFreezeProjectButtonRef}
                 ></button>
-              </fetcher.Form>
+              </fetcher.Form> */}
 
-              <ProjectEditDialog
-                projectTitle={projectTitle}
-                setProjectTitle={setProjectTitle}
-                projectStart={projectStart}
-                setProjectStart={setProjectStart}
-                projectEnd={projectEnd}
-                setProjectEnd={setProjectEnd}
+              <ProjectTitleEditDialogDefeatured
+                // projectTitle={projectTitle}
+                // setProjectTitle={setProjectTitle}
+                // projectStart={projectStart}
+                // setProjectStart={setProjectStart}
+                // projectEnd={projectEnd}
+                // setProjectEnd={setProjectEnd}
                 project={project}
-                projectReviews={projectReviews}
-                setProjectReviews={setProjectReviews}
-                editProjectButton={document.getElementById(project._id)}
-                archiveProjectButton={document.getElementById(
-                  `archive-project-button${project._id}`
-                )}
-                freezeProjectButton={document.getElementById(
-                  `freezeProjectButton${project._id}`
-                )}
-                unFreezeProjectButton={document.getElementById(
-                  `unFreezeProjectButton${project._id}`
-                )}
-                submit={submit}
-                user={user}
+                // projectReviews={projectReviews}
+                // setProjectReviews={setProjectReviews}
+                // editProjectButton={document.getElementById(project._id)}
+                // archiveProjectButton={document.getElementById(
+                //   `archive-project-button${project._id}`
+                // )}
+                // freezeProjectButton={document.getElementById(
+                //   `freezeProjectButton${project._id}`
+                // )}
+                // unFreezeProjectButton={document.getElementById(
+                //   `unFreezeProjectButton${project._id}`
+                // )}
+                // submit={submit}
+                // user={user}
               />
             </Table.Cell>
           </Table.Row>
@@ -248,7 +245,10 @@ export default function Projects() {
         return (
           <Table.Row key={project._id}>
             <Table.Cell>
-              <Link className="flex items-center gap-2" to={project._id}>
+              <Link
+                className="flex items-center gap-2 pointer-events-none"
+                to={project._id}
+              >
                 {project.msProjectGUID && <TiVendorMicrosoft />}
                 {project.title}
               </Link>
@@ -269,7 +269,7 @@ export default function Projects() {
               <Table.Cell>
                 <Link
                   to={project._id}
-                  className={`flex items-center gap-2 ${
+                  className={`flex items-center gap-2 pointer-events-none ${
                     !project.inWork && "text-slate-500 pointer-events-none"
                   }`}
                 >
@@ -295,7 +295,10 @@ export default function Projects() {
           return (
             <Table.Row key={project._id}>
               <Table.Cell>
-                <Link className="flex items-center gap-2" to={project._id}>
+                <Link
+                  className="flex items-center gap-2 pointer-events-none"
+                  to={project._id}
+                >
                   {project.msProjectGUID && <TiVendorMicrosoft />}
                   {project.title}
                 </Link>
@@ -319,7 +322,7 @@ export default function Projects() {
       <div>
         <div className="flex items-center gap-2">
           <h3>My Active Projects</h3>
-          <fetcher.Form method="POST" style={{ display: "none" }}>
+          {/* <fetcher.Form method="POST" style={{ display: "none" }}>
             <input type="hidden" name="title" value={projectTitle} />
             <input type="hidden" name="start" value={projectStart} />
             <input type="hidden" name="end" value={projectEnd} />
@@ -345,8 +348,9 @@ export default function Projects() {
               name="intent"
               value="create-new-project"
             ></button>
-          </fetcher.Form>
-          <AddProjectDialog
+          </fetcher.Form> */}
+          <AddProjectDialog_defeatured />
+          {/* <AddProjectDialog
             projectTitle={projectTitle}
             projectStart={projectStart}
             projectEnd={projectEnd}
@@ -358,7 +362,8 @@ export default function Projects() {
             button={document.getElementById("create-project")}
             submit={submit}
             user={user}
-          />
+            defeatured={true}
+          /> */}
         </div>
 
         {hasSomeUnArchivedProjects && (

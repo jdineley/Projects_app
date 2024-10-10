@@ -1,34 +1,32 @@
 import { useState, useRef, useEffect } from "react";
-import { useLoaderData } from "react-router-dom";
+// import { useLoaderData } from "react-router-dom";
 
 import { Card, Text, Flex, Badge, Button } from "@radix-ui/themes";
 
-import { goBackToStartOfArrayIndex } from "../utility";
+import { goBackToStartOfArrayIndex } from "../../utility";
 
 import { format } from "date-fns";
 
-import { useAuthContext } from "../hooks/useAuthContext";
+// import { useAuthContext } from "../hooks/useAuthContext";
 
 import { BsArrowsCollapse } from "react-icons/bs";
 
 // components
-import ProjectReviewEditDialog from "../components/ProjectReviewEditDialog";
-import ReviewObjective from "../components/ReviewObjective";
+import ProjectReviewEditDialog from "../ProjectReviewEditDialog";
+import ReviewObjective from "../ReviewObjective";
 
-const ProjectReview = () => {
-  const {
-    review,
-    projectId,
-    searchedUsers,
-    actionIndex,
-    newCommentId,
-    newCommenterEmail,
-    newActionId,
-  } = useLoaderData();
+const ProjectReview_defeatured = ({ review }) => {
+  // const {
+  //   review,
+  //   projectId,
+  //   searchedUsers,
+  //   actionIndex,
+  //   newCommentId,
+  //   newCommenterEmail,
+  //   newActionId,
+  // } = useLoaderData();
 
-  console.dir(review);
-
-  const { user } = useAuthContext();
+  // const { user } = useAuthContext();
 
   const themeColors = ["brown", "tomato", "purple", "blue", "green", "sky"];
 
@@ -36,20 +34,20 @@ const ProjectReview = () => {
 
   const allSetOpen = useRef([]);
 
-  useEffect(() => {
-    if (reviewExpanded) {
-      document.getElementById(newCommentId)?.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-        inline: "nearest",
-      });
-      document.getElementById(newActionId)?.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-        inline: "nearest",
-      });
-    }
-  }, [newCommentId, reviewExpanded, newActionId]);
+  // useEffect(() => {
+  //   if (reviewExpanded) {
+  //     document.getElementById(newCommentId)?.scrollIntoView({
+  //       behavior: "smooth",
+  //       block: "end",
+  //       inline: "nearest",
+  //     });
+  //     document.getElementById(newActionId)?.scrollIntoView({
+  //       behavior: "smooth",
+  //       block: "end",
+  //       inline: "nearest",
+  //     });
+  //   }
+  // }, [newCommentId, reviewExpanded, newActionId]);
 
   return (
     <div>
@@ -80,13 +78,14 @@ const ProjectReview = () => {
           </Card>
           {review?.archived && <h1> *ARCHIVED*</h1>}
         </Flex>
-        {!review?.archived && review?.project.owner === user._id && (
+        {!review?.archived && (
           <ProjectReviewEditDialog
             review={review}
-            projectId={projectId}
-            searchedUsers={searchedUsers}
-            actionIndex={actionIndex}
+            projectId={review.project._id}
+            // searchedUsers={searchedUsers}
+            // actionIndex={actionIndex}
             themeColors={themeColors}
+            learning={true}
           />
         )}
       </Flex>
@@ -115,13 +114,14 @@ const ProjectReview = () => {
               accentColor={
                 themeColors[goBackToStartOfArrayIndex(themeColors, i)]
               }
-              projectId={projectId}
+              projectId={review.project._id}
               reviewId={review?._id}
-              newCommentId={newCommentId}
-              newCommenterEmail={newCommenterEmail}
+              // newCommentId={newCommentId}
+              // newCommenterEmail={newCommenterEmail}
               setReviewExpanded={setReviewExpanded}
               allSetOpen={allSetOpen}
-              newActionId={newActionId}
+              // newActionId={newActionId}
+              learning={true}
             />
           );
         })}
@@ -129,4 +129,4 @@ const ProjectReview = () => {
   );
 };
 
-export default ProjectReview;
+export default ProjectReview_defeatured;

@@ -6,7 +6,7 @@ import { useFetcher, useSubmit } from "react-router-dom";
 
 import { format } from "date-fns";
 
-const VacationRequestDialog = ({ vac, project, rejected }) => {
+const VacationRequestDialog = ({ vac, project, rejected, defeatured }) => {
   const [vacationAccepted, setVacationAccepted] = useState(null);
   const [reasonForRejection, setResonForRejection] = useState(null);
 
@@ -95,7 +95,10 @@ const VacationRequestDialog = ({ vac, project, rejected }) => {
               setVacationAccepted(value);
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              className={`${defeatured && "pointer-events-none"}`}
+            >
               <RadioGroup.Item
                 className="RadioGroupItem"
                 value={true}
@@ -108,6 +111,7 @@ const VacationRequestDialog = ({ vac, project, rejected }) => {
             {!rejected && (
               <div
                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                className={`${defeatured && "pointer-events-none"}`}
               >
                 <RadioGroup.Item
                   className="RadioGroupItem"

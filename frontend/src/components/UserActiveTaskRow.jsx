@@ -29,7 +29,9 @@ const UserActiveTaskRow = ({
   isMobileResolution,
   project,
   user,
+  learning,
 }) => {
+  console.log(task);
   const [percentCompleteInState, setPercentCompleteInState] = useState(
     task.percentageComplete
   );
@@ -68,7 +70,12 @@ const UserActiveTaskRow = ({
       {!taskDetail && (
         <>
           <Table.Cell>
-            <Link to={`tasks/${task._id}`}>{task.title}</Link>
+            <Link
+              to={`tasks/${task._id}`}
+              className={`${learning && "pointer-events-none"}`}
+            >
+              {task.title}
+            </Link>
           </Table.Cell>
           {!isTabletResolution && (
             <Table.Cell>{task.description.slice(0, 40)}...</Table.Cell>
@@ -127,6 +134,7 @@ const UserActiveTaskRow = ({
                     }
                   />
                   <button
+                    className={`${learning && "pointer-events-none"}`}
                     disabled={!isSettingPercentComplete ? false : true}
                     name="intent"
                     id={task._id}
@@ -254,6 +262,7 @@ const UserActiveTaskRow = ({
               searchedTasks={searchedTasks}
               taskDep={taskDep}
               taskDetail={taskDetail}
+              learning={learning}
             />
           )}
         </Table.Cell>

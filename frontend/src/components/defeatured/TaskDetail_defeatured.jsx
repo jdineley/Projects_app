@@ -1,54 +1,60 @@
 import { useLoaderData, Form, useFetcher } from "react-router-dom";
-import { useAuthContext } from "../hooks/useAuthContext";
-import UserComment from "../components/UserComment";
+// import { useAuthContext } from "../hooks/useAuthContext";
+import UserComment from "../UserComment";
 import { useState, useEffect } from "react";
-import { useNotificationContext } from "../hooks/useNotificationContext";
+// import { useNotificationContext } from "../hooks/useNotificationContext";
 
 import { Table, Box, Flex, Card, Text } from "@radix-ui/themes";
 
 // components
-import TaskPercentageCompleteGUI from "../components/TaskPercentageCompleteGUI";
-import UserActiveTaskRow from "../components/UserActiveTaskRow";
-import TaskEditDialog from "../components/TaskEditDialog";
+import TaskPercentageCompleteGUI from "../TaskPercentageCompleteGUI";
+import UserActiveTaskRow from "../UserActiveTaskRow";
+import TaskEditDialog from "../TaskEditDialog";
 
 // hooks
-import useMatchMedia from "../hooks/useMatchMedia";
+import useMatchMedia from "../../hooks/useMatchMedia";
 
 // date
 import { format } from "date-fns";
 
 // constants
-import { mobileScreenWidth, tabletScreenWidth } from "../utility";
+import { mobileScreenWidth, tabletScreenWidth } from "../../utility";
 
-export default function TaskDetail() {
+export default function TaskDetail_defeatured({ task, taskComments, user }) {
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
   const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
 
-  const { task, taskComments, newCommentId, taskDep, searchedTasks } =
-    useLoaderData();
-  const { user } = useAuthContext();
+  // const { task, taskComments, newCommentId, taskDep, searchedTasks } =
+  //   useLoaderData();
+  // const { user } = useAuthContext();
   const [isCommenting, setIsCommenting] = useState(false);
 
   const isUserTask = user._id === task?.user._id;
 
-  const { notification } = useNotificationContext();
+  // const { notification } = useNotificationContext();
 
-  const fetcher = useFetcher();
-  console.log(fetcher.formAction);
+  // const fetcher = useFetcher();
+  // console.log(fetcher.formAction);
 
-  console.dir(task);
-  console.dir(taskComments);
+  // console.log(task);
 
   useEffect(() => {
-    setIsCommenting(false);
-    if (notification) {
-      document.getElementById(newCommentId)?.scrollIntoView({
+    // setIsCommenting(false);
+    // if (notification) {
+    //   document.getElementById(newCommentId)?.scrollIntoView({
+    //     behavior: "smooth",
+    //     block: "end",
+    //     inline: "nearest",
+    //   });
+    // }
+    if (isCommenting) {
+      document.getElementById("taskCommentText").scrollIntoView({
         behavior: "smooth",
         block: "end",
         inline: "nearest",
       });
     }
-  }, [task, notification, newCommentId]);
+  }, [isCommenting]);
 
   async function handleAddComment() {
     setIsCommenting(true);
@@ -67,17 +73,18 @@ export default function TaskDetail() {
           )}
           {task?.archived && " *ARCHIVED*"}
         </h1>
-        {isUserTask && (
-          <TaskEditDialog
-            task={task}
-            searchedTasks={searchedTasks}
-            taskDep={taskDep}
-            taskDetail={true}
-          />
-        )}
+        {/* {isUserTask && ( */}
+        <TaskEditDialog
+          task={task}
+          // searchedTasks={searchedTasks}
+          // taskDep={taskDep}
+          taskDetail={true}
+          learning={true}
+        />
+        {/* )} */}
       </Flex>
       <Flex direction="column" gap="2" mb="4">
-        {!task?.archived && isUserTask && (
+        {!task?.archived && (
           <Table.Root variant="surface" style={{ maxWidth: "700px" }}>
             <Table.Header>
               <Table.Row>
@@ -107,11 +114,12 @@ export default function TaskDetail() {
               <UserActiveTaskRow
                 taskDetail={true}
                 task={task}
-                searchedTasks={searchedTasks}
-                taskDep={taskDep}
+                // searchedTasks={searchedTasks}
+                // taskDep={taskDep}
                 isTabletResolution={isTabletResolution}
                 isMobileResolution={isMobileResolution}
                 user={user}
+                learning={true}
               />
             </Table.Body>
           </Table.Root>
@@ -158,12 +166,14 @@ export default function TaskDetail() {
         <UserComment
           key={comment._id}
           comment={comment}
-          newCommentId={newCommentId}
+          learning={true}
+          // newCommentId={newCommentId}
         />
       ))}
       {isCommenting && (
-        <Form method="post" className="add-task-comment-form">
+        <div className="add-task-comment-form">
           <textarea
+            id="taskCommentText"
             rows="8"
             placeholder={`${user.email} add new comment...`}
             name="comment"
@@ -181,7 +191,7 @@ export default function TaskDetail() {
               Submit comment
             </button>
           </div>
-        </Form>
+        </div>
       )}
     </>
   );

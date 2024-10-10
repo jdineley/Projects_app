@@ -10,6 +10,7 @@ export default function UserComment({
   newCommentId,
   projectId,
   reviewId,
+  learning,
 }) {
   const { VITE_REACT_APP_API_URL } = import.meta.env;
 
@@ -112,7 +113,12 @@ export default function UserComment({
           ></textarea>
           <div className="add-reply-buttons-collector">
             <button onClick={() => setIsReplying(false)}>Cancel</button>
-            <button type="submit">Submit</button>
+            <button
+              type="submit"
+              className={`${learning && "pointer-events-none"}`}
+            >
+              Submit
+            </button>
           </div>
         </form>
       )}

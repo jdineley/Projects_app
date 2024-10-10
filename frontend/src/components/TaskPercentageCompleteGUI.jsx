@@ -42,7 +42,7 @@ const TaskPercentageCompleteGUI = ({ task }) => {
     const dateString = stamp[0];
     const percentage = Number(stamp[1]);
     // const percentage = Number(stamp[1].split(",")[0]);
-    console.log(dateString);
+    // console.log(dateString);
     return {
       date: new Date(dateString).getTime(),
       percentage,

@@ -37,6 +37,7 @@ import rootLayoutLoader from "./loaders/rootLayoutLoader";
 import dashboardLoader from "./loaders/dashboardLoader";
 import projectReviewLoader from "./loaders/projectReviewLoader";
 import userProfileLoader from "./loaders/userProfileLoader";
+import learningLoader from "./loaders/learningLoader";
 
 // actions
 import projectAction from "./actions/projectAction";
@@ -82,7 +83,11 @@ function App() {
               action={signupAction}
               errorElement={<LoginError />}
             />
-            <Route path="learning" element={<Learning />} />
+            <Route
+              path="learning"
+              element={<Learning />}
+              loader={learningLoader}
+            />
             <Route
               path="projects"
               element={<ProjectLayout />}

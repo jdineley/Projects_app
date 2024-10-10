@@ -8,6 +8,7 @@ const {
   getUser,
   updateUser,
   readUser,
+  getLearnerUser,
 } = require("../../controllers/userController");
 
 const requireAuth = require("../../middleware/requireAuth");
@@ -27,5 +28,7 @@ router.get("/readUser", requireAuth, readUser);
 router.get("/logout", requireAuth, logoutUser);
 
 router.patch("/:userId", requireAuth, updateUser);
+
+router.get("/getLearnerUser", getUser);
 
 module.exports = router;

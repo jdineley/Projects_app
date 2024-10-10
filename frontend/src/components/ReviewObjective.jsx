@@ -18,6 +18,7 @@ const ReviewObjective = ({
   setReviewExpanded,
   allSetOpen,
   newActionId,
+  learning,
 }) => {
   const [open, setOpen] = useState(false);
   allSetOpen.current.push(setOpen);
@@ -72,6 +73,7 @@ const ReviewObjective = ({
               allSetOpen={allSetOpen}
               number={number}
               newActionId={newActionId}
+              learning={learning}
             />
           ))}
         </Box>

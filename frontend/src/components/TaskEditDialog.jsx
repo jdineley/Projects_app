@@ -8,7 +8,13 @@ import { isPast, isToday, isBefore, isAfter } from "date-fns";
 import { MdOutlinePostAdd } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 
-const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
+const TaskEditDialog = ({
+  task,
+  searchedTasks,
+  taskDep,
+  taskDetail,
+  learning,
+}) => {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [newTaskStartDate, setNewTaskStartDate] = useState("");
@@ -177,6 +183,7 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                 Title
               </Text>
               <TextField.Input
+                disabled={learning}
                 defaultValue={task.title}
                 placeholder="Enter new title"
                 onChange={(e) => {
@@ -189,6 +196,7 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                 Description
               </Text>
               <TextField.Input
+                disabled={learning}
                 defaultValue={task.description}
                 placeholder="Enter new description"
                 onChange={(e) => {
@@ -202,6 +210,7 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                   Start date
                 </Text>
                 <input
+                  disabled={learning}
                   type="date"
                   value={newTaskStartDate}
                   onChange={(e) => {
@@ -228,7 +237,7 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                   !(
                     isAfter(new Date(), new Date(task.startDate)) &&
                     isBefore(new Date(), new Date(task.deadline))
-                  )
+                  ) || learning
                 }
               />
             </label>
@@ -238,6 +247,7 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                   Number of days to complete task
                 </Text>
                 <input
+                  disabled={learning}
                   type="number"
                   min="0"
                   value={daysToCompleteTask}
@@ -259,6 +269,8 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                     }}
                   >
                     <button
+                      disabled={learning}
+                      // className={`${learning && "pointer-events-none"}`}
                       onClick={() => {
                         submit(searchTaskButtonRef.current);
                         setTaskSearchActive(true);
@@ -269,6 +281,7 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
                   </small>
                 </Text>
                 <TextField.Input
+                  disabled={learning}
                   placeholder="Task title search.."
                   id="search-task"
                   onChange={(e) => {
@@ -336,7 +349,9 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
             {!task.msProjectGUID && (
               <Dialog.Close>
                 <Button
+                  disabled={learning}
                   color="tomato"
+                  className={`${learning && "pointer-events-none"}`}
                   onClick={() => {
                     deleting = true;
                   }}
@@ -348,6 +363,8 @@ const TaskEditDialog = ({ task, searchedTasks, taskDep, taskDetail }) => {
             <Dialog.Close>
               {selectionErrors.length === 0 && formFieldsCompleted && (
                 <Button
+                  disabled={learning}
+                  className={`${learning && "pointer-events-none"}`}
                   onClick={() => {
                     saving = true;
                   }}

@@ -30,6 +30,7 @@ const ProjectReviewEditDialog = ({
   searchedUsers,
   actionIndex,
   themeColors,
+  learning,
 }) => {
   const { VITE_REACT_APP_API_URL } = import.meta.env;
 
@@ -241,12 +242,14 @@ const ProjectReviewEditDialog = ({
 
       <Dialog.Content maxWidth="450px">
         <Dialog.Title>Edit Review</Dialog.Title>
-        <Box as="div" mb="3">
+        <Box as="div" mb="3" className={`${learning && "pointer-events-none"}`}>
           <Text as="div" size="2" mb="1" weight="bold">
             Title
           </Text>
           <TextField.Input
             // defaultValue={review.title}
+            // disabled={learning}
+
             value={reviewTitle}
             onChange={(e) => {
               setReviewTitle(e.target.value);
@@ -257,13 +260,14 @@ const ProjectReviewEditDialog = ({
             }}
           />
         </Box>
-        <Box as="div" mb="3">
+        <Box as="div" mb="3" className={`${learning && "pointer-events-none"}`}>
           <Text as="div" size="2" mb="1" weight="bold">
             Start Date{" "}
             {`(${format(review.project.start, "dd/MM/yyyy")} - 
               ${format(review.project.end, "dd/MM/yyyy")})`}
           </Text>
           <input
+            // disabled={learning}
             type="date"
             min={format(review.project.start, "yyyy-MM-dd")}
             max={format(review.project.end, "yyyy-MM-dd")}
@@ -283,11 +287,12 @@ const ProjectReviewEditDialog = ({
             }}
           />
         </Box>
-        <Box as="div" mb="3">
+        <Box as="div" mb="3" className={`${learning && "pointer-events-none"}`}>
           <Text as="div" size="2" mb="1" weight="bold">
             Status
           </Text>
           <RadioGroup.Root
+            // disabled={learning}
             className="RadioGroupRoot"
             defaultValue={review.complete ? "complete" : "pending"}
             aria-label="View density"
@@ -339,9 +344,14 @@ const ProjectReviewEditDialog = ({
                 changeActioneeNotificationData={changeActioneeNotificationData}
                 actioneeNotificationData={actioneeNotificationData}
                 review={review}
+                learning={learning}
               />
-              <Flex justify="end">
+              <Flex
+                justify="end"
+                className={`${learning && "pointer-events-none"}`}
+              >
                 <Button
+                  // disabled={learning}
                   onClick={() => {
                     console.log("clicked");
                     const filteredObjectives = reviewInState.objectives.filter(
@@ -379,12 +389,15 @@ const ProjectReviewEditDialog = ({
         >
           <Flex gap="2">
             <TextArea
+              disabled={learning}
               style={{ flex: "1" }}
               id="newObjectiveTitle"
               name="title"
               placeholder="New objective description"
             />
-            <button type="submit">Add</button>
+            <button type="submit" disabled={learning}>
+              Add
+            </button>
           </Flex>
         </form>
         {selectionErrors.map((msg, i) => {
@@ -403,6 +416,7 @@ const ProjectReviewEditDialog = ({
           <Dialog.Close>
             {selectionErrors.length === 0 && formFieldsCompleted && (
               <Button
+                disabled={learning}
                 onClick={() => {
                   saving = true;
                 }}

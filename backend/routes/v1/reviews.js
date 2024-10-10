@@ -8,7 +8,7 @@ const requireAuth = require("../../middleware/requireAuth");
 
 const router = express.Router();
 
-router.use(requireAuth);
+// router.use(requireAuth);
 
 // router.get("/", getAllProjects);
 
@@ -16,9 +16,11 @@ router.use(requireAuth);
 
 // router.post("/", createProject);
 
-router.get("/:reviewId", getReview);
+router.get("/:reviewId", requireAuth, getReview);
 
-router.patch("/:reviewId/projects/:projectId", updateReview);
+router.patch("/:reviewId/projects/:projectId", requireAuth, updateReview);
+
+router.get("/getLearnerReview/:reviewId", getReview);
 
 // router.delete("/:projectId", deleteProject);
 

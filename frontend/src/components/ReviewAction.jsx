@@ -19,6 +19,7 @@ const ReviewAction = ({
   allSetOpen,
   number,
   newActionId,
+  learning,
 }) => {
   const [open, setOpen] = useState(() => (newCommentId ? true : false));
   const [isCommenting, setIsCommenting] = useState(false);
@@ -116,6 +117,7 @@ const ReviewAction = ({
               reviewId={reviewId}
               newCommentId={newCommentId}
               newCommenterEmail={newCommenterEmail}
+              learning={learning}
             />
           ))}
           {isCommenting && (
@@ -144,7 +146,12 @@ const ReviewAction = ({
                   >
                     Cancel
                   </button>
-                  <button type="submit" name="intent" value="newComment">
+                  <button
+                    type="submit"
+                    name="intent"
+                    value="newComment"
+                    disabled={learning}
+                  >
                     Submit comment
                   </button>
                 </div>

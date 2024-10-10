@@ -7,7 +7,10 @@ import { calculatePercentProjectComplete, isTaskAtRisk } from "../utility";
 // components
 import ProjectTimeline from "./ProjectTimeline";
 
-const UserProjectDashSummary = ({ project, accentColor }) => {
+// icons
+import { TiVendorMicrosoft } from "react-icons/ti";
+
+const UserProjectDashSummary = ({ project, accentColor, defeatured }) => {
   const percentageProjectComplete = calculatePercentProjectComplete(project);
 
   const atRiskTasksArray = project.tasks.filter(
@@ -20,7 +23,15 @@ const UserProjectDashSummary = ({ project, accentColor }) => {
       style={{ color: accentColor, borderColor: accentColor }}
     >
       <Text as="div" size="2" weight="bold" mb="2">
-        <Link to={`/projects/${project._id}`}>{project.title}</Link>
+        <Link
+          to={`/projects/${project._id}`}
+          className={`${defeatured && "pointer-events-none"}`}
+        >
+          <Flex align="center" gap="2">
+            {project?.msProjectGUID && <TiVendorMicrosoft />}
+            {project.title}
+          </Flex>
+        </Link>
       </Text>
       <Box className="dash-card-element">
         <Flex gap="2" align="center">
@@ -43,7 +54,10 @@ const UserProjectDashSummary = ({ project, accentColor }) => {
           {atRiskTasksArray.length > 0
             ? atRiskTasksArray.map((riskyTask) => (
                 <Badge key={riskyTask._id} color="tomato">
-                  <Link to={`/projects/${project._id}/tasks/${riskyTask._id}`}>
+                  <Link
+                    to={`/projects/${project._id}/tasks/${riskyTask._id}`}
+                    className={`${defeatured && "pointer-events-none"}`}
+                  >
                     {riskyTask.title}
                   </Link>
                 </Badge>
@@ -51,7 +65,11 @@ const UserProjectDashSummary = ({ project, accentColor }) => {
             : ""}
         </Flex>
       </Box>
-      <ProjectTimeline dashCardElement={true} project={project} />
+      <ProjectTimeline
+        dashCardElement={true}
+        project={project}
+        defeatured={defeatured}
+      />
     </Card>
   );
 };

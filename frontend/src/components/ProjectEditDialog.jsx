@@ -14,7 +14,7 @@ import {
   Heading,
 } from "@radix-ui/themes";
 
-import { submitMsProject } from "../utility";
+import { submitMsProject, msProjectGuidance } from "../utility";
 
 // icons
 import { CiTrash } from "react-icons/ci";
@@ -416,7 +416,7 @@ const ProjectTitleEditDialog = ({
               {
                 !project.inWork ? (
                   <>
-                    <Flex align="center" gap="2" mb="4">
+                    <Flex align="center" gap="2" mb="4" className="relative">
                       <TiVendorMicrosoft />
                       <Dialog.Title mb="0">Update MS Project</Dialog.Title>
                       <Text>
@@ -433,34 +433,22 @@ const ProjectTitleEditDialog = ({
                                   Importing Ms Project Guidance:
                                 </Heading>
                                 <Text as="div" size="2" color="gray" mt="3">
-                                  <ul>
-                                    <li>
-                                      If a project is already uploaded and you
-                                      wish to update the project, use Update
-                                      instead.
-                                    </li>
-                                    <li>No Summary Tasks as Predecessors</li>
-                                    <li>
-                                      All non-summary work based tasks should be
-                                      assigned a work resource. Projects will
-                                      assign the PM as task owner if the
-                                      resource is absent.
-                                    </li>
-                                    <li>
-                                      All work resources must have a valid email
-                                      with an existing account.
-                                    </li>
-                                    <li>
-                                      Cost based resources MUST be assigned to
-                                      summary tasks only.
-                                    </li>
-                                  </ul>
+                                  {msProjectGuidance.map((g, i) => {
+                                    return (
+                                      <li key={i} className="mb-2">
+                                        {g}
+                                      </li>
+                                    );
+                                  })}
                                 </Text>
                               </Box>
                             </Flex>
                           </HoverCard.Content>
                         </HoverCard.Root>{" "}
                       </Text>
+                      {loading && (
+                        <div className="spinner absolute right-0"></div>
+                      )}
                     </Flex>
                     <form
                       onSubmit={(e) => {

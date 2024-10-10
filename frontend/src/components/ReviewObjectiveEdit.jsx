@@ -22,6 +22,7 @@ const ReviewObjectiveEdit = ({
   accentColor,
   changeActioneeNotificationData,
   actioneeNotificationData,
+  learning,
 }) => {
   const [open, setOpen] = useState(false);
   // const navigate = useNavigate();
@@ -47,11 +48,12 @@ const ReviewObjectiveEdit = ({
             flex: 1,
           }}
         >
-          <label>
+          <label className={`${learning && "pointer-events-none"}`}>
             <Text as="div" size="2" mb="1" weight="bold">
               Objective {i + 1}
             </Text>
             <TextArea
+              // disabled={learning}
               variant="soft"
               color={accentColor}
               defaultValue={objective.title}
@@ -86,7 +88,12 @@ const ReviewObjectiveEdit = ({
           </Text>
           {objective.actions?.map((action, k, arr) => {
             return (
-              <Box as="div" key={action._id} mb="5">
+              <Box
+                as="div"
+                key={action._id}
+                mb="5"
+                className={`${learning && "pointer-events-none"}`}
+              >
                 <label>
                   <Flex align="center" justify="between" mb="1">
                     <Text as="div" size="2" mb="1" weight="bold">
@@ -95,6 +102,7 @@ const ReviewObjectiveEdit = ({
                     <Form>
                       <Flex gap="2">
                         <input
+                          // disabled={learning}
                           placeholder="find actionee.."
                           type="text"
                           name="assignUser"
@@ -108,6 +116,7 @@ const ReviewObjectiveEdit = ({
                     searchedUsers?.map((user) => (
                       <Link
                         // href="#"
+                        // className={`${learning && "pointer-events-none"}`}
                         key={user._id}
                         onClick={() => {
                           reviewInStateChangedRef.current = true;
@@ -139,6 +148,7 @@ const ReviewObjectiveEdit = ({
                       </Link>
                     ))}
                   <TextArea
+                    // disabled={learning}
                     variant="soft"
                     color={accentColor}
                     defaultValue={action.content}
@@ -173,6 +183,7 @@ const ReviewObjectiveEdit = ({
                       <Flex key={actionee._id} align="center" gap="2" mr="3">
                         <small>{actionee.email}</small>
                         <Button
+                          // disabled={learning}
                           style={{ padding: "0px" }}
                           variant="ghost"
                           onClick={() => {
@@ -229,6 +240,7 @@ const ReviewObjectiveEdit = ({
                   </Flex>
                 </label>
                 <button
+                  // disabled={learning}
                   onClick={() => {
                     console.log("clicked");
                     const filteredActions = arr.filter((action, l) => {
@@ -264,9 +276,14 @@ const ReviewObjectiveEdit = ({
             document.getElementById(`newObjectiveAction${i}`).value = "";
           }}
         >
-          <Box as="div" mb="3">
+          <Box
+            as="div"
+            mb="3"
+            className={`${learning && "pointer-events-none"}`}
+          >
             <Flex align="center" gap="2">
               <TextArea
+                // disabled={learning}
                 style={{ flex: "1" }}
                 id={`newObjectiveAction${i}`}
                 name="content"

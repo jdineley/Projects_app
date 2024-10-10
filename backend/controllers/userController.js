@@ -62,9 +62,17 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   console.log("hit getUser route");
-
+  const { email } = req.query;
+  console.log(email);
+  let user;
   try {
-    const user = await User.findById(req.user._id).populate([
+    if (email) {
+      user = await User.findOne({ email });
+    } else {
+      user = await User.findById(req.user._id);
+    }
+
+    await user.populate([
       {
         path: "tasks",
         populate: "project",
@@ -168,6 +176,10 @@ const updateUser = async (req, res) => {
   }
 };
 
+const getLearnerUser = async (req, res) => {
+  console.log("in get learner user");
+};
+
 module.exports = {
   signUpUser,
   loginUser,
@@ -176,4 +188,5 @@ module.exports = {
   getUser,
   updateUser,
   readUser,
+  getLearnerUser,
 };

@@ -17,28 +17,23 @@ async function msProjectUpload(
   currentUser,
   originalFileName
 ) {
-  if (msProjObj.Project.$.xmlns !== "http://schemas.microsoft.com/project") {
-    throw Error("invalid ms Project xml type");
-  }
+  // if (msProjObj.Project.$.xmlns !== "http://schemas.microsoft.com/project") {
+  //   throw Error("invalid ms Project xml type");
+  // }
 
-  const existingProject = await Project.findOne({
-    msProjectGUID: msProjObj.Project.GUID[0],
-  }).populate(["owner", "tasks"]);
-  // console.log(existingProject);
-  // console.log("existing Project ID", existingProject.owner._id, currentUser);
-  if (existingProject) {
-    //logic to update the existing project
-    // console.log("the imported file has previously been added to Projects");
-    if (existingProject.owner._id.toString() !== currentUser._id.toString()) {
-      throw {
-        errors: `This MS Project is already being actively managed by ${existingProject.owner.email}`,
-      };
-    }
-    throw {
-      errors: `You have already uploaded ${existingProject.title}.  If you wish to update changes use edit project`,
-    };
-    // return msProjectUpdate(existingProject, msProjObj, userId);
-  }
+  // const existingProject = await Project.findOne({
+  //   msProjectGUID: msProjObj.Project.GUID[0],
+  // }).populate(["owner", "tasks"]);
+  // if (existingProject) {
+  //   if (existingProject.owner._id.toString() !== currentUser._id.toString()) {
+  //     throw {
+  //       errors: `This MS Project is already being actively managed by ${existingProject.owner.email}`,
+  //     };
+  //   }
+  //   throw {
+  //     errors: `You have already uploaded ${existingProject.title}.  If you wish to update changes use edit project`,
+  //   };
+  // }
 
   // const projectMapped = await rawMapMsProjToNative(
   //   msProjObj,

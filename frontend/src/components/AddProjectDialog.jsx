@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useRevalidator } from "react-router-dom";
 // import xml2js from "xml2js";
 
-import { submitMsProject } from "../utility";
+import { submitMsProject, msProjectGuidance } from "../utility";
 
 import {
   Dialog,
@@ -26,7 +26,9 @@ import { RxCircle } from "react-icons/rx";
 
 import { isBefore, isEqual, isWithinInterval } from "date-fns";
 
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
+
+// import { PiSpinnerGap } from "react-icons/pi";
 
 const AddProjectDialog = ({
   projectTitle,
@@ -311,7 +313,7 @@ const AddProjectDialog = ({
           </Dialog.Close>
         </Flex>
         <hr className="mb-5" />
-        <Flex align="center" gap="2" mb="4">
+        <Flex align="center" gap="2" mb="4" className="relative">
           <TiVendorMicrosoft />
           <Dialog.Title mb="0">Add new MS Project</Dialog.Title>
           <Text>
@@ -329,24 +331,13 @@ const AddProjectDialog = ({
                     </Heading>
                     <Text as="div" size="2" color="gray" mt="3">
                       <ul>
-                        <li>
-                          If a project is already uploaded and you wish to
-                          update the project, use Update instead.
-                        </li>
-                        <li>No Summary Tasks as Predecessors</li>
-                        <li>
-                          All non-summary work based tasks should be assigned a
-                          work resource. Projects will assign the PM as task
-                          owner if the resource is absent.
-                        </li>
-                        <li>
-                          All work resources must have a valid email with an
-                          existing account.
-                        </li>
-                        <li>
-                          Cost based resources MUST be assigned to summary tasks
-                          only.
-                        </li>
+                        {msProjectGuidance.map((g, i) => {
+                          return (
+                            <li key={i} className="mb-2">
+                              {g}
+                            </li>
+                          );
+                        })}
                       </ul>
                     </Text>
                   </Box>
@@ -354,6 +345,8 @@ const AddProjectDialog = ({
               </HoverCard.Content>
             </HoverCard.Root>{" "}
           </Text>
+          {/* {true && <PiSpinnerGap className="spinner absolute right-0" />} */}
+          {loading && <div className="spinner absolute right-0"></div>}
         </Flex>
         <form
           onSubmit={(e) => {
@@ -379,16 +372,18 @@ const AddProjectDialog = ({
           <Text as="div" size="2" mb="1" weight="bold">
             Import .xml file from MS Project Desktop
           </Text>
-          <input
-            type="file"
-            name="uploadFile"
-            accept=".xml"
-            id="xml-file"
-            required
-          />
-          <Button mt="2" disabled={loading}>
-            Upload
-          </Button>
+          <Flex gap="4">
+            <input
+              type="file"
+              name="uploadFile"
+              accept=".xml"
+              id="xml-file"
+              required
+            />
+            <Button mt="2" disabled={loading}>
+              Upload
+            </Button>
+          </Flex>
         </form>
         <Heading size="3" as="h3" mb="2">
           Pre-Checks:{" "}

@@ -13,16 +13,18 @@ const requireAuth = require("../../middleware/requireAuth");
 
 const router = express.Router();
 
-router.use(requireAuth);
+// router.use(requireAuth);
 
-router.get("/", getAllProjects);
+router.get("/", requireAuth, getAllProjects);
 
-router.get("/:projectId", getProject);
+router.get("/:projectId", requireAuth, getProject);
 
-router.post("/", upload.single("file"), createProject);
+router.post("/", requireAuth, upload.single("file"), createProject);
 
-router.patch("/:projectId", upload.single("file"), updateProject);
+router.patch("/:projectId", requireAuth, upload.single("file"), updateProject);
 
-router.delete("/:projectId", deleteProject);
+router.delete("/:projectId", requireAuth, deleteProject);
+
+router.get("/getLearnerProject/:projectId", getProject);
 
 module.exports = router;

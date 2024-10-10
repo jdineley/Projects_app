@@ -40,6 +40,7 @@ const ProjectTimeline = ({
   dashCardElement,
   userProfile,
   projectTasks,
+  defeatured,
 }) => {
   const [showApprovedVacs, setShowApprovedVacs] = useState(false);
 
@@ -199,6 +200,7 @@ const ProjectTimeline = ({
                         <Heading size="3" as="h3" mb="1">
                           <Link
                             to={`/projects/${project._id}/reviews/${review._id}`}
+                            className={`${defeatured && "pointer-events-none"}`}
                           >
                             Project review - {review.title}
                           </Link>
@@ -236,7 +238,7 @@ const ProjectTimeline = ({
             </div>
           ))}
           {/* 2025-01-21T17:00:00.000+00:00 */}
-          {projectTasks
+          {(projectTasks || project.tasks)
             ?.filter((t) => t.milestone)
             .map((t) => (
               <div
@@ -354,7 +356,11 @@ const ProjectTimeline = ({
                       style={{ display: "block", height: "10px" }}
                     >
                       <RadixLink target="_blank">
-                        <VacationRequestDialog vac={vac} project={project} />
+                        <VacationRequestDialog
+                          vac={vac}
+                          project={project}
+                          defeatured={defeatured}
+                        />
                       </RadixLink>
                     </HoverCard.Trigger>
                     <HoverCard.Content maxWidth="300px">

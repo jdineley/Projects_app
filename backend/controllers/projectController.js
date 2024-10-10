@@ -125,7 +125,25 @@ const createProject = async (req, res) => {
     //   "secondaryTasks",
     // ]);
     if (originalFileName) {
-      console.log("trying to import MS Project xml file..");
+      console.log("Adding MS Project...");
+
+      const existingProject = await Project.findOne({
+        msProjectGUID: msProjObj.Project.GUID[0],
+      }).populate(["owner", "tasks"]);
+
+      if (existingProject) {
+        if (
+          existingProject.owner._id.toString() !== currentUser._id.toString()
+        ) {
+          throw {
+            errors: `This MS Project is already being actively managed by ${existingProject.owner.email}`,
+          };
+        }
+        throw {
+          errors: `You have already uploaded ${existingProject.title}.  If you wish to update changes use edit project`,
+        };
+      }
+
       const newProject = await msProjectUpload(
         msProjObj,
         projectMapped,
@@ -231,7 +249,7 @@ const updateProject = async (req, res) => {
     // ]);
 
     if (originalFileName) {
-      console.log("trying to import MS Project xml file..");
+      console.log("Updating MS Project..");
       await msProjectUpdate(
         projectToUpdate,
         // msProjObj,

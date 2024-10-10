@@ -11,7 +11,7 @@ import { useFetcher } from "react-router-dom";
 
 import { format } from "date-fns";
 
-const PendingVacationRequests = ({ vac, userObj }) => {
+const PendingVacationRequests = ({ vac, userObj, learning }) => {
   const fetcher = useFetcher();
   return (
     <Text key={vac._id}>
@@ -35,7 +35,7 @@ const PendingVacationRequests = ({ vac, userObj }) => {
                 );
               }
             }}
-            disabled={fetcher.state === "submitting" ? true : false}
+            disabled={fetcher.state === "submitting" ? true : false || learning}
           >
             Del.
           </Button>

@@ -97,7 +97,7 @@ h2 {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-width: 1200px;
+  /* max-width: 1200px; */
   margin: 0 auto;
 }
 
@@ -722,4 +722,27 @@ button:hover {
 
 .rt-CardInner {
   overflow: visible;
+}
+
+/* spinner */
+
+.spinner {
+  height: 40px;
+  width: 40px;
+  /* color: var(--logo); */
+  border: 2px solid;
+  border-color: var(--logo) transparent;
+  border-radius: 50%;
+  animation: spin 1.3s ease infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* learning */
+.logo-highlight {
+  color: var(--logo);
 }

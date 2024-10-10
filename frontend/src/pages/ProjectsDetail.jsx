@@ -62,7 +62,8 @@ export default function ProjectsDetail() {
     assignUser,
   } = useLoaderData();
 
-  console.log("project", project);
+  console.dir(project);
+  console.dir(projectTasks);
 
   const json = useActionData();
 
@@ -76,6 +77,7 @@ export default function ProjectsDetail() {
   const [filteredUsers, setFilterUsers] = useState("all-members");
 
   const { user } = useAuthContext();
+  console.dir(user);
   const submit = useSubmit();
   const { notification } = useNotificationContext();
 
