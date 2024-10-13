@@ -17,7 +17,8 @@ async function msProjectUpdate(
   // msProjObj,
   projectMapped,
   currentUser,
-  originalFileName
+  originalFileName,
+  isDemo
 ) {
   // const projectMapped = rawMapMsProjToNative(
   //   msProjObj,
@@ -49,7 +50,7 @@ async function msProjectUpdate(
       milestone,
     } = task;
 
-    const storedUser = await User.findOne({ email: user }).populate([
+    const storedUser = await User.findOne({ email: user, isDemo }).populate([
       "tasks",
       "vacationRequests",
       "secondaryTasks",
@@ -66,7 +67,13 @@ async function msProjectUpdate(
 
     if (!taskToUpdate) {
       // create new task
-      await createTaskUtil({ task, projectToUpdate, storedUser, currentUser });
+      await createTaskUtil({
+        task,
+        projectToUpdate,
+        storedUser,
+        currentUser,
+        isDemo,
+      });
       continue;
     }
 

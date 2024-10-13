@@ -33,6 +33,10 @@ const vacationSchema = new mongoose.Schema(
       required: true,
     },
     projects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }],
+    isDemo: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

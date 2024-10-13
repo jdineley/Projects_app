@@ -8,6 +8,7 @@ const createReviewAction = async (req, res) => {
   console.log("hit createReviewAction route");
   const { objectiveId } = req.params;
   const { content } = req.body;
+  const { isDemo } = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(objectiveId)) {
     return res.status(404).json({ error: "No such reviewObjective" });
@@ -17,6 +18,7 @@ const createReviewAction = async (req, res) => {
     const newAction = await ReviewAction.create({
       content,
       reviewObjective: objectiveId,
+      isDemo,
     });
     const objective = await ReviewObjective.findById(objectiveId);
     if (!objective) {

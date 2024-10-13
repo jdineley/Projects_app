@@ -28,7 +28,9 @@ const UserProjectDashSummary = ({ project, accentColor, defeatured }) => {
           className={`${defeatured && "pointer-events-none"}`}
         >
           <Flex align="center" gap="2">
-            {project?.msProjectGUID && <TiVendorMicrosoft />}
+            {project?.msProjectGUID && (
+              <TiVendorMicrosoft className="min-w-5" />
+            )}
             {project.title}
           </Flex>
         </Link>

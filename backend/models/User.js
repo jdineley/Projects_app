@@ -50,6 +50,10 @@ const userSchema = new mongoose.Schema(
     archivedProjects: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
     ],
+    isDemo: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

@@ -44,27 +44,66 @@ mongoose
     console.log("Mongo connection open!!");
     const seedDb = async () => {
       try {
-        await Project.deleteMany({});
-        await User.deleteMany({});
-        await Task.deleteMany({});
-        await Comment.deleteMany({});
-        await Reply.deleteMany({});
-        await Review.deleteMany({});
-        await ReviewObjective.deleteMany({});
-        await ReviewAction.deleteMany({});
-        await Vacation.deleteMany({});
+        // await Project.deleteMany({});
+        // await User.deleteMany({});
+        // await Task.deleteMany({});
+        // await Comment.deleteMany({});
+        // await Reply.deleteMany({});
+        // await Review.deleteMany({});
+        // await ReviewObjective.deleteMany({});
+        // await ReviewAction.deleteMany({});
+        // await Vacation.deleteMany({});
+
+        await Project.deleteMany({ isDemo: true });
+        await User.deleteMany({ isDemo: true });
+        await Task.deleteMany({ isDemo: true });
+        await Comment.deleteMany({ isDemo: true });
+        await Reply.deleteMany({ isDemo: true });
+        await Review.deleteMany({ isDemo: true });
+        await ReviewObjective.deleteMany({ isDemo: true });
+        await ReviewAction.deleteMany({ isDemo: true });
+        await Vacation.deleteMany({ isDemo: true });
+
+        // delete everything related to demo users:
+        // const demoUsers = await User.find({ demo: true });
+
+        // async function clearDemoUsers(demoUsers) {
+        //   const cascadeDeleteHandler = async (demoUser) => {
+        //     const childrenDocs = [
+        //       ["tasks", Task],
+        //       ["secondaryTasks", Task],
+        //       ["comments", Comment],
+        //       ["projects", Project],
+        //       ["vacationRequests", Vacation],
+        //       ["archivedProjects", Project],
+        //     ];
+        //     for (const childDoc of childrenDocs) {
+        //       if (demoUser[childDoc[0]].length > 0) {
+        //         for (const childDocId of demoUser[childDoc[0]]) {
+        //           await childDoc[1].findByIdAndDelete(childDocId);
+        //         }
+        //       }
+        //     }
+        //   };
+        //   for (const demoUser of demoUsers) {
+        //     await cascadeDeleteHandler(demoUser);
+        //   }
+        // }
+        // await clearDemoUsers(demoUsers);
 
         // Create users #1
         async function createUsers() {
           const userCreateHandler = async (user) => {
-            await User.signUp(user.email, user.password);
+            const demoUser = await User.signUp(user.email, user.password);
+            demoUser.isDemo = true;
+            await demoUser.save();
           };
           for (const user of users) {
             await userCreateHandler(user);
           }
         }
         await createUsers();
-        const savedUsers = await User.find();
+        const savedUsers = await User.find({ isDemo: true });
         const userIds = savedUsers.map((user) => user._id);
         // still requires tasks & comments & projects - complete
 
@@ -85,6 +124,7 @@ mongoose
                 generateRandomNumberBetweenMinMax(6, 12)
               ),
               owner: owner_id,
+              isDemo: true,
             });
 
             const midTermReview = await Review.create({
@@ -104,6 +144,7 @@ mongoose
                       generateRandomNumberBetweenMinMax(4, 16)
                     ),
               project: newProject._id,
+              isDemo: true,
               // objectives: createReviewObjectives(projectReviewObjectives, this._id, userIds),
             });
             // console.log(midTermReview);
@@ -112,6 +153,7 @@ mongoose
               title: "end of project",
               date: subWeeks(new Date(newProject.end), 6),
               project: newProject._id,
+              isDemo: true,
               // objectives: createReviewObjectives(projectReviewObjectives),
             });
 
@@ -195,6 +237,7 @@ mongoose
               daysToComplete: generateRandomNumberBetweenMinMax(5, 90),
               startDate,
               deadline,
+              isDemo: true,
             });
 
             project.tasks.push(newTask._id);
@@ -250,6 +293,7 @@ mongoose
               ...comment,
               user: user._id,
               task: task._id,
+              isDemo: true,
             });
             task.comments.push(newComment._id);
             user.comments.push(newComment._id);
@@ -276,6 +320,7 @@ mongoose
               ...reply,
               comment: comment_id,
               user: user._id,
+              isDemo: true,
             });
 
             comment.replies.push(newReply._id);

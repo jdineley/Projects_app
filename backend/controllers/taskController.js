@@ -28,6 +28,7 @@ const getAllTasks = async (req, res) => {
 // get searched tasks
 const getTasks = async (req, res) => {
   console.log("hit getTasks route");
+  const { isDemo } = req.user;
   const { task } = req.query;
   console.log(task === "");
   if (task === "") {
@@ -36,6 +37,7 @@ const getTasks = async (req, res) => {
   }
   const searchedTasks = await Task.find({
     title: { $regex: task, $options: "i" },
+    isDemo,
   });
   res.status(200).json(searchedTasks);
 };
@@ -80,13 +82,16 @@ const createTask = async (req, res) => {
   console.log("req.body", req.body);
   const { projectId } = req.params;
   const { assigneeId } = req.body;
+  const { isDemo } = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(projectId)) {
     return res.status(404).json({ error: "No such project" });
   }
 
   try {
-    const project = await Project.findById(projectId).populate(["tasks"]);
+    const project = await Project.findById(projectId).populate([
+      { path: "tasks", populate: ["secondaryUsers"] },
+    ]);
     if (!project) {
       return res.status(404).json({ error: "No such project" });
     }
@@ -101,6 +106,7 @@ const createTask = async (req, res) => {
       user: req.user._id,
       project: projectId,
       ...req.body,
+      isDemo,
     });
     const user = await User.findById(task.user).populate([
       "tasks",
@@ -154,6 +160,7 @@ const updateTask = async (req, res) => {
   console.log(req.body);
   const { taskId } = req.params;
   const { dependencies, editPercent, ...list } = req.body;
+  // const {isDemo} = req.user
 
   if (editPercent === "true") {
     req.body = list;
@@ -215,6 +222,7 @@ const updateTask = async (req, res) => {
 const deleteTask = async (req, res) => {
   console.log("hit delete task route");
   const { taskId } = req.params;
+  console.log("taskId", taskId);
 
   if (!mongoose.Types.ObjectId.isValid(taskId)) {
     return res.status(404).json({ error: "No such task" });
@@ -228,16 +236,21 @@ const deleteTask = async (req, res) => {
     if (taskToDelete.user._id.toString() !== req.user._id.toString()) {
       return res.status(401).json({ error: "Not authorised to delete task" });
     }
-    const task = await Task.findByIdAndDelete(taskId);
-    if (!task) {
-      return res.status(404).json({ error: "No such task" });
-    }
-    const taskUser = await User.findById(task.user).populate[
-      ("tasks", "vacationRequests")
-    ];
-    const taskProject = await Project.findById(task.project).populate([
+    // const task = await Task.findByIdAndDelete(taskId);
+    // if (!task) {
+    //   return res.status(404).json({ error: "No such task" });
+    // }
+    const taskUser = await User.findById(taskToDelete.user).populate([
       "tasks",
+      "secondaryTasks",
+      "vacationRequests",
     ]);
+
+    const taskProject = await Project.findById(taskToDelete.project).populate({
+      path: "tasks",
+      populate: ["secondaryUsers"],
+    });
+
     if (taskUser) {
       taskUser.tasks = taskUser.tasks.filter((task) => {
         return task._id.toString() !== taskId;
@@ -249,15 +262,17 @@ const deleteTask = async (req, res) => {
       });
     }
     await resyncUserAndVacs(taskUser);
-    await resyncProjTasksUsersVacs(taskProject, taskUser);
+    await resyncProjTasksUsersVacs(taskProject);
     await taskUser.save();
     await taskProject.save();
-    if (task.comments.length > 0) {
-      for (const comment of task.comments) {
+    if (taskToDelete.comments.length > 0) {
+      for (const comment of taskToDelete.comments) {
         await Comment.findByIdAndDelete(comment);
       }
     }
-    res.status(200).json(task);
+    await Task.findByIdAndDelete(taskId);
+    console.log("end of delete task controller");
+    res.status(200).json(taskToDelete);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }

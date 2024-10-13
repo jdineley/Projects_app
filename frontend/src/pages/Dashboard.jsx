@@ -62,7 +62,9 @@ export default function Home() {
           <Table.Cell>
             <Link to={`/projects/${proj.projectId}`}>
               <Flex align="center" gap="2">
-                {proj?.msProjectGUID && <TiVendorMicrosoft />}
+                {proj?.msProjectGUID && (
+                  <TiVendorMicrosoft className="min-w-5" />
+                )}
                 {proj.projectTitle}
               </Flex>
             </Link>

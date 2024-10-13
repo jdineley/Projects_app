@@ -39,6 +39,7 @@ mongoose
         const storedObjective = await ReviewObjective.create({
           ...objective,
           review: reviewId,
+          isDemo: true,
         });
         review.objectives.push(storedObjective._id);
         await review.save();
@@ -61,6 +62,7 @@ mongoose
         const storedAction = await ReviewAction.create({
           ...action,
           reviewObjective: reviewObjectiveId,
+          isDemo: true,
         });
         reviewObjective.actions.push(storedAction._id);
         await reviewObjective.save();
@@ -91,6 +93,7 @@ mongoose
           ...comment,
           user: userId,
           action: actionId,
+          isDemo: true,
         });
         const action = await ReviewAction.findById(actionId);
         action.comments.push(storedComment._id);

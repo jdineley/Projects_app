@@ -14,7 +14,7 @@ const getReplies = async (req, res) => {};
 
 // get reply
 const getReply = async (req, res) => {
-  console;
+  // console;
   const { replyId } = req.params;
 
   try {
@@ -35,7 +35,7 @@ const createReply = async (req, res) => {
     projectId,
     reviewId,
   } = req.body;
-  const { _id: currentUserId, email: currentUserEmail } = req.user;
+  const { _id: currentUserId, email: currentUserEmail, isDemo } = req.user;
   console.log("current user id", currentUserId, currentUserEmail);
   try {
     const comment = await Comment.findById(commentId);
@@ -57,7 +57,7 @@ const createReply = async (req, res) => {
         throw Error("no associated action found");
       }
     }
-    const reply = await Reply.create(req.body);
+    const reply = await Reply.create({ ...req.body, isDemo });
     comment.replies.push(reply._id);
     await comment.save();
     const commentWithPopReplies = await Comment.findById(comment._id).populate(

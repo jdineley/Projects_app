@@ -239,7 +239,7 @@ export default function ProjectsDetail() {
     <div
       className={`projects-detail ${
         !project?.inWork &&
-        project?.owner._id !== user._id &&
+        project?.owner._id !== user?._id &&
         "pointer-events-none"
       }`}
     >
@@ -503,6 +503,11 @@ export default function ProjectsDetail() {
                                     <Strong>{u.email}</Strong>
                                   </Select.Item>
                                 ))}
+                                {
+                                  <Select.Item value={project.owner._id}>
+                                    <Strong>{project.owner.email}</Strong>
+                                  </Select.Item>
+                                }
                               </Select.Group>
                             </Select.Content>
                           </Select.Root>

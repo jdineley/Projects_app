@@ -238,7 +238,7 @@ const ProjectTimeline = ({
             </div>
           ))}
           {/* 2025-01-21T17:00:00.000+00:00 */}
-          {(projectTasks || project.tasks)
+          {(projectTasks || project?.tasks)
             ?.filter((t) => t.milestone)
             .map((t) => (
               <div

@@ -30,6 +30,10 @@ const reviewSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isDemo: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("Review", reviewSchema);

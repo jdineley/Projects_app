@@ -26,7 +26,10 @@ const createComment = async (req, res) => {
   const { task: taskId, action: actionId, projectId, reviewId } = req.body;
 
   try {
-    const comment = await Comment.create(req.body);
+    const comment = await Comment.create({
+      ...req.body,
+      isDemo: req.user.isDemo,
+    });
     if (taskId) {
       const task = await Task.findById(taskId);
       if (!task) {

@@ -34,6 +34,10 @@ const commentSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isDemo: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("Comment", commentSchema);

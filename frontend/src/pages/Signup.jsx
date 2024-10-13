@@ -16,7 +16,7 @@ export default function Signup() {
 
   const { dispatch } = useAuthContext();
   const json = useActionData();
-  console.log("signup json:", json);
+  // console.log("signup json:", json);
   const navigate = useNavigate();
 
   useEffect(() => {

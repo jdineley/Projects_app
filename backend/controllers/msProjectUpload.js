@@ -15,7 +15,8 @@ async function msProjectUpload(
   msProjObj,
   projectMapped,
   currentUser,
-  originalFileName
+  originalFileName,
+  isDemo
 ) {
   // if (msProjObj.Project.$.xmlns !== "http://schemas.microsoft.com/project") {
   //   throw Error("invalid ms Project xml type");
@@ -60,6 +61,7 @@ async function msProjectUpload(
     end,
     msProjectGUID,
     file: originalFileName,
+    isDemo,
     // fileJSON: JSON.stringify(msProjObj),
   };
   // console.log("hello", createProjObj);
@@ -83,7 +85,7 @@ async function msProjectUpload(
       milestone,
     } = task;
 
-    const storedUser = await User.findOne({ email: user }).populate([
+    const storedUser = await User.findOne({ email: user, isDemo }).populate([
       "tasks",
       "vacationRequests",
       "secondaryTasks",
@@ -95,7 +97,7 @@ async function msProjectUpload(
       };
     }
 
-    await createTaskUtil({ task, storedUser, newProject, currentUser });
+    await createTaskUtil({ task, storedUser, newProject, currentUser, isDemo });
   }
 
   await resyncProjTasksUsersVacs(newProject);

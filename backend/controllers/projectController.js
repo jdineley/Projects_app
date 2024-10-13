@@ -109,7 +109,7 @@ const createProject = async (req, res) => {
     msProjObj,
     ...reviews
   } = req.body;
-  const { _id: userId } = req.user;
+  const { _id: userId, isDemo } = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return res.status(404).json({ error: "Invalid user id" });
@@ -148,7 +148,8 @@ const createProject = async (req, res) => {
         msProjObj,
         projectMapped,
         currentUser,
-        originalFileName
+        originalFileName,
+        isDemo
       );
       return res.status(200).json(newProject);
     }
@@ -173,12 +174,14 @@ const createProject = async (req, res) => {
       start,
       end,
       owner: req.user._id,
+      isDemo,
     });
 
     for (let review of reviewArray) {
       const reviewNew = await Review.create({
         ...review,
         project: project._id,
+        isDemo,
       });
       project.reviews.push(reviewNew._id);
       await project.save();
@@ -207,7 +210,7 @@ const updateProject = async (req, res) => {
     ...reviews
   } = req.body;
   const { projectId } = req.params;
-  const { _id: userId } = req.user;
+  const { _id: userId, isDemo } = req.user;
   console.log("intent", intent);
   console.log("projectId", projectId);
   console.log("req.file", req.file);
@@ -255,7 +258,8 @@ const updateProject = async (req, res) => {
         // msProjObj,
         projectMapped,
         currentUser,
-        originalFileName
+        originalFileName,
+        isDemo
       );
       return res.status(200).json(projectToUpdate);
     }
@@ -313,6 +317,7 @@ const updateProject = async (req, res) => {
           const newReviewObj = await Review.create({
             ...newReview,
             project: projectId,
+            isDemo,
           });
           newReviewIds.push(newReviewObj._id);
         }

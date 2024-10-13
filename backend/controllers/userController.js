@@ -53,9 +53,11 @@ const logoutUser = async (req, res) => {
 const getUsers = async (req, res) => {
   console.log("hit getUsers route");
   const { assignUser } = req.query;
+  const { isDemo } = req.user;
 
   const users = await User.find({
     email: { $regex: assignUser, $options: "i" },
+    isDemo,
   });
   res.status(200).json(users);
 };
@@ -176,9 +178,9 @@ const updateUser = async (req, res) => {
   }
 };
 
-const getLearnerUser = async (req, res) => {
-  console.log("in get learner user");
-};
+// const getLearnerUser = async (req, res) => {
+//   console.log("in get learner user");
+// };
 
 module.exports = {
   signUpUser,
@@ -188,5 +190,5 @@ module.exports = {
   getUser,
   updateUser,
   readUser,
-  getLearnerUser,
+  // getLearnerUser,
 };

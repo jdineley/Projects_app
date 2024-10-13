@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
-import { Card, Text, Grid } from "@radix-ui/themes";
-import { useLoaderData, useFetcher } from "react-router-dom";
+import { Card, Text, Grid, Flex } from "@radix-ui/themes";
+import { useLoaderData, useFetcher, useLocation, Link } from "react-router-dom";
 
 import ProjectTimeline from "../components/ProjectTimeline";
 
@@ -24,6 +24,9 @@ import useMatchMedia from "../hooks/useMatchMedia";
 // constants
 import { tabletScreenWidth } from "../utility";
 
+// icons
+import { TiVendorMicrosoft } from "react-icons/ti";
+
 export default function UserProfile() {
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
 
@@ -31,6 +34,9 @@ export default function UserProfile() {
   const [vacEndInState, setVacEndInState] = useState(null);
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
   const userObj = useLoaderData();
+
+  const location = useLocation();
+  const url = new URL("..", window.origin + location.pathname);
 
   // if (!userObj || userObj.error) return null;
 
@@ -153,7 +159,7 @@ export default function UserProfile() {
           isTabletResolution ? { maxWidth: "600px" } : { maxWidth: "1000px" }
         }
       >
-        <Card className="flex-1">
+        <Card className="flex-1 self-start">
           <h2>Personal vacation management</h2>
           <div className="border-b border-solid border-0 border-slate-200">
             <h3>
@@ -273,7 +279,14 @@ export default function UserProfile() {
               if (!proj.archived) {
                 return (
                   <div key={proj._id}>
-                    <h3>{proj.title}</h3>
+                    <Link to={`/projects/${proj._id}`}>
+                      <Flex align="center" gap="2">
+                        {proj?.msProjectGUID && (
+                          <TiVendorMicrosoft className="min-w-5" />
+                        )}
+                        <h3>{proj.title}</h3>
+                      </Flex>
+                    </Link>
                     <div>
                       <ProjectTimeline project={proj} userProfile={true} />
                     </div>
