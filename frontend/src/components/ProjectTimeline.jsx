@@ -66,13 +66,13 @@ const ProjectTimeline = ({
     "purple",
     "blue",
     "green",
-    "sky",
-    "amber",
+    "skyblue",
+    "coral",
     "pink",
     "lime",
     "teal",
     "cyan",
-    "iris",
+    "indigo",
   ];
 
   function getProjectUserColorIndex(userId) {
@@ -146,7 +146,7 @@ const ProjectTimeline = ({
           </Flex>
           {rejectedVacationRequests?.length > 0 &&
             userProfile &&
-            project.owner._id === user._id && (
+            (project.owner._id === user._id || defeatured) && (
               <Flex direction="column" position="relative" className="dropdown">
                 <button>See all rejected vacations</button>
                 <div className="dropdown-options">
@@ -157,6 +157,7 @@ const ProjectTimeline = ({
                         vac={vac}
                         project={project}
                         rejected={true}
+                        defeatured={defeatured}
                       />
                     );
                   })}
@@ -422,7 +423,11 @@ const ProjectTimeline = ({
                     >
                       <RadixLink target="_blank">
                         {userProfile && (
-                          <VacationRequestDialog vac={vac} project={project} />
+                          <VacationRequestDialog
+                            vac={vac}
+                            project={project}
+                            defeatured={defeatured}
+                          />
                         )}
                       </RadixLink>
                     </HoverCard.Trigger>

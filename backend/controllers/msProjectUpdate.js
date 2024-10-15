@@ -14,17 +14,11 @@ const { channel } = require("../routes/v1/sse");
 
 async function msProjectUpdate(
   projectToUpdate,
-  // msProjObj,
   projectMapped,
   currentUser,
   originalFileName,
   isDemo
 ) {
-  // const projectMapped = rawMapMsProjToNative(
-  //   msProjObj,
-  //   currentUser._id,
-  //   currentUser.email
-  // );
   const { title, owner, users, start, end, tasks } = projectMapped;
   // console.log(projectToUpdate);
   // look up mongoose document.update() method???
@@ -83,6 +77,7 @@ async function msProjectUpdate(
     taskToUpdate.deadline = new Date(deadline);
     taskToUpdate.startDate = new Date(startDate);
     taskToUpdate.milestone = milestone;
+
     // update taskToUpdate.user, taskToUpdate.secondaryUsers[]..
     if (taskToUpdate.user.toString() !== storedUser._id.toString()) {
       console.log(`task ${taskToUpdate.title} has changed user`);

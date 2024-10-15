@@ -304,7 +304,7 @@ async function resyncProjTasksUsersVacs(storedProject) {
         task.secondaryUsers.forEach((u) => {
           if (
             !projectUsersIds.includes(u._id.toString()) &&
-            u._id !== storedProject.owner.toString()
+            u._id.toString() !== storedProject.owner.toString()
           )
             projectUsersIds.push(u._id.toString());
         });
@@ -325,11 +325,6 @@ async function resyncProjTasksUsersVacs(storedProject) {
 
     console.log("noNewProjectUsers", noNewProjectUsers);
 
-    // if (
-    //   (storedProject.users.length === projectUsersIds.length &&
-    //     !noNewProjectUsers) ||
-    //   storedProject.users.length !== projectUsersIds.length
-    // ) {
     if (
       !noNewProjectUsers ||
       storedProject.users.length !== projectUsersIds.length

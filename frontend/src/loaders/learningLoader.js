@@ -3,7 +3,7 @@ const learningLoader = async ({ params, request }) => {
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   try {
     const resp1 = await fetch(
-      `${VITE_REACT_APP_API_URL}/api/v1/users/getLearnerUser?email=willy@mail.com`,
+      `${VITE_REACT_APP_API_URL}/api/v1/users/getLearnerUser?email=jenny@mail.com`,
       {
         method: "GET",
         mode: "cors",

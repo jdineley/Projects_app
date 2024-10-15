@@ -79,68 +79,68 @@ export default function UserProfile_defeatured({ userObj }) {
   // end date is ahead of the start date...
   // start and end dates are different
 
-  useEffect(() => {
-    let localDateSelectionErrors = [];
+  // useEffect(() => {
+  //   let localDateSelectionErrors = [];
 
-    if (fetcher.data) {
-      setVacStartInState("");
-      setVacEndInState("");
-    }
+  //   if (fetcher.data) {
+  //     setVacStartInState("");
+  //     setVacEndInState("");
+  //   }
 
-    if (
-      vacStartInState &&
-      vacEndInState &&
-      isBefore(new Date(vacEndInState), new Date(vacStartInState))
-    ) {
-      localDateSelectionErrors.push(
-        "return to work must precede last day at work"
-      );
-    }
-    if (
-      vacEndInState &&
-      vacStartInState &&
-      isEqual(new Date(vacEndInState), new Date(vacStartInState))
-    ) {
-      localDateSelectionErrors.push("start and return dates must be different");
-    }
-    if (
-      vacStartInState &&
-      userObj?.vacationRequests.some((vacReq) => {
-        return isWithinInterval(new Date(vacStartInState), {
-          start: new Date(vacReq.lastWorkDate),
-          end: new Date(vacReq.returnToWorkDate),
-        });
-      })
-    ) {
-      localDateSelectionErrors.push("vacation request clash");
-    }
-    if (
-      vacEndInState &&
-      userObj?.vacationRequests.some((vacReq) => {
-        return isWithinInterval(new Date(vacEndInState), {
-          start: new Date(vacReq.lastWorkDate),
-          end: new Date(vacReq.returnToWorkDate),
-        });
-      })
-    ) {
-      localDateSelectionErrors.push("vacation request clash");
-    }
-    if (vacStartInState && isPast(new Date(vacStartInState))) {
-      if (!isToday(new Date(vacStartInState))) {
-        localDateSelectionErrors.push(
-          "last work date selection is in the past"
-        );
-      }
-    }
-    if (vacEndInState && isPast(new Date(vacEndInState))) {
-      if (!isToday(new Date(vacEndInState))) {
-        localDateSelectionErrors.push(
-          "return to work date selection is in the past"
-        );
-      }
-    }
-    setDateSelectionErrors(localDateSelectionErrors);
-  }, [userObj?.vacationRequests, vacEndInState, vacStartInState, fetcher.data]);
+  //   if (
+  //     vacStartInState &&
+  //     vacEndInState &&
+  //     isBefore(new Date(vacEndInState), new Date(vacStartInState))
+  //   ) {
+  //     localDateSelectionErrors.push(
+  //       "return to work must precede last day at work"
+  //     );
+  //   }
+  //   if (
+  //     vacEndInState &&
+  //     vacStartInState &&
+  //     isEqual(new Date(vacEndInState), new Date(vacStartInState))
+  //   ) {
+  //     localDateSelectionErrors.push("start and return dates must be different");
+  //   }
+  //   if (
+  //     vacStartInState &&
+  //     userObj?.vacationRequests.some((vacReq) => {
+  //       return isWithinInterval(new Date(vacStartInState), {
+  //         start: new Date(vacReq.lastWorkDate),
+  //         end: new Date(vacReq.returnToWorkDate),
+  //       });
+  //     })
+  //   ) {
+  //     localDateSelectionErrors.push("vacation request clash");
+  //   }
+  //   if (
+  //     vacEndInState &&
+  //     userObj?.vacationRequests.some((vacReq) => {
+  //       return isWithinInterval(new Date(vacEndInState), {
+  //         start: new Date(vacReq.lastWorkDate),
+  //         end: new Date(vacReq.returnToWorkDate),
+  //       });
+  //     })
+  //   ) {
+  //     localDateSelectionErrors.push("vacation request clash");
+  //   }
+  //   if (vacStartInState && isPast(new Date(vacStartInState))) {
+  //     if (!isToday(new Date(vacStartInState))) {
+  //       localDateSelectionErrors.push(
+  //         "last work date selection is in the past"
+  //       );
+  //     }
+  //   }
+  //   if (vacEndInState && isPast(new Date(vacEndInState))) {
+  //     if (!isToday(new Date(vacEndInState))) {
+  //       localDateSelectionErrors.push(
+  //         "return to work date selection is in the past"
+  //       );
+  //     }
+  //   }
+  //   setDateSelectionErrors(localDateSelectionErrors);
+  // }, [userObj?.vacationRequests, vacEndInState, vacStartInState, fetcher.data]);
 
   return (
     <>

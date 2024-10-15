@@ -255,7 +255,6 @@ const updateProject = async (req, res) => {
       console.log("Updating MS Project..");
       await msProjectUpdate(
         projectToUpdate,
-        // msProjObj,
         projectMapped,
         currentUser,
         originalFileName,
