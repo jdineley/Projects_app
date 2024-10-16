@@ -34,7 +34,8 @@ import ProjectReview_defeatured from "../components/defeatured/ProjectReview_def
 import UserProfile_defeatured from "../components/defeatured/UserProfile_defeatured";
 
 const Learning = () => {
-  const { userObj, project, projectTasks, review } = useLoaderData();
+  const { userObj, project, projectTasks, review, task, taskComments } =
+    useLoaderData();
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
   const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
   const subHeadElemsRef = useRef([]);
@@ -386,8 +387,8 @@ const Learning = () => {
               }}
             >
               <TaskDetail_defeatured
-                task={projectTasks[0]}
-                taskComments={projectTasks[0].comments}
+                task={task}
+                taskComments={taskComments}
                 user={userObj._id}
               />
             </Box>

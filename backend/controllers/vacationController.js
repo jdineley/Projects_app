@@ -116,7 +116,9 @@ const updateVacation = async (req, res) => {
   }
 
   try {
-    const vacationToUpdate = await Vacation.findById(vacationId);
+    const vacationToUpdate = await Vacation.findById(vacationId).populate(
+      "projects"
+    );
     if (!vacationToUpdate) {
       return res.status(404).json({ error: "No such vacation" });
     }
@@ -161,6 +163,10 @@ const updateVacation = async (req, res) => {
         Object.fromEntries(vacationToUpdate.approvals)
       ).map((approv) => approv.accepted);
       console.log("approvalValuesArray", approvalValuesArray);
+      console.log(
+        "vacProjNoArchiveNumber",
+        vacationToUpdate.projects.filter((p) => !p.archived).length
+      );
       if (
         approvalValuesArray.length ===
           vacationToUpdate.projects.filter((p) => !p.archived).length &&

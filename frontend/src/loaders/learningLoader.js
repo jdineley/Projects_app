@@ -14,7 +14,7 @@ const learningLoader = async ({ params, request }) => {
     }
     const userObj = await resp1.json();
     const resp2 = await fetch(
-      `${VITE_REACT_APP_API_URL}/api/v1/projects/getLearnerProject/${userObj.projects[0]._id}`,
+      `${VITE_REACT_APP_API_URL}/api/v1/projects/getLearnerProject/${userObj.projects[1]._id}`,
       {
         method: "GET",
         mode: "cors",
@@ -29,7 +29,7 @@ const learningLoader = async ({ params, request }) => {
     const { project, projectTasks } = await resp2.json();
 
     const resp3 = await fetch(
-      `${VITE_REACT_APP_API_URL}/api/v1/reviews/getLearnerReview/${project.reviews[0]._id}`,
+      `${VITE_REACT_APP_API_URL}/api/v1/reviews/getLearnerReview/${project.reviews[1]._id}`,
       {
         method: "GET",
         mode: "cors",
@@ -40,7 +40,20 @@ const learningLoader = async ({ params, request }) => {
     }
     const review = await resp3.json();
 
-    return { userObj, project, projectTasks, review };
+    const resp4 = await fetch(
+      `${VITE_REACT_APP_API_URL}/api/v1/tasks/getLearnerTask/${project.tasks[2]}`,
+      {
+        method: "GET",
+        mode: "cors",
+      }
+    );
+    if (!resp4.ok) {
+      throw Error("something went wrong getting the learner task");
+    }
+
+    const { task, taskComments } = await resp4.json();
+
+    return { userObj, project, projectTasks, review, task, taskComments };
   } catch (error) {
     throw Error(error.message);
   }

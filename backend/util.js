@@ -152,6 +152,7 @@ async function resyncUserAndVacs(storedUser) {
   let userInProjectIds =
     storedUser.tasks?.length > 0
       ? storedUser.tasks
+          // .filter((task) => !task.archived)
           .map((task) => task.project.toString())
           .filter((projId, i, arr) => arr.indexOf(projId) === i)
           .filter((projId) => !storedUser.projects.includes(projId))

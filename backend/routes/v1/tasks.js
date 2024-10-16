@@ -12,18 +12,20 @@ const requireAuth = require("../../middleware/requireAuth");
 
 const router = express.Router();
 
-router.use(requireAuth);
+// router.use(requireAuth);
 
-router.get("/", getAllTasks);
+router.get("/", requireAuth, getAllTasks);
 
-router.get("/getTasks", getTasks);
+router.get("/getTasks", requireAuth, getTasks);
 
-router.get("/:taskId", getTask);
+router.get("/:taskId", requireAuth, getTask);
 
-router.post("/project/:projectId", createTask);
+router.post("/project/:projectId", requireAuth, createTask);
 
-router.patch("/:taskId", updateTask);
+router.patch("/:taskId", requireAuth, updateTask);
 
-router.delete("/:taskId", deleteTask);
+router.delete("/:taskId", requireAuth, deleteTask);
+
+router.get("/getLearnerTask/:taskId", getTask);
 
 module.exports = router;

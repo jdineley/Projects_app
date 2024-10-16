@@ -408,7 +408,7 @@ export default function ProjectsDefeatured({ userObj }) {
           )}
         </>
       )}
-      <Flex gap="5">
+      <Flex gap="5" direction={isMobileResolution && "column"}>
         {userObj?.archivedProjects?.length > 0 && (
           <div className="flex-1">
             <h3>My Archived Projects</h3>

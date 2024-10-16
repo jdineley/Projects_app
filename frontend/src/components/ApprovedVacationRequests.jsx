@@ -51,22 +51,24 @@ const ApprovedVacationRequests = ({ vac, userObj, learning }) => {
           <Flex gap="4">
             <Box>
               <Heading size="3" as="h3" mb="1">
-                Vacation request summary: {vac._id}
+                Vacation request summary:
               </Heading>
               {userObj.userInProjects
                 .filter((proj) => !proj.archived)
                 .map((proj) => {
-                  return (
-                    <Box key={proj._id}>
-                      <Heading size="1" as="h4" mb="1">
-                        {proj.title}(PM:{proj.owner.email})
-                      </Heading>
-                      {vac.approvals[proj._id] &&
-                        vac.approvals[proj._id].accepted === "true" && (
-                          <Badge>Accepted</Badge>
-                        )}
-                    </Box>
-                  );
+                  if (proj.vacationRequests.includes(vac._id)) {
+                    return (
+                      <Box key={proj._id}>
+                        <Heading size="1" as="h4" mb="1">
+                          {proj.title}(PM:{proj.owner.email})
+                        </Heading>
+                        {vac.approvals[proj._id] &&
+                          vac.approvals[proj._id].accepted === "true" && (
+                            <Badge>Accepted</Badge>
+                          )}
+                      </Box>
+                    );
+                  }
                 })}
             </Box>
           </Flex>

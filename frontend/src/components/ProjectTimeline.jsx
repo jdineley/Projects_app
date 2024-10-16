@@ -146,7 +146,7 @@ const ProjectTimeline = ({
           </Flex>
           {rejectedVacationRequests?.length > 0 &&
             userProfile &&
-            (project.owner._id === user._id || defeatured) && (
+            (project.owner._id === user?._id || defeatured) && (
               <Flex direction="column" position="relative" className="dropdown">
                 <button>See all rejected vacations</button>
                 <div className="dropdown-options">
