@@ -60,7 +60,7 @@ const UserProjectDashSummary = ({ project, accentColor, defeatured }) => {
                     to={`/projects/${project._id}/tasks/${riskyTask._id}`}
                     className={`${defeatured && "pointer-events-none"}`}
                   >
-                    {riskyTask.title}
+                    {riskyTask.title.slice(0, 40)}...
                   </Link>
                 </Badge>
               ))

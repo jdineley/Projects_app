@@ -25,7 +25,7 @@ export default function UserReply({ reply: replyProp }) {
       .catch((error) => {
         throw Error(error.message);
       });
-  }, [replyProp._id, user.token]);
+  }, [replyProp._id, user?.token]);
 
   return (
     <div className="user-reply">
