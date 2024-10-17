@@ -36,7 +36,7 @@ const getReview = async (req, res) => {
             "actionees",
             {
               path: "comments",
-              populate: ["user", "replies"],
+              populate: ["user", { path: "replies", populate: "user" }],
             },
           ],
         },

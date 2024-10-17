@@ -64,7 +64,7 @@ const getTask = async (req, res) => {
         const populatedComment = await Comment.findById(comment).populate([
           "user",
           "content",
-          "replies",
+          { path: "replies", populate: ["user"] },
         ]);
         taskComments.push(populatedComment);
       }
