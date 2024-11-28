@@ -10,6 +10,10 @@ on:
       - "Projects_EndToEndTests/**"
     branches: [main, master]
 
+defaults:
+  run:
+    working-directory: ../../Projects_EndToEndTests
+
 jobs:
   test:
     timeout-minutes: 60
