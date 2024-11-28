@@ -21,6 +21,7 @@ jobs:
     env:
       BASE_API_URL: ${{ vars.BASE_API_URL }}
       BASE_FRONTEND_URL: ${{ vars.BASE_FRONTEND_URL }}
+      PW: ${{ vars.PW }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
