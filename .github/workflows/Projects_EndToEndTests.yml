@@ -2,12 +2,12 @@ name: Playwright Tests
 
 on:
   push:
-    paths:
-      - "Projects_EndToEndTests/**"
+    # paths:
+    #   - "Projects_EndToEndTests/**"
     branches: [main, master]
   pull_request:
-    paths:
-      - "Projects_EndToEndTests/**"
+    # paths:
+    #   - "Projects_EndToEndTests/**"
     branches: [main, master]
 
 defaults:
