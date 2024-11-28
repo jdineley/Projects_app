@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "user",
+          "value": "{\"_id\":\"674885e5fff54e9d8bdff40e\",\"email\":\"henryTest@mail.com\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzQ4ODVlNWZmZjU0ZTlkOGJkZmY0MGUiLCJpYXQiOjE3MzI4MDYxNTgsImV4cCI6MTczMzA2NTM1OH0.T3IBsoFljeylvIdbpRG4zqDrybmwoTf2za4t4BdeW7g\"}"
+        }
+      ]
+    }
+  ]
+}
