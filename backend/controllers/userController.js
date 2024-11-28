@@ -7,9 +7,21 @@ const createToken = (_id) => {
 };
 
 const signUpUser = async (req, res) => {
+  const testUsers = [
+    "henryTest@mail.com",
+    "georgeTest@mail.com",
+    "catherineTest@mail.com",
+    "penelopeTest@mail.com",
+    "jamesTest@mail.com",
+    "rubyTest@mail.com",
+  ];
+  let isTest;
   const { email, password } = req.body;
+  if (testUsers.includes(email)) isTest = true;
+  else isTest = false;
+
   try {
-    const user = await User.signUp(email, password);
+    const user = await User.signUp(email, password, isTest);
     const token = createToken(user._id);
 
     res.status(201).json({ _id: user._id, email, token });

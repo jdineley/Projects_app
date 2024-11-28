@@ -193,9 +193,15 @@ const ProjectTitleEditDialog = ({
       >
         <Dialog.Trigger>
           {/* <a href="#">Edit</a> */}
-          <FaEdit className="cursor-pointer text-blue-600" />
+          <FaEdit
+            className="cursor-pointer text-blue-600"
+            data-testid="edit-project"
+          />
         </Dialog.Trigger>
-        <Dialog.Content style={{ maxWidth: 450 }}>
+        <Dialog.Content
+          style={{ maxWidth: 450 }}
+          data-testid="edit-project-dialog"
+        >
           <Dialog.Title>Edit Project</Dialog.Title>
           {project.inWork && (
             <>

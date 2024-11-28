@@ -15,7 +15,12 @@ const requireAuth = async (req, res, next) => {
     //verify provides the payload unhashed if no error {_id: 5443wfr435...}
     const { _id } = jwt.verify(token, process.env.SECRET);
 
-    req.user = await User.findOne({ _id }).select(["_id", "email", "isDemo"]);
+    req.user = await User.findOne({ _id }).select([
+      "_id",
+      "email",
+      "isDemo",
+      "isTest",
+    ]);
     next();
   } catch (error) {
     console.log(error);

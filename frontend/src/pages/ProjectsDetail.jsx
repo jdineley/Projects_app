@@ -242,6 +242,7 @@ export default function ProjectsDetail() {
         project?.owner._id !== user?._id &&
         "pointer-events-none"
       }`}
+      data-testid="project-detail"
     >
       <div className="project-title-collector">
         <div className="title-icon-collect">

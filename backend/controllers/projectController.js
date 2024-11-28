@@ -107,9 +107,10 @@ const createProject = async (req, res) => {
     originalFileName,
     projectMapped,
     msProjObj,
+    // isTest,
     ...reviews
   } = req.body;
-  const { _id: userId, isDemo } = req.user;
+  const { _id: userId, isDemo, isTest } = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return res.status(404).json({ error: "Invalid user id" });
@@ -149,7 +150,8 @@ const createProject = async (req, res) => {
         projectMapped,
         currentUser,
         originalFileName,
-        isDemo
+        isDemo,
+        isTest
       );
       return res.status(200).json(newProject);
     }
@@ -182,6 +184,7 @@ const createProject = async (req, res) => {
         ...review,
         project: project._id,
         isDemo,
+        isTest,
       });
       project.reviews.push(reviewNew._id);
       await project.save();
@@ -210,7 +213,7 @@ const updateProject = async (req, res) => {
     ...reviews
   } = req.body;
   const { projectId } = req.params;
-  const { _id: userId, isDemo } = req.user;
+  const { _id: userId, isDemo, isTest } = req.user;
   console.log("intent", intent);
   console.log("projectId", projectId);
   console.log("req.file", req.file);
@@ -317,6 +320,7 @@ const updateProject = async (req, res) => {
             ...newReview,
             project: projectId,
             isDemo,
+            isTest,
           });
           newReviewIds.push(newReviewObj._id);
         }
@@ -503,7 +507,7 @@ const updateProject = async (req, res) => {
       );
       projectToUnarchive.archived = false;
 
-      if (projectToUnarchive.descendentsAtArchive.Review?.length > 0) {
+      if (projectToUnarchive.descendentsAtArchive?.Review?.length > 0) {
         console.log("in Review");
         for (const reviewId of projectToUnarchive.descendentsAtArchive.Review) {
           const review = await Review.findById(reviewId);
@@ -511,7 +515,9 @@ const updateProject = async (req, res) => {
           await review.save();
         }
       }
-      if (projectToUnarchive.descendentsAtArchive.ReviewObjective?.length > 0) {
+      if (
+        projectToUnarchive.descendentsAtArchive?.ReviewObjective?.length > 0
+      ) {
         console.log("in ReviewObjective");
         for (const reviewObjectiveId of projectToUnarchive.descendentsAtArchive
           .ReviewObjective) {
@@ -522,7 +528,7 @@ const updateProject = async (req, res) => {
           await reviewObjective.save();
         }
       }
-      if (projectToUnarchive.descendentsAtArchive.ReviewAction?.length > 0) {
+      if (projectToUnarchive.descendentsAtArchive?.ReviewAction?.length > 0) {
         console.log("in ReviewAction");
         for (const reviewActionId of projectToUnarchive.descendentsAtArchive
           .ReviewAction) {
@@ -533,7 +539,7 @@ const updateProject = async (req, res) => {
           await reviewAction.save();
         }
       }
-      if (projectToUnarchive.descendentsAtArchive.Comment?.length > 0) {
+      if (projectToUnarchive.descendentsAtArchive?.Comment?.length > 0) {
         console.log("in Comment");
         for (const commentId of projectToUnarchive.descendentsAtArchive
           .Comment) {
@@ -542,7 +548,7 @@ const updateProject = async (req, res) => {
           await comment.save();
         }
       }
-      if (projectToUnarchive.descendentsAtArchive.Task?.length > 0) {
+      if (projectToUnarchive.descendentsAtArchive?.Task?.length > 0) {
         console.log("in Task");
         for (const taskId of projectToUnarchive.descendentsAtArchive.Task) {
           const task = await Task.findById(taskId);
@@ -550,7 +556,7 @@ const updateProject = async (req, res) => {
           await task.save();
         }
       }
-      if (projectToUnarchive.descendentsAtArchive.Reply?.length > 0) {
+      if (projectToUnarchive.descendentsAtArchive?.Reply?.length > 0) {
         console.log("in Reply");
         for (const replyId of projectToUnarchive.descendentsAtArchive.Reply) {
           const reply = await Reply.findById(replyId);
@@ -559,7 +565,7 @@ const updateProject = async (req, res) => {
         }
       }
       await projectToUnarchive.save();
-      if (projectToUnarchive.vacationRequests.length > 0) {
+      if (projectToUnarchive.vacationRequests?.length > 0) {
         for (const vacReqId of projectToUnarchive.vacationRequests) {
           const vacReq = await Vacation.findById(vacReqId).populate("projects");
           const approvalValuesArray = Object.values(
@@ -654,7 +660,9 @@ const deleteProject = async (req, res) => {
         .status(401)
         .json({ error: "Project must be archived before deletion" });
     }
-    const project = await Project.findByIdAndDelete(projectId);
+    const project = await Project.findByIdAndDelete(projectId).populate(
+      "vacationRequests"
+    );
     // if (!project) {
     //   return res.status(404).json({ error: "No such project" });
     // }
@@ -715,6 +723,15 @@ const deleteProject = async (req, res) => {
         { _id: userId },
         { $pull: { userInProjects: project._id } }
       );
+    }
+    // remove project from relevant vacations
+    if (project.vacationRequests.length > 0) {
+      for (const vacationRequest of project.vacationRequests) {
+        vacationRequest.projects = vacationRequest.projects.filter(
+          (p) => p.toString() !== project._id.toString()
+        );
+        await vacationRequest.save();
+      }
     }
     res.status(200).json({ project, result: intent });
   } catch (error) {

@@ -54,11 +54,15 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isTest: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
 
-userSchema.statics.signUp = async function (email, password) {
+userSchema.statics.signUp = async function (email, password, isTest) {
   console.log("In sign up");
   // Check if email and password are present
   if (!email || !password) {
@@ -82,7 +86,7 @@ userSchema.statics.signUp = async function (email, password) {
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);
 
-  const user = await this.create({ email, password: hash });
+  const user = await this.create({ email, password: hash, isTest });
   console.log("End of sign up");
   return user;
 };

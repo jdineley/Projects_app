@@ -31,7 +31,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <AuthContextProvider>
       <Theme accentColor="mint">
         <App />
-        <ToastContainer />
+        <ToastContainer position="bottom-left" />
       </Theme>
     </AuthContextProvider>
   </NotificationContextProvider>

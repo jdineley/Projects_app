@@ -43,9 +43,9 @@ export default function TaskDetail() {
     setIsCommenting(false);
     if (notification) {
       document.getElementById(newCommentId)?.scrollIntoView({
-        behavior: "smooth",
+        behavior: "instant",
         block: "end",
-        inline: "nearest",
+        inline: "end",
       });
     }
   }, [task, notification, newCommentId]);
@@ -55,7 +55,7 @@ export default function TaskDetail() {
   }
 
   return (
-    <>
+    <div data-testid="task-detail">
       <Flex justify="between" align="center" mb="4">
         <h1>
           {task?.title}
@@ -183,6 +183,6 @@ export default function TaskDetail() {
           </div>
         </Form>
       )}
-    </>
+    </div>
   );
 }

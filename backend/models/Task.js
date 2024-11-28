@@ -86,6 +86,10 @@ const taskSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isTest: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

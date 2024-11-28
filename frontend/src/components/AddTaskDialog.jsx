@@ -234,11 +234,11 @@ export const AddTaskDialog = ({
       >
         <Dialog.Trigger>
           <a href="#">
-            <MdOutlinePostAdd />
+            <MdOutlinePostAdd data-testid="add-task" />
           </a>
         </Dialog.Trigger>
 
-        <Dialog.Content style={{ maxWidth: 450 }}>
+        <Dialog.Content style={{ maxWidth: 450 }} data-testid="add-task-dialog">
           <Dialog.Title>Create new task</Dialog.Title>
 
           <Flex direction="column" gap="3">

@@ -38,6 +38,10 @@ const commentSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isTest: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("Comment", commentSchema);

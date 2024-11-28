@@ -112,7 +112,7 @@ export default function Home() {
   } else return null;
 
   return (
-    <main>
+    <div id="dashboard">
       {/* <h1 className="mb-4">Dashboard</h1> */}
       <Grid columns={isTabletResolution ? "1" : "2"} gap="3" width="auto">
         {hasSomeUnArchivedProjects && (
@@ -174,6 +174,6 @@ export default function Home() {
           )}
         </div>
       </Grid>
-    </main>
+    </div>
   );
 }

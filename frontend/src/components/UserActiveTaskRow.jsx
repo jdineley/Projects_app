@@ -66,6 +66,7 @@ const UserActiveTaskRow = ({
       className={
         task._id === newTaskId && notification ? "new-task-notification" : ""
       }
+      data-testid="user-active-task-row"
     >
       {!taskDetail && (
         <>
@@ -155,7 +156,10 @@ const UserActiveTaskRow = ({
                   ></div>
                 </fetcher.Form>
 
-                <div className="numerical-percent-complete">
+                <div
+                  className="numerical-percent-complete"
+                  data-testid={`percentage-complete-${task._id}`}
+                >
                   {/* {isSettingPercentComplete
             ? task.percentageComplete
             : percentCompleteInState} */}
@@ -241,10 +245,10 @@ const UserActiveTaskRow = ({
               {format(new Date(task.startDate), "dd/MM/yyyy")}
             </Table.Cell>
           )} */}
-          <Table.Cell>
+          <Table.Cell data-testid={`finish-date-${task._id}`}>
             {format(new Date(task.deadline), "dd/MM/yyyy")}
           </Table.Cell>
-          <Table.Cell>
+          <Table.Cell data-testid="task-owner">
             <Flex direction="column">
               <b>{task.user.email.split("@")[0]}</b>
               {task.secondaryUsers.map((u) => (
@@ -255,7 +259,7 @@ const UserActiveTaskRow = ({
         </>
       )}
       {!taskDetail && !task.archived && (
-        <Table.Cell>
+        <Table.Cell data-testid="task-edit">
           {user?._id === task.user._id && (
             <TaskEditDialog
               task={task}

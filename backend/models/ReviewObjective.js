@@ -27,6 +27,10 @@ const reviewObjectiveSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isTest: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("ReviewObjective", reviewObjectiveSchema);

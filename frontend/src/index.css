@@ -160,12 +160,14 @@ footer a {
 }
 
 /* login / sign-up */
-.login {
+.login,
+.signup {
   width: 70%;
   max-width: 400px;
 }
 
-.login > * {
+.login > *,
+.signup > * {
   margin-top: 12px;
 }
 

@@ -110,7 +110,7 @@ export default function Projects() {
               )} */}
             </Table.Cell>
             {!isMobileResolution && (
-              <Table.Cell>
+              <Table.Cell data-testid="project-start-date">
                 {/* {formatDistanceToNow(new Date(project.start))} */}
                 {format(
                   new Date(project.start).toISOString().split("T")[0],
@@ -118,7 +118,7 @@ export default function Projects() {
                 )}
               </Table.Cell>
             )}
-            <Table.Cell>
+            <Table.Cell data-testid="project-finish-date">
               {format(
                 new Date(project.end).toISOString().split("T")[0],
                 "dd/MM/yyyy"
@@ -277,13 +277,20 @@ export default function Projects() {
                   {project.title}
                 </Link>
               </Table.Cell>
-              <Table.Cell>
+              {!isMobileResolution && (
+                <Table.Cell data-testid="project-start-date">
+                  {format(new Date(project.start), "dd/MM/yyyy")}
+                </Table.Cell>
+              )}
+              <Table.Cell data-testid="project-finish-date">
                 {format(new Date(project.end), "dd/MM/yyyy")}
               </Table.Cell>
               {!isMobileResolution && (
                 <Table.Cell>{project.tasks.length}</Table.Cell>
               )}
-              <Table.Cell>{project.owner.email.split("@")[0]}</Table.Cell>
+              <Table.Cell data-testid="other-project-pm">
+                {project.owner.email.split("@")[0]}
+              </Table.Cell>
             </Table.Row>
           );
         }
@@ -315,8 +322,8 @@ export default function Projects() {
   }
 
   return (
-    <main>
-      <div>
+    <div id="projects">
+      <div data-testid="my-active-projects">
         <div className="flex items-center gap-2">
           <h3>My Active Projects</h3>
           <fetcher.Form method="POST" style={{ display: "none" }}>
@@ -382,13 +389,16 @@ export default function Projects() {
       </div>
 
       {otherUsersTableRows?.length > 0 && (
-        <>
+        <div data-testid="other-users-active-projects">
           <h3>Other Active Projects</h3>
           {userObj.userInProjects.length > 0 && (
             <Table.Root variant="surface" className="mb-7">
               <Table.Header>
                 <Table.Row>
                   <Table.ColumnHeaderCell>Project</Table.ColumnHeaderCell>
+                  {!isMobileResolution && (
+                    <Table.ColumnHeaderCell>Start date</Table.ColumnHeaderCell>
+                  )}
                   <Table.ColumnHeaderCell>End date</Table.ColumnHeaderCell>
                   {!isMobileResolution && (
                     <Table.ColumnHeaderCell>
@@ -401,7 +411,7 @@ export default function Projects() {
               <Table.Body>{otherUsersTableRows}</Table.Body>
             </Table.Root>
           )}
-        </>
+        </div>
       )}
       <Flex gap="5">
         {userObj?.archivedProjects?.length > 0 && (
@@ -434,6 +444,6 @@ export default function Projects() {
           </div>
         )}
       </Flex>
-    </main>
+    </div>
   );
 }

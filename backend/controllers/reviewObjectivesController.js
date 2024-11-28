@@ -29,7 +29,7 @@ const createReviewObjective = async (req, res) => {
   console.log("hit createReviewObjective route");
   const { reviewId } = req.params;
   const { title } = req.body;
-  const { isDemo } = req.user;
+  const { isDemo, isTest } = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(reviewId)) {
     return res.status(404).json({ error: "No such reviewObjective" });
@@ -44,6 +44,7 @@ const createReviewObjective = async (req, res) => {
       title,
       review: reviewId,
       isDemo,
+      isTest,
     });
     review.objectives.push(newObjective._id);
     await review.save();

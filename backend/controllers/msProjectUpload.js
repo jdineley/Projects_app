@@ -16,7 +16,8 @@ async function msProjectUpload(
   projectMapped,
   currentUser,
   originalFileName,
-  isDemo
+  isDemo,
+  isTest
 ) {
   // Loop over projectMapped to create the new project and tasks
   const {
@@ -38,6 +39,7 @@ async function msProjectUpload(
     msProjectGUID,
     file: originalFileName,
     isDemo,
+    isTest,
   };
   // console.log("hello", createProjObj);
   const newProject = await Project.create(createProjObj);
@@ -63,7 +65,14 @@ async function msProjectUpload(
       };
     }
 
-    await createTaskUtil({ task, storedUser, newProject, currentUser, isDemo });
+    await createTaskUtil({
+      task,
+      storedUser,
+      newProject,
+      currentUser,
+      isDemo,
+      isTest,
+    });
   }
   await newProject.populate([{ path: "tasks", populate: ["secondaryUsers"] }]);
   await resyncProjTasksUsersVacs(newProject);

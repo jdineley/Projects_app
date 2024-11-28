@@ -74,7 +74,8 @@ export default function UserProfile() {
       differenceInBusinessDays(
         new Date(vacEndInState),
         new Date(vacStartInState)
-      );
+      ) -
+      1;
     localVacDaysRemainingRendered =
       localVacDaysRemaining < 0 ? 0 : localVacDaysRemaining;
   }
@@ -89,8 +90,8 @@ export default function UserProfile() {
     let localDateSelectionErrors = [];
 
     if (fetcher.data) {
-      setVacStartInState("");
-      setVacEndInState("");
+      setVacStartInState(null);
+      setVacEndInState(null);
     }
 
     if (
@@ -99,7 +100,7 @@ export default function UserProfile() {
       isBefore(new Date(vacEndInState), new Date(vacStartInState))
     ) {
       localDateSelectionErrors.push(
-        "return to work must precede last day at work"
+        "last vacation date must precede first vacation date"
       );
     }
     if (
@@ -107,7 +108,7 @@ export default function UserProfile() {
       vacStartInState &&
       isEqual(new Date(vacEndInState), new Date(vacStartInState))
     ) {
-      localDateSelectionErrors.push("start and return dates must be different");
+      localDateSelectionErrors.push("start and end dates must be different");
     }
     if (
       vacStartInState &&
@@ -134,14 +135,14 @@ export default function UserProfile() {
     if (vacStartInState && isPast(new Date(vacStartInState))) {
       if (!isToday(new Date(vacStartInState))) {
         localDateSelectionErrors.push(
-          "last work date selection is in the past"
+          "first vacation date selection is in the past"
         );
       }
     }
     if (vacEndInState && isPast(new Date(vacEndInState))) {
       if (!isToday(new Date(vacEndInState))) {
         localDateSelectionErrors.push(
-          "return to work date selection is in the past"
+          "last vacation date selection is in the past"
         );
       }
     }
@@ -149,7 +150,7 @@ export default function UserProfile() {
   }, [userObj?.vacationRequests, vacEndInState, vacStartInState, fetcher.data]);
 
   return (
-    <>
+    <div data-testid="user-profile">
       <h1 className="mb-4">User Profile</h1>
       <Grid
         columns={isTabletResolution ? "1" : "2"}
@@ -177,7 +178,7 @@ export default function UserProfile() {
             <h3>Vacation request</h3>
             <fetcher.Form method="post" className="mb-4">
               <label htmlFor="lastWorkDate">
-                Enter last date at work:
+                Enter first date of vacation:
                 <input
                   type="date"
                   name="lastWorkDate"
@@ -191,7 +192,7 @@ export default function UserProfile() {
                 />
               </label>
               <label>
-                Enter return to work date:
+                Enter last date of vacation:
                 <input
                   type="date"
                   id="returnToWorkDate"
@@ -278,7 +279,7 @@ export default function UserProfile() {
             {userObj?.projects.map((proj) => {
               if (!proj.archived) {
                 return (
-                  <div key={proj._id}>
+                  <div key={proj._id} data-testid="project-vac-manage">
                     <Link to={`/projects/${proj._id}`}>
                       <Flex align="center" gap="2">
                         {proj?.msProjectGUID && (
@@ -297,6 +298,6 @@ export default function UserProfile() {
           </div>
         </Card>
       </Grid>
-    </>
+    </div>
   );
 }

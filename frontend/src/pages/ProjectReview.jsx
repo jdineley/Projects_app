@@ -52,7 +52,7 @@ const ProjectReview = () => {
   }, [newCommentId, reviewExpanded, newActionId]);
 
   return (
-    <div>
+    <div data-testid="project-review">
       <Flex justify="between" align="center" gap="2">
         <Flex gap="2" mb="4" align="center">
           <div>

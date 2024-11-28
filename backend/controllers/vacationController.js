@@ -22,11 +22,15 @@ const createVacation = async (req, res) => {
   //receive array of objects [{lastWorkDate: ..., returnToWorkDate: ...},{},{}] or
   //only one vacation per request...
   const { lastWorkDate, returnToWorkDate } = req.body;
+  const { _id: user, isDemo, isTest } = req.user;
   try {
     const vacation = await Vacation.create({
       ...req.body,
       user: req.user._id,
+      isDemo,
+      isTest,
     });
+    console.log("vacation", vacation);
     // console.log("User");
     const user = await User.findById(req.user._id);
     // .populate("vacationRequests");

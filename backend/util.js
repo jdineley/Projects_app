@@ -276,6 +276,7 @@ async function correctRemainingVacDays(userId) {
               new Date(cur.returnToWorkDate),
               new Date(cur.lastWorkDate)
             );
+            acc += 1;
           }
           return acc;
         }, 0)

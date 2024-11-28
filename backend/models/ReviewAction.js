@@ -28,6 +28,10 @@ const reviewActionSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isTest: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("ReviewAction", reviewActionSchema);

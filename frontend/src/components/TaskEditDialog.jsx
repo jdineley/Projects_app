@@ -68,7 +68,7 @@ const TaskEditDialog = ({
   }, [newTaskDeadline, daysToCompleteTask, newTaskDescription, newTaskTitle]);
 
   return (
-    <>
+    <div>
       <fetcher.Form method="POST" style={{ display: "none" }}>
         <input type="hidden" name="title" value={newTaskTitle} />
         <input type="hidden" name="description" value={newTaskDescription} />
@@ -174,7 +174,10 @@ const TaskEditDialog = ({
           <FaEdit className="cursor-pointer text-blue-600" />
         </Dialog.Trigger>
 
-        <Dialog.Content style={{ maxWidth: 450 }}>
+        <Dialog.Content
+          style={{ maxWidth: 450 }}
+          data-testid="task-edit-dialog"
+        >
           <Dialog.Title>Edit task</Dialog.Title>
 
           <Flex direction="column" gap="3">
@@ -376,7 +379,7 @@ const TaskEditDialog = ({
           </Flex>
         </Dialog.Content>
       </Dialog.Root>
-    </>
+    </div>
   );
 };
 

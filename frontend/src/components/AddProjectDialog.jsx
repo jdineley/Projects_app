@@ -150,11 +150,12 @@ const AddProjectDialog = ({
         <MdOutlinePostAdd
           // title="Add new project"
           className="cursor-pointer text-blue-600"
+          data-testid="add-project"
         />
       </Dialog.Trigger>
       <Dialog.Content
         style={{ maxWidth: 450, paddingBottom: "80px" }}
-
+        data-testid="add-project-dialog"
         // className={loading ? "loading" : ""}
       >
         <Dialog.Title>Add new Project</Dialog.Title>
@@ -379,6 +380,7 @@ const AddProjectDialog = ({
               accept=".xml"
               id="xml-file"
               required
+              data-testid="upload-.xml"
             />
             <Button mt="2" disabled={loading}>
               Upload

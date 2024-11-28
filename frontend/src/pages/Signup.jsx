@@ -62,7 +62,7 @@ export default function Signup() {
   }, [json, dispatch, navigate, password, confirmPassword]);
 
   return (
-    <div className="login">
+    <div className="signup">
       <h2>Sign up</h2>
       {error && <div className="error">{error}</div>}
       <Form method="POST">
@@ -79,8 +79,7 @@ export default function Signup() {
         </label>
         <label
           htmlFor="password"
-          name="password"
-          id="password"
+
           // className="mb-1"
         >
           Password
@@ -100,10 +99,11 @@ export default function Signup() {
               : ""}
           </p>
         </label>
-        <label htmlFor="password" name="password" id="password">
+        <label htmlFor="confirm-password">
           Confirm Password
           <input
             type="password"
+            id="confirm-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
@@ -120,6 +120,16 @@ export default function Signup() {
               : ""}
           </p>
         </label>
+        {/* <label htmlFor="for-test">
+          isTest
+          <input
+            id="for-test"
+            type="checkbox"
+            className="hidden"
+            name="isTest"
+            defaultValue={false}
+          />
+        </label> */}
         <button
           disabled={
             emailError ||
@@ -135,7 +145,7 @@ export default function Signup() {
           Submit
         </button>
         <p className="text-rose-400">
-          *password must be at least 8 charactures including at least 1
+          *password must be at least 8 characters including at least 1
           lowercase, 1 uppercase, 1 number and 1 symbol
         </p>
       </Form>

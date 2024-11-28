@@ -35,7 +35,12 @@ const createReply = async (req, res) => {
     projectId,
     reviewId,
   } = req.body;
-  const { _id: currentUserId, email: currentUserEmail, isDemo } = req.user;
+  const {
+    _id: currentUserId,
+    email: currentUserEmail,
+    isDemo,
+    isTest,
+  } = req.user;
   console.log("current user id", currentUserId, currentUserEmail);
   try {
     const comment = await Comment.findById(commentId);
@@ -45,6 +50,7 @@ const createReply = async (req, res) => {
     }
     let task;
     let action;
+    let actionees;
     if (comment.task) {
       task = await Task.findById(comment.task);
       if (!task) {
@@ -56,25 +62,30 @@ const createReply = async (req, res) => {
       if (!action) {
         throw Error("no associated action found");
       }
+      actionees = action.actionees.map((a) => a.toString());
     }
-    const reply = await Reply.create({ ...req.body, isDemo });
+    console.log(actionees);
+    const reply = await Reply.create({ ...req.body, isDemo, isTest });
     comment.replies.push(reply._id);
     await comment.save();
     const commentWithPopReplies = await Comment.findById(comment._id).populate(
       "replies"
     );
-    const allUsersInDisscussion = commentWithPopReplies.replies.map(
-      (reply) => reply.user
+    const allUsersInDisscussion = commentWithPopReplies.replies.map((reply) =>
+      reply.user.toString()
     );
     res.status(200).json(reply);
-
     // notification logic needs updating to with with action / actionees etc..
     // const taskOrActionOwners = comment.task ? task.user.toString() : action.actionees;
 
     // task.user.toString(),
     [
-      ...allUsersInDisscussion.map((user) => user.toString()),
-      comment.task ? task.user.toString() : action.actionees,
+      // ...allUsersInDisscussion.map((user) => user.toString()),
+      ...allUsersInDisscussion,
+      ...(comment.task
+        ? task.user.toString()
+        : // : action.actionees.map((a) => a.toString()),
+          actionees),
       comment.user.toString(),
     ]
       .filter((userId, i, arr) => arr.indexOf(userId) === i) //remove duplicates
@@ -84,8 +95,8 @@ const createReply = async (req, res) => {
         // if (!userObj.isLoggedIn) {
         userObj.recievedNotifications.push(
           comment.task
-            ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-reply`
-            : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-reply`
+            ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-task-reply`
+            : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-review-reply`
         );
         // userObj.recentReceivedReplies.push(
         //   comment.task
@@ -96,8 +107,8 @@ const createReply = async (req, res) => {
         // }
         channel.publish(
           comment.task
-            ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-reply`
-            : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-reply`,
+            ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-task-reply`
+            : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-review-reply`,
           `new-reply-notification${user}`
         );
       });

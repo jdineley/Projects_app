@@ -163,7 +163,8 @@ export default function RouteLayout() {
               <div className="current-user-container">
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger>
-                    <Flex gap="2">
+                    <Flex gap="2" data-testid="avatar">
+                      {/* <Button data-testid="avatar" display="none"> */}
                       <Avatar
                         fallback={
                           notification ? (
@@ -183,6 +184,7 @@ export default function RouteLayout() {
                         }
                         className={notification ? "notification" : "avatar"}
                       />
+                      {/* </Button> */}
                     </Flex>
                   </DropdownMenu.Trigger>
                   <DropdownMenu.Content>
@@ -229,7 +231,7 @@ export default function RouteLayout() {
                           });
 
                           return (
-                            <Link key={i} to={url}>
+                            <Link key={i} to={url} data-testid="avatar-drop">
                               <DropdownMenu.Item>
                                 {`${notificationControlObj.intent}`}
 
@@ -294,7 +296,7 @@ export default function RouteLayout() {
           </nav>
           {currentPathNoQuery !== "/user" && <BreadCrumbs />}
         </header>
-        <main className={navigation.state === "loading" ? "loading" : ""}>
+        <main className={navigation.state !== "idle" ? "loading" : ""}>
           <Outlet />
         </main>
       </>

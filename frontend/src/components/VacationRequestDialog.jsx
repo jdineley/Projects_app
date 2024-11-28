@@ -11,6 +11,7 @@ const VacationRequestDialog = ({ vac, project, rejected, defeatured }) => {
   const [reasonForRejection, setResonForRejection] = useState(null);
 
   const [isRejectedComment, setIsRejectedComment] = useState(false);
+  // const [open, setOpen] = useState(false);
 
   const fetcher = useFetcher();
   const submit = useSubmit();
@@ -56,8 +57,8 @@ const VacationRequestDialog = ({ vac, project, rejected, defeatured }) => {
               {": "}
               {
                 <small className="cursor-pointer text-blue-600">
-                  {format(vac.lastWorkDate, "MM/dd/yyyy")}-
-                  {format(vac.returnToWorkDate, "MM/dd/yyyy")}
+                  {format(vac.lastWorkDate, "dd/MM/yyyy")}-
+                  {format(vac.returnToWorkDate, "dd/MM/yyyy")}
                 </small>
               }
             </Flex>

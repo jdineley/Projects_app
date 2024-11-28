@@ -43,6 +43,7 @@ const ProjectTimeline = ({
   defeatured,
 }) => {
   const [showApprovedVacs, setShowApprovedVacs] = useState(false);
+  const [hoverDisplay, setHoverDisplay] = useState(true);
 
   const { user } = useAuthContext();
 
@@ -119,6 +120,11 @@ const ProjectTimeline = ({
     (vac) => vac.status === "rejected"
   );
 
+  function toggleOpenHover() {
+    console.log("toggled");
+    setHoverDisplay(!hoverDisplay);
+  }
+
   return (
     <Box
       className={`project-timeline ${
@@ -141,6 +147,7 @@ const ProjectTimeline = ({
                   setShowApprovedVacs(false);
                 }
               }}
+              data-testid="show-approved-vac-button"
             />
             <Text>Show approved vacations</Text>
           </Flex>
@@ -148,7 +155,9 @@ const ProjectTimeline = ({
             userProfile &&
             (project.owner._id === user?._id || defeatured) && (
               <Flex direction="column" position="relative" className="dropdown">
-                <button>See all rejected vacations</button>
+                <button data-testid="show-rejected-vacations">
+                  See all rejected vacations
+                </button>
                 <div className="dropdown-options">
                   {rejectedVacationRequests?.map((vac) => {
                     return (
@@ -355,6 +364,7 @@ const ProjectTimeline = ({
                   <HoverCard.Root>
                     <HoverCard.Trigger
                       style={{ display: "block", height: "10px" }}
+                      onClick={toggleOpenHover}
                     >
                       <RadixLink target="_blank">
                         <VacationRequestDialog
@@ -364,7 +374,11 @@ const ProjectTimeline = ({
                         />
                       </RadixLink>
                     </HoverCard.Trigger>
-                    <HoverCard.Content maxWidth="300px">
+                    <HoverCard.Content
+                      maxWidth="300px"
+                      align="end"
+                      style={{ display: hoverDisplay ? "block" : "none" }}
+                    >
                       <Box>
                         <Text as="div" size="2" color="gray">
                           {vac.user.email}{" "}

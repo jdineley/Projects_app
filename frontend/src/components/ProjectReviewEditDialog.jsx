@@ -236,7 +236,7 @@ const ProjectReviewEditDialog = ({
     >
       <Dialog.Trigger>
         <a href="#">
-          <FaEdit />{" "}
+          <FaEdit data-testid="edit-review" />{" "}
         </a>
       </Dialog.Trigger>
 

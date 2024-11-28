@@ -17,11 +17,17 @@ const ApprovedVacationRequests = ({ vac, userObj, learning }) => {
   return (
     <Text key={vac._id}>
       <HoverCard.Root>
-        <Flex width="70%" justify="between" align="center" mb="1">
+        <Flex
+          width="70%"
+          justify="between"
+          align="center"
+          mb="1"
+          data-testid="approved-vac"
+        >
           <HoverCard.Trigger>
             <p className="cursor-pointer text-blue-600">
-              {format(vac.lastWorkDate, "MM/dd/yyyy")}-
-              {format(vac.returnToWorkDate, "MM/dd/yyyy")}
+              {format(vac.lastWorkDate, "dd/MM/yyyy")}-
+              {format(vac.returnToWorkDate, "dd/MM/yyyy")}
             </p>
           </HoverCard.Trigger>
           {/* <fetcher.Form method="POST">
@@ -47,18 +53,22 @@ const ApprovedVacationRequests = ({ vac, userObj, learning }) => {
             Del.
           </Button>
         </Flex>
-        <HoverCard.Content maxWidth="300px">
+        <HoverCard.Content
+          maxWidth="300px"
+          data-testid="approved-vac-req-hover"
+        >
           <Flex gap="4">
             <Box>
               <Heading size="3" as="h3" mb="1">
-                Vacation request summary:
+                Vacation request summary{" "}
+                <small data-testid="vac-id">{vac._id}</small>:
               </Heading>
               {userObj.userInProjects
                 .filter((proj) => !proj.archived)
                 .map((proj) => {
                   if (proj.vacationRequests.includes(vac._id)) {
                     return (
-                      <Box key={proj._id}>
+                      <Box key={proj._id} data-testid="pm-vac-decision">
                         <Heading size="1" as="h4" mb="1">
                           {proj.title}(PM:{proj.owner.email})
                         </Heading>

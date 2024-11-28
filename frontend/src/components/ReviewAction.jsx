@@ -69,7 +69,7 @@ const ReviewAction = ({
 
   return (
     <Collapsible.Root
-      className="CollapsibleRoot"
+      className="CollapsibleRoot action"
       open={open}
       onOpenChange={setOpen}
     >

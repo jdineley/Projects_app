@@ -431,6 +431,17 @@ function submitMsProject(
   setSummaryPredecessorCheck(false);
   setWorkTasksResourceError("");
   setWorkTaskResourceCheck(false);
+
+  const testUsers = [
+    "henryTest@mail.com",
+    "georgeTest@mail.com",
+    "catherineTest@mail.com",
+    "penelopeTest@mail.com",
+    "jamesTest@mail.com",
+    "rubyTest@mail.com",
+  ];
+  const isTest = testUsers.includes(user.email);
+
   if (
     window.confirm("Are you sure you want to submit a MS Project .xml file?")
   ) {
@@ -472,6 +483,7 @@ function submitMsProject(
               msProjObj: result,
               projectMapped: data,
               originalFileName: file.name,
+              isTest,
             }),
           });
         } else {
