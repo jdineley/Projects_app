@@ -12,7 +12,7 @@ on:
 
 defaults:
   run:
-    working-directory: ../../Projects_EndToEndTests
+    working-directory: ./Projects_EndToEndTests
 
 jobs:
   test:
