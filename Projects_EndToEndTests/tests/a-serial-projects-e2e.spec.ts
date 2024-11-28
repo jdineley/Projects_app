@@ -1,3 +1,5 @@
+// Test suite
+
 import { test, expect } from "./base.ts";
 // import { LoginPage, ProjectDetailPage } from "./pom.ts";
 import { testUsers } from "./test-users.ts";
