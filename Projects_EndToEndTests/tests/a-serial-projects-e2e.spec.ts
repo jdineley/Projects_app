@@ -476,7 +476,7 @@ test("User profile...", async ({
   loginPage,
   projectDetailPage,
 }) => {
-  test.setTimeout(100000);
+  test.setTimeout(120000);
   let userStore: User[] = [];
   let vacationStore: Vacation[] = [];
   let projectStore: Project[] = [];
