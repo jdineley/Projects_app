@@ -19,6 +19,7 @@ setup("do initialisations", async ({ request, signupPage, rootLayout }) => {
     await expect(rootLayout.$avatarLocator).toHaveText(
       `${email[0].toUpperCase()}`
     );
+    console.log(`${email} has signed up`);
   }
 });
 
@@ -40,6 +41,7 @@ setup(
     ];
     for (const user of usersArray) {
       let currentUser = createLoggedInUser(user[0]);
+      console.log("currentUser", currentUser);
       await loginPage.login(currentUser.email, currentUser.pw!);
       await dashboardPage.isReady();
       await projectsPage.goto();
