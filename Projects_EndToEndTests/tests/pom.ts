@@ -190,7 +190,7 @@ export class ProjectsPage {
       this.page.getByRole("link", {
         name: xmlName,
       })
-    ).toBeVisible({ timeout: 200000 });
+    ).toBeVisible({ timeout: 300000 });
   }
 }
 

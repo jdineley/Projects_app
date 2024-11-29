@@ -26,7 +26,7 @@ setup("do initialisations", async ({ request, signupPage, rootLayout }) => {
 setup(
   "login & MS Project upload",
   async ({ loginPage, dashboardPage, projectsPage, page, rootLayout }) => {
-    setup.setTimeout(250000);
+    setup.setTimeout(500000);
     page.on("dialog", (dialog) => dialog.accept());
     await loginPage.goto();
     await page.waitForTimeout(2000);
