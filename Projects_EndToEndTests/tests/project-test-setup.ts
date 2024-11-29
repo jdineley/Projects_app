@@ -45,6 +45,7 @@ setup(
       await projectsPage.goto();
       await projectsPage.isReady();
       await projectsPage.addMsProject(user[1]);
+      console.log(`${user[1]} uploaded`);
       if (user[0] !== "henryTest@mail.com") {
         await rootLayout.logout();
         await loginPage.isReady();
