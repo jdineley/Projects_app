@@ -10,6 +10,11 @@ on:
     #   - "Projects_EndToEndTests/**"
     branches: [main, master]
 
+env:
+  BASE_API_URL: https://projects-app-90ge.onrender.com
+  BASE_FRONTEND_URL: https://projects-app-front-end.onrender.com/
+  PW: Password123!
+
 defaults:
   run:
     working-directory: ./Projects_EndToEndTests
@@ -18,12 +23,16 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    env:
-      BASE_API_URL: ${{ vars.BASE_API_URL }}
-      BASE_FRONTEND_URL: ${{ vars.BASE_FRONTEND_URL }}
-      PW: ${{ vars.PW }}
+    # env:
+    #   BASE_API_URL: ${{ vars.BASE_API_URL }}
+    #   BASE_FRONTEND_URL: ${{ vars.BASE_FRONTEND_URL }}
+    #   PW: ${{ vars.PW }}
     steps:
       - uses: actions/checkout@v4
+        # env:
+        #   BASE_API_URL: ${{ vars.BASE_API_URL }}
+        #   BASE_FRONTEND_URL: ${{ vars.BASE_FRONTEND_URL }}
+        #   PW: ${{ vars.PW }}
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*

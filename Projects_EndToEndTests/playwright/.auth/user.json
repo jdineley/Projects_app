@@ -2,11 +2,11 @@
   "cookies": [],
   "origins": [
     {
-      "origin": "https://projects-app-front-end.onrender.com",
+      "origin": "http://localhost:5173",
       "localStorage": [
         {
           "name": "user",
-          "value": "{\"_id\":\"6749e01c610fa2662f4b8da5\",\"email\":\"henryTest@mail.com\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzQ5ZTAxYzYxMGZhMjY2MmY0YjhkYTUiLCJpYXQiOjE3MzI4OTQ4MTAsImV4cCI6MTczMzE1NDAxMH0.rfr1ND8KscGgPffYez2OUj7lbQ9zZsKm6GOp-_kazOQ\"}"
+          "value": "{\"_id\":\"6749e5413dbce167f03b03e6\",\"email\":\"henryTest@mail.com\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzQ5ZTU0MTNkYmNlMTY3ZjAzYjAzZTYiLCJpYXQiOjE3MzI4OTYxMTEsImV4cCI6MTczMzE1NTMxMX0.xWc1n8cHEM8oMD9n0hZaMRuR-wgw0k_jZWHL8SIz4hI\"}"
         }
       ]
     }

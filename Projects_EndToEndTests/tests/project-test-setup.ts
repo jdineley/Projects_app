@@ -7,6 +7,7 @@ import { STORAGE_STATE } from "../playwright.config";
 setup.describe.configure({ mode: "serial" });
 
 setup("do initialisations", async ({ request, signupPage, rootLayout }) => {
+  console.log("api URL", process.env.BASE_API_URL + "/api/v1/test");
   const response = await request.delete(
     process.env.BASE_API_URL + "/api/v1/test"
   );
