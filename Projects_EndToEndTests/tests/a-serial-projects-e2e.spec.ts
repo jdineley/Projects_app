@@ -52,15 +52,12 @@ test("test ms project edit percentage complete & finish date", async ({
   await projectsPage.goto();
   await projectsPage.clickProject("Customer Service Ramp Up");
   await projectDetailPage.isReady();
-  await expect(page.getByTestId("user-active-task-row")).toHaveCount(49);
+  await expect(page.getByTestId("user-active-task-row")).toHaveCount(44);
   // await expect(page.getByTestId("user-active-task-row")).toHaveCount(91);
   await projectDetailPage.filterBy("henryTest@mail.com");
-  await expect(page.getByTestId("user-active-task-row")).toHaveCount(11);
+  await expect(page.getByTestId("user-active-task-row")).toHaveCount(9);
   // await expect(page.getByTestId("user-active-task-row")).toHaveCount(23);
-  await projectDetailPage.updatePercentagecomplete(
-    "Determine cost efficiency standards",
-    0.3
-  );
+  await projectDetailPage.updatePercentagecomplete("On-site support", 0.3);
   // await projectDetailPage.updatePercentagecomplete(
   //   "Review resource performance, determine which ones are the most effective",
   //   0.3
@@ -74,10 +71,7 @@ test("test ms project edit percentage complete & finish date", async ({
     0.95
   );
   await projectDetailPage.$savePercentCompleteButton.click();
-  await projectDetailPage.assertPercentageComplete(
-    "30",
-    "Determine cost efficiency standards"
-  );
+  await projectDetailPage.assertPercentageComplete("30", "On-site support");
   // await projectDetailPage.assertPercentageComplete(
   //   "30",
   //   "Review resource performance, determine which ones are the most effective"
