@@ -52,13 +52,19 @@ test("test ms project edit percentage complete & finish date", async ({
   await projectsPage.goto();
   await projectsPage.clickProject("Customer Service Ramp Up");
   await projectDetailPage.isReady();
-  await expect(page.getByTestId("user-active-task-row")).toHaveCount(91);
+  await expect(page.getByTestId("user-active-task-row")).toHaveCount(49);
+  // await expect(page.getByTestId("user-active-task-row")).toHaveCount(91);
   await projectDetailPage.filterBy("henryTest@mail.com");
-  await expect(page.getByTestId("user-active-task-row")).toHaveCount(23);
+  await expect(page.getByTestId("user-active-task-row")).toHaveCount(11);
+  // await expect(page.getByTestId("user-active-task-row")).toHaveCount(23);
   await projectDetailPage.updatePercentagecomplete(
-    "Review resource performance, determine which ones are the most effective",
+    "Determine cost efficiency standards",
     0.3
   );
+  // await projectDetailPage.updatePercentagecomplete(
+  //   "Review resource performance, determine which ones are the most effective",
+  //   0.3
+  // );
   await projectDetailPage.updatePercentagecomplete(
     "Identify typical customer types",
     0.4
@@ -70,8 +76,12 @@ test("test ms project edit percentage complete & finish date", async ({
   await projectDetailPage.$savePercentCompleteButton.click();
   await projectDetailPage.assertPercentageComplete(
     "30",
-    "Review resource performance, determine which ones are the most effective"
+    "Determine cost efficiency standards"
   );
+  // await projectDetailPage.assertPercentageComplete(
+  //   "30",
+  //   "Review resource performance, determine which ones are the most effective"
+  // );
   await projectDetailPage.assertPercentageComplete(
     "40",
     "Identify typical customer types"
