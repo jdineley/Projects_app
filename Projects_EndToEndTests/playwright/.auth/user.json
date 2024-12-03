@@ -6,7 +6,7 @@
       "localStorage": [
         {
           "name": "user",
-          "value": "{\"_id\":\"674e3e18610fa2662f4d5ab7\",\"email\":\"henryTest@mail.com\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzRlM2UxODYxMGZhMjY2MmY0ZDVhYjciLCJpYXQiOjE3MzMxODEwMDcsImV4cCI6MTczMzQ0MDIwN30.1kccAwy6c7CaPFW25cnh8KP4C6WUbU6FKOySrv3qQRw\"}"
+          "value": "{\"_id\":\"674e4913610fa2662f4dc005\",\"email\":\"henryTest@mail.com\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzRlNDkxMzYxMGZhMjY2MmY0ZGMwMDUiLCJpYXQiOjE3MzMxODM4MTYsImV4cCI6MTczMzQ0MzAxNn0.sFxe2TWIuPdimIzf3knwM7VJz5I-a60Y2aQoRVUF9NU\"}"
         }
       ]
     }
