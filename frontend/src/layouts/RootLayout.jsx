@@ -161,7 +161,7 @@ export default function RouteLayout() {
             </NavLink>
             <NavLink to="https://jdineley.github.io/Projects_app/">
               <Button variant="ghost" color="gray">
-                Playwright
+                {!isMobileResolution ? "Playwright - CI" : "CI"}
               </Button>
             </NavLink>
             {user && (
@@ -307,7 +307,7 @@ export default function RouteLayout() {
       </>
       <footer>
         <small>James Dineley</small>
-        <a href="https://github.com/jdineley">
+        <a href="https://github.com/jdineley/Projects_app">
           <FaGithub />
         </a>
       </footer>
