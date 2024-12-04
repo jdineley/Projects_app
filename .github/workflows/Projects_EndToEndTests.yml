@@ -4,11 +4,11 @@ on:
   push:
     # paths:
     #   - "Projects_EndToEndTests/**"
-    branches: [main, master]
+    # branches: [main, master]
   pull_request:
     # paths:
     #   - "Projects_EndToEndTests/**"
-    branches: [main, master]
+    # branches: [main, master]
 
 env:
   BASE_API_URL: https://projects-app-90ge.onrender.com

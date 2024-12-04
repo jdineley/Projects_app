@@ -159,7 +159,7 @@ export default function RouteLayout() {
                 {!isMobileResolution ? "Learning" : "Learn"}
               </Button>
             </NavLink>
-            <NavLink to="http://google.com">
+            <NavLink to="https://jdineley.github.io/Projects_app/">
               <Button variant="ghost" color="gray">
                 Playwright
               </Button>
