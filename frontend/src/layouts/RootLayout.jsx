@@ -159,6 +159,11 @@ export default function RouteLayout() {
                 {!isMobileResolution ? "Learning" : "Learn"}
               </Button>
             </NavLink>
+            <NavLink to="http://google.com">
+              <Button variant="ghost" color="gray">
+                Playwright
+              </Button>
+            </NavLink>
             {user && (
               <div className="current-user-container">
                 <DropdownMenu.Root>
