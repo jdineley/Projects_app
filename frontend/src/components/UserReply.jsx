@@ -1,5 +1,5 @@
 import EmbeddedLink from "./EmbeddedLink";
-import VideoLinkSent from "./videoLinkSent";
+import VideoLinkSent from "./VideoLinkSent";
 
 import { Text } from "@radix-ui/themes";
 

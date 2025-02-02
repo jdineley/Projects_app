@@ -1,6 +1,6 @@
 import EmbeddedAttachment from "./EmbeddedAttachment";
-import EmbeddedLink from "./EmbeddedLink";
-import VideoLinkSent from "./videoLinkSent";
+// import EmbeddedLink from "./EmbeddedLink";
+// import VideoLinkSent from "./videoLinkSent";
 
 import { Text } from "@radix-ui/themes";
 
