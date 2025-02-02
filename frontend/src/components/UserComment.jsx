@@ -6,9 +6,9 @@ import { useNavigate, useLocation, useRevalidator } from "react-router-dom";
 import { useNotificationContext } from "../hooks/useNotificationContext";
 
 import EmbeddedLink from "./EmbeddedLink";
-import VideoLinkSent from "./videoLinkSent";
+import VideoLinkSent from "./VideoLinkSent";
 import MessageForm from "./MessageForm";
-import OptimisticUserComment from "./OptimisticUserComment";
+// import OptimisticUserComment from "./OptimisticUserComment";
 import OptimisticUserReply from "./OptimisticUserReply";
 
 import { Text } from "@radix-ui/themes";
