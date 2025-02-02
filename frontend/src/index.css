@@ -7,6 +7,7 @@
 
 :root {
   --logo: rgb(22, 101, 192);
+  --logo2: rgb(33, 150, 243);
   --logoAplha: 22, 101, 192;
   /* --primary: 231, 113, 125; */
   --primary: var(--mint-3);

@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { useFetcher, useNavigate, useLocation } from "react-router-dom";
+import {
+  useFetcher,
+  useNavigate,
+  useLocation,
+  useRevalidator,
+} from "react-router-dom";
 import { Flex, Badge, Box } from "@radix-ui/themes";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNotificationContext } from "../hooks/useNotificationContext";
@@ -9,6 +14,9 @@ import * as Collapsible from "@radix-ui/react-collapsible";
 import { RowSpacingIcon, Cross2Icon } from "@radix-ui/react-icons";
 
 import UserComment from "./UserComment";
+import MessageForm from "./MessageForm";
+import OptimisticUserComment from "./OptimisticUserComment";
+import EmbeddedLink from "./EmbeddedLink";
 
 const ReviewAction = ({
   action,
@@ -23,6 +31,15 @@ const ReviewAction = ({
 }) => {
   const [open, setOpen] = useState(() => (newCommentId ? true : false));
   const [isCommenting, setIsCommenting] = useState(false);
+  const [comment, setComment] = useState("");
+  const [messButHover, setMessageButHover] = useState(false);
+  const [uploadFileButHover, setUploadFileButHover] = useState(false);
+  const [uploadPicButHover, setUploadPicButHover] = useState(false);
+  const [inputImages, setInputImages] = useState([]);
+  const [inputVideos, setInputVideos] = useState([]);
+  const hasAttachedFiles =
+    [...inputImages, ...inputVideos].length > 0 ? true : false;
+  const [isSending, setIsSending] = useState(false);
   const { user } = useAuthContext();
 
   const { notification } = useNotificationContext();
@@ -35,6 +52,20 @@ const ReviewAction = ({
   allSetOpen.current.push(setOpen);
 
   const fetcher = useFetcher();
+  console.log("fetcher.data", fetcher.data);
+
+  const revalidator = useRevalidator();
+
+  const URL_REGEX =
+    /https?:\/\/.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*/g;
+  const urlsArr = comment.match(URL_REGEX) || null;
+  let emmbeddedLinksArr;
+  if (urlsArr) {
+    emmbeddedLinksArr = urlsArr.map((url) => {
+      return <EmbeddedLink url={url} />;
+    });
+  }
+  console.log("urlsArr", urlsArr);
 
   useEffect(() => {
     if (fetcher.data) {
@@ -47,7 +78,8 @@ const ReviewAction = ({
       }, 1000);
     }
     if (isCommenting) {
-      document.getElementById("reviewActionCommentText").scrollIntoView({
+      // document.getElementById("reviewActionCommentText").scrollIntoView({
+      document.getElementById(`comment-${action._id}`).scrollIntoView({
         behavior: "smooth",
         block: "end",
         inline: "nearest",
@@ -64,7 +96,7 @@ const ReviewAction = ({
   ]);
 
   async function handleAddComment() {
-    setIsCommenting(true);
+    setIsCommenting(!isCommenting);
   }
 
   return (
@@ -106,7 +138,9 @@ const ReviewAction = ({
           <div className="task-detail-button-collector">
             <h4>Comments..</h4>
             {!action.archived && (
-              <button onClick={handleAddComment}>Add comment...</button>
+              <button onClick={handleAddComment}>
+                {isCommenting ? "Close comment.." : "Add comment.."}
+              </button>
             )}
           </div>
           {action.comments.map((comment) => (
@@ -120,14 +154,48 @@ const ReviewAction = ({
               learning={learning}
             />
           ))}
+          {isSending && (
+            <OptimisticUserComment
+              comment={comment}
+              inputImages={inputImages}
+              inputVideos={inputVideos}
+              emmbeddedLinksArr={emmbeddedLinksArr}
+            />
+          )}
           {isCommenting && (
-            <div
-              style={{
-                marginLeft: "auto",
-                width: "50%",
-              }}
-            >
-              <fetcher.Form method="POST" className="add-task-comment-form">
+            // <div
+            //   style={{
+            //     marginLeft: "auto",
+            //     width: "50%",
+            //   }}
+            // >
+            <MessageForm
+              comment={comment}
+              setComment={setComment}
+              inputImages={inputImages}
+              setInputImages={setInputImages}
+              inputVideos={inputVideos}
+              setInputVideos={setInputVideos}
+              emmbeddedLinksArr={emmbeddedLinksArr}
+              uploadFileButHover={uploadFileButHover}
+              setUploadFileButHover={setUploadFileButHover}
+              uploadPicButHover={uploadPicButHover}
+              setUploadPicButHover={setUploadPicButHover}
+              messButHover={messButHover}
+              setMessageButHover={setMessageButHover}
+              // handleSubmitMessage={handleSubmitMessage}
+              setIsCommenting={setIsCommenting}
+              revalidate={revalidator.revalidate}
+              intent="action"
+              target={action}
+              user={user}
+              endPoint="/api/v1/comments"
+              setIsSending={setIsSending}
+              projectId={projectId}
+              reviewId={reviewId}
+              learning={learning}
+            />
+            /* <fetcher.Form method="POST" className="add-task-comment-form">
                 <textarea
                   id="reviewActionCommentText"
                   rows="8"
@@ -155,8 +223,8 @@ const ReviewAction = ({
                     Submit comment
                   </button>
                 </div>
-              </fetcher.Form>
-            </div>
+              </fetcher.Form> */
+            // </div>
           )}
         </Box>
       </Collapsible.Content>

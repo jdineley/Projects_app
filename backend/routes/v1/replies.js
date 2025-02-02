@@ -1,5 +1,7 @@
 const express = require("express");
 const requireAuth = require("../../middleware/requireAuth");
+const multer = require("multer");
+const upload = multer({ dest: "./public/temp/" });
 
 const {
   getReplies,
@@ -17,7 +19,11 @@ router.get("/", getReplies);
 
 router.get("/:replyId", getReply);
 
-router.post("/", createReply);
+router.post(
+  "/",
+  upload.fields([{ name: "uploaded_images" }, { name: "uploaded_videos" }]),
+  createReply
+);
 
 router.patch("/replyId", updateReply);
 

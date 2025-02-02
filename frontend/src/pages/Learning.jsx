@@ -33,9 +33,13 @@ import TaskDetail_defeatured from "../components/defeatured/TaskDetail_defeature
 import ProjectReview_defeatured from "../components/defeatured/ProjectReview_defeatured";
 import UserProfile_defeatured from "../components/defeatured/UserProfile_defeatured";
 
+// page components
+import TaskDetailComponent from "../components/page_components/TaskDetailComponent";
+
 const Learning = () => {
   const { userObj, project, projectTasks, review, task, taskComments } =
     useLoaderData();
+  console.log("userObj", userObj);
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
   const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
   const subHeadElemsRef = useRef([]);
@@ -386,10 +390,16 @@ const Learning = () => {
                 borderColor: "var(--logo)",
               }}
             >
-              <TaskDetail_defeatured
+              {/* <TaskDetail_defeatured
                 task={task}
                 taskComments={taskComments}
                 user={userObj._id}
+              /> */}
+              <TaskDetailComponent
+                learning={true}
+                task={task}
+                taskComments={taskComments}
+                user={userObj}
               />
             </Box>
           </Box>

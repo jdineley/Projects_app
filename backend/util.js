@@ -2,6 +2,9 @@ const User = require("./models/User");
 // const Vacation = require("./models/Vacation");
 const Project = require("./models/Project");
 
+const fs = require("fs").promises;
+const path = require("path");
+
 // const mongoose = require("mongoose");
 
 const { differenceInBusinessDays, isWithinInterval } = require("date-fns");
@@ -360,6 +363,16 @@ async function resyncProjTasksUsersVacs(storedProject) {
   }
 }
 
+async function removeAllFilesAsync(directory) {
+  const files = await fs.readdir(directory);
+
+  for (const file of files) {
+    console.log("file", file);
+    const filePath = path.join(directory, file);
+    await fs.unlink(filePath);
+  }
+}
+
 module.exports = {
   generateRandomNumber,
   generateRandomElement,
@@ -372,4 +385,5 @@ module.exports = {
   resyncUserAndVacs,
   correctRemainingVacDays,
   resyncProjTasksUsersVacs,
+  removeAllFilesAsync,
 };

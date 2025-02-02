@@ -10,9 +10,10 @@ class CommentReply {
   constructor(page: Page) {
     this.page = page;
     this.$addCommentLocator = page.getByRole("button", {
-      name: "Add comment...",
+      name: "Add comment",
     });
-    this.$submitButtonLocator = page.getByRole("button", { name: "Submit" });
+    // this.$submitButtonLocator = page.getByRole("button", { name: "Submit" });
+    this.$submitButtonLocator = page.getByTestId("submit-message");
   }
 
   public async addNewComment(comment: string) {
@@ -33,7 +34,9 @@ class CommentReply {
           has: this.page.getByText(comment, { exact: true }),
         }),
       });
-    await userCommentCollector.getByRole("button", { name: "Reply.." }).click();
+    await userCommentCollector
+      .getByRole("button", { name: "Show reply field" })
+      .click();
     const replyBox = this.page.getByPlaceholder("reply to henryTest@mail.com");
     await expect(replyBox).toBeVisible();
     await replyBox.click();
@@ -427,7 +430,7 @@ export class ProjectReviewPage extends CommentReply {
 }
 
 export class UserProfilePage {
-  readonly page: Page;
+  // readonly page: Page;
   readonly $userProfileLocator: Locator;
   readonly $remainingVacDaysLocator: Locator;
 

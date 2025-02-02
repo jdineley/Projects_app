@@ -22,8 +22,22 @@ const commentSchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: true,
+    // required: true,
   },
+  images: [
+    {
+      url: String,
+      asset_id: String,
+      originalname: String,
+    },
+  ],
+  videos: [
+    {
+      url: String,
+      asset_id: String,
+      originalname: String,
+    },
+  ],
   replies: [
     {
       type: mongoose.Schema.Types.ObjectId,

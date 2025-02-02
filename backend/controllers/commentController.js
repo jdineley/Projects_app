@@ -1,11 +1,20 @@
 const mongoose = require("mongoose");
 
+const path = require("path");
+
 const Comment = require("../models/Comment");
 const Task = require("../models/Task");
 const User = require("../models/User");
 const ReviewAction = require("../models/ReviewAction");
 
 const { channel } = require("../routes/v1/sse");
+
+require("dotenv").config();
+const cloudinary = require("cloudinary").v2;
+console.log("cloudinary", cloudinary.config().cloud_name);
+
+// util
+const { removeAllFilesAsync } = require("../util");
 
 // get all comments
 const getAllComments = async (req, res) => {
@@ -22,6 +31,9 @@ const getComment = async (req, res) => {
 const createComment = async (req, res) => {
   console.log("hit createComment handler");
   const user = req.user;
+  console.log("req.files", req.files);
+  console.log("req.body", req.body);
+  // const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
 
   const { task: taskId, action: actionId, projectId, reviewId } = req.body;
 
@@ -31,6 +43,57 @@ const createComment = async (req, res) => {
       isDemo: req.user.isDemo,
       isTest: req.user.isTest,
     });
+    if (req.files) {
+      if (req.files.uploaded_images) {
+        const imagePaths = req.files.uploaded_images.map((image) => {
+          return {
+            url: image.path,
+            originalname: image.originalname,
+          };
+        });
+        for (const image of imagePaths) {
+          const result = await cloudinary.uploader.upload(image.url, {
+            folder: "Projects/images",
+          });
+          console.log(result);
+          comment.images.push({
+            url: result.secure_url,
+            asset_id: result.asset_id,
+            originalname: image.originalname,
+          });
+        }
+      }
+      if (req.files.uploaded_videos) {
+        const videoPaths = req.files.uploaded_videos.map((video) => {
+          return {
+            url: video.path,
+            originalname: video.originalname,
+          };
+        });
+        for (const video of videoPaths) {
+          const result = await cloudinary.uploader.upload(video.url, {
+            folder: "Projects/videos",
+            resource_type: "video",
+          });
+          console.log(result);
+          comment.videos.push({
+            url: result.secure_url,
+            asset_id: result.asset_id,
+            originalname: video.originalname,
+          });
+        }
+      }
+      await comment.save();
+      console.log("comment", comment);
+
+      // delete temp attachment files
+      const dirPath = path.join(__dirname, "../public/temp");
+      console.log("dirPath", dirPath);
+      await removeAllFilesAsync(dirPath);
+      // .then(() => console.log("All files have been removed asynchronously."))
+      // .catch(console.error);
+    }
+
     if (taskId) {
       const task = await Task.findById(taskId);
       if (!task) {

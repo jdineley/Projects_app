@@ -10,6 +10,7 @@ import { Table, Box, Flex, Card, Text } from "@radix-ui/themes";
 import TaskPercentageCompleteGUI from "../TaskPercentageCompleteGUI";
 import UserActiveTaskRow from "../UserActiveTaskRow";
 import TaskEditDialog from "../TaskEditDialog";
+import MessageForm from "../MessageForm";
 
 // hooks
 import useMatchMedia from "../../hooks/useMatchMedia";
@@ -171,6 +172,7 @@ export default function TaskDetail_defeatured({ task, taskComments, user }) {
         />
       ))}
       {isCommenting && (
+        // <MessageForm />
         <div className="add-task-comment-form">
           <textarea
             id="taskCommentText"

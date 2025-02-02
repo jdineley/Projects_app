@@ -1,6 +1,6 @@
 const express = require("express");
-const multer = require("multer");
-const upload = multer({ dest: "../../public/data/uploads/" });
+// const multer = require("multer");
+// const upload = multer({ dest: "../../public/data/uploads/" });
 const {
   getAllProjects,
   getProject,
@@ -19,9 +19,11 @@ router.get("/", requireAuth, getAllProjects);
 
 router.get("/:projectId", requireAuth, getProject);
 
-router.post("/", requireAuth, upload.single("file"), createProject);
+// router.post("/", requireAuth, upload.single("file"), createProject);
+router.post("/", requireAuth, createProject);
 
-router.patch("/:projectId", requireAuth, upload.single("file"), updateProject);
+// router.patch("/:projectId", requireAuth, upload.single("file"), updateProject);
+router.patch("/:projectId", requireAuth, updateProject);
 
 router.delete("/:projectId", requireAuth, deleteProject);
 

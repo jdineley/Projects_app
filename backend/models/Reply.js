@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const replySchema = new mongoose.Schema({
   content: {
     type: String,
-    required: true,
+    // required: true,
   },
   comment: {
     type: mongoose.Schema.Types.ObjectId,
@@ -15,6 +15,20 @@ const replySchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  images: [
+    {
+      url: String,
+      asset_id: String,
+      originalname: String,
+    },
+  ],
+  videos: [
+    {
+      url: String,
+      asset_id: String,
+      originalname: String,
+    },
+  ],
   archived: {
     type: Boolean,
     default: false,

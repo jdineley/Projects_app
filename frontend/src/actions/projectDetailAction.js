@@ -7,6 +7,10 @@ const projectDetailAction =
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, taskId, reviewId } = params;
     const data = await request.formData();
+    console.log(
+      "************Object.fromEntries(data)**************",
+      Object.fromEntries(data)
+    );
     const { intent, ...list } = Object.fromEntries(data);
     if (intent === "edit-task") {
       console.log("hit edit task");

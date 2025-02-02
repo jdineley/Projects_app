@@ -596,6 +596,77 @@ function submitMsProject(
   }
 }
 
+function handleSubmitMessage({
+  comment,
+  user,
+  intent,
+  target,
+  setIsSending,
+  setIsCommenting,
+  inputImages,
+  inputVideos,
+  endPoint,
+  setInputImages,
+  setInputVideos,
+  setComment,
+  revalidate,
+  projectId,
+  reviewId,
+}) {
+  console.log("in handleSubmitMessage..");
+  console.log("$$$$$$$$$$$$$$INTENT$$$$$$$$$$$$", intent);
+  console.log("@@@@@@@@@@@@TARGET@@@@@@@@@@@", target._id);
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
+  setIsSending(true);
+  setIsCommenting(false);
+  if (intent === "task") {
+    document.querySelector(".root-layout").scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+      inline: "end",
+    });
+  }
+  let formData = new FormData();
+  formData.append("content", comment);
+  formData.append(intent, target._id);
+  formData.append("user", user._id);
+  if (intent === "action") {
+    formData.append("projectId", projectId);
+    formData.append("reviewId", reviewId);
+  }
+  if (inputImages.length > 0) {
+    for (const image of inputImages) {
+      formData.append("uploaded_images", image);
+    }
+  }
+  if (inputVideos.length > 0) {
+    for (const video of inputVideos) {
+      formData.append("uploaded_videos", video);
+    }
+  }
+  console.log("formData", formData);
+  fetch(`${VITE_REACT_APP_API_URL}${endPoint}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${user.token}`,
+    },
+    body: formData,
+  })
+    .then((resp) => resp.json())
+    .then((data) => {
+      setIsSending(false);
+      if (data.errors) {
+        alert(data.errors);
+      } else {
+        setInputImages([]);
+        setInputVideos([]);
+        setComment("");
+        console.log(data);
+        revalidate();
+      }
+    });
+}
+
 const msProjectGuidance = [
   "No Summary Tasks as Predecessors",
   "All work based tasks should be assigned a work resource.",
@@ -621,303 +692,5 @@ export {
   rawMapMsProjToNative,
   submitMsProject,
   msProjectGuidance,
+  handleSubmitMessage,
 };
-
-// function submitMsProject(e) {
-//   e.preventDefault();
-//   setLoading(true);
-//   setValidEmailError("");
-//   setValidEmailCheck(false);
-//   setSummaryPredecessorError("");
-//   setSummaryPredecessorCheck(false);
-//   setWorkTasksResourceError("");
-//   setWorkTaskResourceCheck(false);
-//   if (
-//     window.confirm("Are you sure you want to submit a MS Project .xml file?")
-//   ) {
-//     let file = e.target.uploadFile.files[0];
-//     console.log(file.name);
-//     const reader = new FileReader();
-//     reader.readAsText(file);
-//     reader.onload = async function () {
-//       console.log(reader.result);
-//       // const parser = new DOMParser();
-//       // var doc = parser.parseFromString(reader.result, "application/xml");
-//       // console.log(doc);
-
-//       try {
-//         const result = await xml2js.parseStringPromise(reader.result);
-//         const data = await rawMapMsProjToNative(
-//           result,
-//           user._id,
-//           user.email,
-//           user.token
-//         );
-//         setValidEmailCheck(true);
-//         setSummaryPredecessorCheck(true);
-//         setWorkTaskResourceCheck(true);
-
-//         await delay(1000);
-
-//         const resp = await fetch(
-//           `${VITE_REACT_APP_API_URL}/api/v1/projects`,
-//           {
-//             method: "POST",
-//             headers: {
-//               "Content-Type": "application/json",
-//               Authorization: `Bearer ${user.token}`,
-//             },
-//             body: JSON.stringify({
-//               msProjObj: result,
-//               projectMapped: data,
-//               originalFileName: file.name,
-//             }),
-//           }
-//         );
-
-//         const json = await resp.json();
-//         console.log(json);
-//         if (!resp.ok) {
-//           console.log("1");
-//           throw { errors: json.errors };
-//         }
-
-//         setOpen(false);
-//         toast(`${json.title} imported from MS Project`);
-//         setLoading(false);
-//         revalidator.revalidate();
-//       } catch (err) {
-//         console.log("2");
-
-//         if (err.type) {
-//           console.log("3");
-
-//           switch (err.type) {
-//             case "invalid-email":
-//               setValidEmailError(err.errors);
-//               break;
-//             case "work-resource-for-work-tasks":
-//               setValidEmailCheck(true);
-//               setWorkTasksResourceError(err.errors);
-//               break;
-//             case "summary-predecessor":
-//               setValidEmailCheck(true);
-//               setWorkTaskResourceCheck(true);
-//               setSummaryPredecessorError(err.errors);
-//               break;
-//           }
-//         } else if (err.newProjectId) {
-//           console.log("4");
-
-//           try {
-//             const resp2 = await fetch(
-//               `${VITE_REACT_APP_API_URL}/api/v1/projects/${err.newProjectId}`,
-//               {
-//                 method: "PATCH",
-//                 mode: "cors",
-//                 headers: {
-//                   "Content-Type": "application/json",
-//                   Authorization: `Bearer ${user.token}`,
-//                 },
-//                 body: JSON.stringify({ intent: "archive-project" }),
-//               }
-//             );
-//             const json2 = await resp2.json();
-//             if (!resp2.ok) {
-//               console.log("5");
-
-//               throw { errors: json2.errors };
-//             }
-//             const resp3 = await fetch(
-//               `${VITE_REACT_APP_API_URL}/api/v1/projects/${err.newProjectId}`,
-//               {
-//                 method: "DELETE",
-//                 mode: "cors",
-//                 headers: {
-//                   "Content-Type": "application/json",
-//                   Authorization: `Bearer ${user.token}`,
-//                 },
-//                 body: JSON.stringify({ intent: "delete-project" }),
-//               }
-//             );
-//             const json3 = await resp3.json();
-//             if (!resp3.ok) {
-//               console.log("6");
-
-//               throw { errors: json3.errors };
-//             }
-//             console.log("7");
-
-//             alert(err.errors);
-//           } catch (error) {
-//             console.log("8");
-
-//             alert(
-//               "An unknown error has occured. If a partial project has been uploaded, manually delete and restart the upload process"
-//             );
-//           }
-//         } else {
-//           console.log("9");
-
-//           alert(err.errors);
-//         }
-//         setLoading(false);
-//         // setOpen(false);
-//       }
-
-//       // .then(function (result) {
-//       //   // console.log(result.Project);
-//       //   // console.log("Done");
-//       //   return rawMapMsProjToNative(
-//       //     result,
-//       //     user._id,
-//       //     user.email,
-//       //     user.token
-//       //   );
-//       // })
-//       // .then((data) => {
-//       //   console.dir(JSON.stringify(data));
-//       //   setValidEmailCheck(true);
-//       //   setSummaryPredecessorCheck(true);
-//       //   setWorkTaskResourceCheck(true);
-//       //   return data;
-//       // })
-//       // .then((data) => {
-//       //   delay(2000);
-//       //   return data;
-//       // })
-//       // .then(() => {
-//       //   return fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects`, {
-//       //     method: "POST",
-//       //     headers: {
-//       //       "Content-Type": "application/json",
-//       //       Authorization: `Bearer ${user.token}`,
-//       //     },
-//       //     body: JSON.stringify({
-//       //       msProjObj: result,
-//       //       projectMapped: data,
-//       //       originalFileName: file.name,
-//       //     }),
-//       //   });
-//       // })
-//       // .then((resp) => resp.json())
-//       // .then((data) => {
-//       //   setOpen(false);
-//       //   toast(`${data.newProject.title} imported from MS Project`);
-//       //   setLoading(false);
-//       //   revalidator.revalidate();
-//       // })
-//       // .catch((err) => {
-//       //   // fail
-//       //   // Archive and delete any project saved during failed attempt
-//       //   console.log(err);
-//       //   if (err.type) {
-//       //     switch (err.type) {
-//       //       case "invalid-email":
-//       //         setValidEmailError(err.errors);
-//       //         break;
-//       //       case "work-resource-for-work-tasks":
-//       //         setValidEmailCheck(true);
-//       //         setWorkTasksResourceError(err.errors);
-//       //         break;
-//       //       case "summary-predecessor":
-//       //         setValidEmailCheck(true);
-//       //         setWorkTaskResourceCheck(true);
-//       //         setSummaryPredecessorError(err.errors);
-//       //         break;
-//       //     }
-//       //   } else {
-//       //     alert(err.errors.error);
-//       //   }
-//       //   setLoading(false);
-//       //   setOpen(false);
-//       // });
-//     };
-
-//     // let formData = new FormData();
-//     // formData.append("file", file);
-//     // fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects`, {
-//     //   method: "POST",
-//     //   headers: {
-//     //     Authorization: `Bearer ${user.token}`,
-//     //   },
-//     //   body: formData,
-//     // })
-//     //   .then((resp) => resp.json())
-//     //   .then((data) => {
-//     //     if (data.errors && data.newProjectId) {
-//     //       fetch(
-//     //         `${VITE_REACT_APP_API_URL}/api/v1/projects/${data.newProjectId}`,
-//     //         {
-//     //           method: "PATCH",
-//     //           mode: "cors",
-//     //           headers: {
-//     //             "Content-Type": "application/json",
-//     //             Authorization: `Bearer ${user.token}`,
-//     //           },
-//     //           body: JSON.stringify({ intent: "archive-project" }),
-//     //         }
-//     //       ).then((resp) => {
-//     //         if (resp.ok) {
-//     //           fetch(
-//     //             `${VITE_REACT_APP_API_URL}/api/v1/projects/${data.newProjectId}`,
-//     //             {
-//     //               method: "DELETE",
-//     //               mode: "cors",
-//     //               headers: {
-//     //                 "Content-Type": "application/json",
-//     //                 Authorization: `Bearer ${user.token}`,
-//     //               },
-//     //               body: JSON.stringify({ intent: "delete-project" }),
-//     //             }
-//     //           ).then((resp) => {
-//     //             if (resp.ok) {
-//     //               setLoading(false);
-//     //               alert(data.errors);
-//     //             } else {
-//     //               setLoading(false);
-//     //               alert(
-//     //                 data.errors +
-//     //                   " " +
-//     //                   "***Something went wrong attempting to delete the invalid project, please delete manually if necessary***"
-//     //               );
-//     //             }
-//     //           });
-//     //         }
-//     //       });
-//     //       // fetch(
-//     //       //   `${VITE_REACT_APP_API_URL}/api/v1/projects/${data.newProjectId}`,
-//     //       //   {
-//     //       //     method: "DELETE",
-//     //       //     mode: "cors",
-//     //       //     headers: {
-//     //       //       Authorization: `Bearer ${user.token}`,
-//     //       //     },
-//     //       //     body: JSON.stringify({ intent: "delete-project" }),
-//     //       //   }
-//     //       // ).then((resp) => {
-//     //       //   if (resp.ok) {
-//     //       //     setLoading(false);
-//     //       //     alert(data.errors);
-//     //       //   } else {
-//     //       //     setLoading(false);
-//     //       //     alert(
-//     //       //       data.errors +
-//     //       //         " " +
-//     //       //         "***Something went wrong attempting to delete the invalid project, please delete manually if necessary***"
-//     //       //     );
-//     //       //   }
-//     //       // });
-//     //     } else if (data.errors) {
-//     //       setLoading(false);
-//     //       alert(data.errors);
-//     //     } else {
-//     //       console.log(data);
-//     //       setOpen(false);
-//     //       toast(`${data.newProject.title} imported from MS Project`);
-//     //       setLoading(false);
-//     //       revalidator.revalidate();
-//     //     }
-//     //   });
-//   }
-// }

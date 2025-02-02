@@ -21,7 +21,12 @@ export default {
       6: "6px",
       8: "8px",
     },
-    extend: {},
+    extend: {
+      colors: {
+        "logo-primary": "#1564c0",
+        "logo-secondary": "#2196f3",
+      },
+    },
   },
   plugins: [],
 };
