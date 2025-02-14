@@ -32,7 +32,11 @@ const signUpUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   console.log("hit loginUser route");
-  const { email, password } = req.body;
+  const { email, password, accessToken } = req.body;
+  if (accessToken) {
+    console.log("accessToken", accessToken);
+    return res.status(200).json({ accessToken });
+  }
   let payload = {};
   try {
     const user = await User.login(email, password);

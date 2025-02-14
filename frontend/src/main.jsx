@@ -10,6 +10,16 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import * as Sentry from "@sentry/react";
 
+import { PublicClientApplication } from "@azure/msal-browser";
+import { MsalProvider } from "@azure/msal-react";
+import { msalConfig } from "../authConfig";
+
+/**
+ * Initialize a PublicClientApplication instance which is provided to the MsalProvider component
+ * We recommend initializing this outside of your root component to ensure it is not re-initialized on re-renders
+ */
+const msalInstance = new PublicClientApplication(msalConfig);
+
 Sentry.init({
   dsn: "https://ae5e8036ccf9064dd9c2b48841ccdb20@o4506342901940224.ingest.us.sentry.io/4507628979945472",
   integrations: [
@@ -27,13 +37,15 @@ Sentry.init({
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   // <React.StrictMode>
-  <NotificationContextProvider>
-    <AuthContextProvider>
-      <Theme accentColor="mint">
-        <App />
-        <ToastContainer position="bottom-left" />
-      </Theme>
-    </AuthContextProvider>
-  </NotificationContextProvider>
+  <MsalProvider instance={msalInstance}>
+    <NotificationContextProvider>
+      <AuthContextProvider>
+        <Theme accentColor="mint">
+          <App />
+          <ToastContainer position="bottom-left" />
+        </Theme>
+      </AuthContextProvider>
+    </NotificationContextProvider>
+  </MsalProvider>
   // </React.StrictMode>
 );
