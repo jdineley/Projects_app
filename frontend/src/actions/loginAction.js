@@ -10,7 +10,9 @@ const loginAction = async ({ request }) => {
   try {
     // if (!accessToken) {
     const response = await fetch(
-      `${VITE_REACT_APP_API_URL}/api/v1/users/login`,
+      `${VITE_REACT_APP_API_URL}/api/v1/users/${
+        accessToken ? "loginEntraID" : "login"
+      }`,
       {
         method: "POST",
         mode: "cors",

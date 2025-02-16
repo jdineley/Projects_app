@@ -6,6 +6,19 @@ const { format, differenceInBusinessDays } = require("date-fns");
 
 const userSchema = new mongoose.Schema(
   {
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
+      // required: function () {
+      //   return !this.email;
+      // },
+    },
+    objectID: {
+      type: String,
+      required: function () {
+        return this.tenant;
+      },
+    },
     email: {
       type: String,
       required: true,
@@ -13,7 +26,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.tenant;
+      },
     },
     tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
     secondaryTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],

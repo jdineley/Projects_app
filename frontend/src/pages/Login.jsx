@@ -5,7 +5,7 @@ import {
   useRevalidator,
   useSubmit,
 } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import {
   AuthenticatedTemplate,
@@ -72,8 +72,11 @@ export default function Login() {
 
   const [error, setError] = useState(null);
   const { user, dispatch } = useAuthContext();
-  // let json = useActionData();
-  let json = null;
+  let json = useActionData();
+  // let json = null;
+
+  const entraIDSignedIn = useRef(null);
+
   const navigate = useNavigate();
 
   let revalidator = useRevalidator();
@@ -81,7 +84,7 @@ export default function Login() {
   const { dispatch: notificationDispatch } = useNotificationContext();
 
   let submit = useSubmit();
-  const [graphData, setGraphData] = useState(null);
+  // const [graphData, setGraphData] = useState(null);
 
   useEffect(() => {
     console.log("in useEffect Login");
@@ -90,7 +93,8 @@ export default function Login() {
       "Email does not exist",
       "Incorrect password",
     ];
-    if (inProgress === InteractionStatus.None) {
+    // if (!entraIDSignedIn.current || inProgress === InteractionStatus.None) {
+    if (!entraIDSignedIn.current) {
       // Acquire access tokens
       // make post request to /login
       instance
@@ -113,6 +117,7 @@ export default function Login() {
               encType: "application/x-www-form-urlencoded",
             }
           );
+          entraIDSignedIn.current = true;
           // submit(response.accessToken, {
           //   method: "post",
           //   encType: "text/plain",
@@ -130,14 +135,25 @@ export default function Login() {
         });
     }
     if (json?._id) {
-      const { _id, email, token } = json;
-      localStorage.setItem("user", JSON.stringify({ _id, email, token }));
+      const { _id, email, token, accessToken } = json;
+      const user = token ? { _id, email, token } : { _id, email, accessToken };
+      localStorage.setItem("user", JSON.stringify(user));
       dispatch({
         type: "LOGIN",
-        payload: { _id, email, token },
+        payload: user,
       });
       return navigate("/dashboard");
-    } else if (json && userLoginErrorMessages.includes(json.message)) {
+    }
+    // else if (json?.accessToken) {
+    //   const { _id, email, accessToken } = json;
+    //   localStorage.setItem("user", JSON.stringify({ _id, email, accessToken }));
+    //   dispatch({
+    //     type: "LOGIN",
+    //     payload: { _id, email, token },
+    //   });
+    //   return navigate("/dashboard");
+    // }
+    else if (json && userLoginErrorMessages.includes(json.message)) {
       setError(json.message); //incorrect user credentials??
     } else if (json) {
       throw new Error(json.message);
@@ -153,6 +169,7 @@ export default function Login() {
     notificationDispatch,
     revalidator,
     inProgress,
+    entraIDSignedIn.current,
   ]);
 
   return (
@@ -188,7 +205,7 @@ export default function Login() {
           <MSIdentityLogoutButton />
           {/* <ProfileContent /> */}
           <h5 className="card-title">Welcome {accounts[0].name}</h5>
-          {graphData && <ProfileData graphData={graphData} />}
+          {/* {graphData && <ProfileData graphData={graphData} />} */}
         </>
       ) : (
         <>

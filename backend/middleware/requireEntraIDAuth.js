@@ -24,6 +24,8 @@ const getKey = (header, callback) => {
 // Middleware to verify token
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
+  // const { _id } = req.headers;
+  // console.log("_id", _id);
   if (!authHeader) {
     return res.status(401).json({ error: "No token provided" });
   }
@@ -36,7 +38,7 @@ const verifyToken = (req, res, next) => {
     {
       audience: clientId,
       issuer: (iss) => {
-        console.log("Issuer:", iss);
+        // console.log("Issuer:", iss);
         if (
           iss ===
           "https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0"
@@ -59,27 +61,17 @@ const verifyToken = (req, res, next) => {
         return res.status(401).json({ error: "Invalid token" });
       }
       console.log("Decoded Token:", decoded);
-      req.user = decoded;
-      next();
+      const { scp } = decoded;
+      if (scp === "Data.ReadAndWrite") {
+        req.user = { decoded, accessToken: token };
+        next();
+      } else {
+        return res
+          .status(401)
+          .json({ error: "The necessary permissions haven't been granted" });
+      }
     }
   );
-
-  // jwt.verify(
-  //   token,
-  //   getKey,
-  //   {
-  //     audience: clientId,
-  //     issuer: `https://login.microsoftonline.com/${tenantId}/v2.0`,
-  //     algorithms: ["RS256"],
-  //   },
-  //   (err, decoded) => {
-  //     if (err) {
-  //       return res.status(401).json({ error: "Invalid token" });
-  //     }
-  //     req.user = decoded;
-  //     next();
-  //   }
-  // );
 };
 
 module.exports = verifyToken;

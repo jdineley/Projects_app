@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
+const Tenant = require("../models/Tenant");
 
 const createToken = (_id) => {
   return jwt.sign({ _id }, process.env.SECRET, { expiresIn: "3d" });
@@ -32,11 +33,11 @@ const signUpUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   console.log("hit loginUser route");
-  const { email, password, accessToken } = req.body;
-  if (accessToken) {
-    console.log("accessToken", accessToken);
-    return res.status(200).json({ accessToken });
-  }
+  const { email, password } = req.body;
+  // if (accessToken) {
+  //   console.log("accessToken", accessToken);
+  //   return res.status(200).json({ accessToken });
+  // }
   let payload = {};
   try {
     const user = await User.login(email, password);
@@ -48,6 +49,43 @@ const loginUser = async (req, res) => {
     res.status(200).json(payload);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+const loginEntraUser = async (req, res) => {
+  console.log("hit loginEntra route");
+  const { decoded, accessToken } = req.user;
+  const { oid, tid, preferred_username } = decoded;
+
+  // const { oid, tid, preferred_username } = req.user;
+  console.log("req.user", req.user);
+  // Business logic to handle user login/signup/tenant creation
+  // No sign-up option for entra sign in, so that must be handled here
+  try {
+    if (!oid || !tid) {
+      throw Error("incomplete access token");
+    }
+    let user = await User.findOne({ objectID: oid });
+    let tenant = await Tenant.findOne({ tenantId: tid });
+    if (!tenant) {
+      // create tenant
+      tenant = await Tenant.create({
+        tenantId: tid,
+      });
+    }
+    if (!user) {
+      // create user
+      user = await User.create({
+        tenant: tenant._id,
+        objectID: oid,
+        email: preferred_username,
+      });
+    }
+    return res
+      .status(200)
+      .json({ accessToken, email: preferred_username, _id: user._id });
+  } catch (error) {
+    return res.status(401).json({ error: error.message });
   }
 };
 
@@ -82,12 +120,16 @@ const getUser = async (req, res) => {
   console.log("hit getUser route");
   const { email } = req.query;
   console.log(email);
+  console.log("req.user._id", req.user._id);
+  const { oid } = req.user.decoded;
   let user;
   try {
     if (email) {
       user = await User.findOne({ email });
-    } else {
+    } else if (req.user._id) {
       user = await User.findById(req.user._id);
+    } else {
+      user = await User.findOne({ objectID: oid });
     }
 
     await user.populate([
@@ -207,4 +249,5 @@ module.exports = {
   updateUser,
   readUser,
   // getLearnerUser,
+  loginEntraUser,
 };
