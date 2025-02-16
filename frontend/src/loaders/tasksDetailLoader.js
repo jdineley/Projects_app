@@ -1,6 +1,7 @@
 const taskDetailLoader =
   (user) =>
   async ({ params, request }) => {
+    const token = user.token ? user.token : user.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { taskId } = params;
     const url = new URL(request.url);
@@ -19,7 +20,7 @@ const taskDetailLoader =
           `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}`,
           {
             headers: {
-              Authorization: `Bearer: ${user.token}`,
+              Authorization: `Bearer: ${token}`,
             },
           }
         );
@@ -35,7 +36,7 @@ const taskDetailLoader =
               method: "GET",
               mode: "cors",
               headers: {
-                Authorization: `Bearer ${user.token}`,
+                Authorization: `Bearer ${token}`,
               },
             }
           );

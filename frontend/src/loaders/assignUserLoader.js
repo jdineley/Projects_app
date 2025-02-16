@@ -2,6 +2,7 @@ const assignUserLoader =
   (user) =>
   async ({ request }) => {
     console.log("in assignUser loader");
+    const token = user.token ? user.token : user.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const url = new URL(request.url);
     const assignUser = url.searchParams?.get("assignUser");
@@ -15,7 +16,7 @@ const assignUserLoader =
             method: "GET",
             mode: "cors",
             headers: {
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );

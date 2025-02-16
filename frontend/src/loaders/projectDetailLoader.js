@@ -2,6 +2,7 @@ const projectDetailLoader =
   (user) =>
   async ({ params, request }) => {
     console.log("calling project detail loader..");
+    const token = user.token ? user.token : user.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, reviewId } = params;
     const url = new URL(request.url);
@@ -24,7 +25,7 @@ const projectDetailLoader =
             method: "GET",
             mode: "cors",
             headers: {
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -38,7 +39,7 @@ const projectDetailLoader =
               method: "GET",
               mode: "cors",
               headers: {
-                Authorization: `Bearer ${user.token}`,
+                Authorization: `Bearer ${token}`,
               },
             }
           );
@@ -55,7 +56,7 @@ const projectDetailLoader =
               method: "GET",
               mode: "cors",
               headers: {
-                Authorization: `Bearer ${user.token}`,
+                Authorization: `Bearer ${token}`,
               },
             }
           );

@@ -8,20 +8,22 @@ const loginAction = async ({ request }) => {
   console.log("accessToken", accessToken);
 
   try {
-    // if (!accessToken) {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    if (accessToken) {
+      headers.append("Authorization", `Bearer ${accessToken}`);
+    }
+    const options = {
+      method: "POST",
+      mode: "cors",
+      headers: headers,
+      body: JSON.stringify(submission),
+    };
     const response = await fetch(
       `${VITE_REACT_APP_API_URL}/api/v1/users/${
         accessToken ? "loginEntraID" : "login"
       }`,
-      {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(submission),
-      }
+      options
     );
     if (response.statusText === "Not Found") {
       throw Error("Server connection error");
@@ -30,10 +32,8 @@ const loginAction = async ({ request }) => {
     if (!response.ok) {
       throw Error(json.error);
     }
+    console.log("JSON@@£@£@£@£@@£@£@£@£", json);
     return json;
-    // }
-
-    // return null;
   } catch (error) {
     return error;
   }

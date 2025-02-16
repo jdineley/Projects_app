@@ -23,6 +23,10 @@ const getKey = (header, callback) => {
 
 // Middleware to verify token
 const verifyToken = (req, res, next) => {
+  console.log("in requireEntraIDAuth");
+  if (req.user?._id) {
+    return next();
+  }
   const authHeader = req.headers.authorization;
   // const { _id } = req.headers;
   // console.log("_id", _id);

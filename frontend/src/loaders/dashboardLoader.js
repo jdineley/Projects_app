@@ -1,5 +1,6 @@
 const dashboardLoader = (user) => async () => {
   console.log("in dashboard loader");
+  const token = user?.token ? user?.token : user?.accessToken;
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   try {
     if (user) {
@@ -9,7 +10,7 @@ const dashboardLoader = (user) => async () => {
           method: "GET",
           mode: "cors",
           headers: {
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

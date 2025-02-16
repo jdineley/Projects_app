@@ -92,7 +92,13 @@ const loginEntraUser = async (req, res) => {
 const logoutUser = async (req, res) => {
   console.log("hit logoutUser route");
   try {
-    const user = await User.findById(req.user._id);
+    let user;
+    if (req.user.accessToken) {
+      const { oid } = req.user.decoded;
+      user = await User.findOne({ objectID: oid });
+    } else {
+      user = await User.findById(req.user._id);
+    }
     if (!user) {
       throw Error("not user found");
     }
@@ -121,7 +127,8 @@ const getUser = async (req, res) => {
   const { email } = req.query;
   console.log(email);
   console.log("req.user._id", req.user._id);
-  const { oid } = req.user.decoded;
+  const oid = req.user.decoded?.oid;
+  console.log("oid", oid);
   let user;
   try {
     if (email) {
@@ -131,7 +138,7 @@ const getUser = async (req, res) => {
     } else {
       user = await User.findOne({ objectID: oid });
     }
-
+    console.log("user", user);
     await user.populate([
       {
         path: "tasks",

@@ -2,6 +2,7 @@ const rootLayoutLoader =
   (user) =>
   async ({ request }) => {
     console.log("hit rootLayoutLoader");
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     // console.log("$$$$$$$$$$$$$$$$$$$$", import.meta.env.VITE_REACT_APP_API_URL);
     const url = new URL(request.url);
@@ -16,7 +17,7 @@ const rootLayoutLoader =
             method: "GET",
             mode: "cors",
             headers: {
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );

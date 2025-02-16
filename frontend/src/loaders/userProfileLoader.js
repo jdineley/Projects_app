@@ -1,5 +1,6 @@
 const userProfileLoader = (user) => async () => {
   console.log("hit userProfileLoader");
+  const token = user?.token ? user?.token : user?.accessToken;
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   // const url = new URL(request.url);
   // const intent = url.searchParams.get("vacation-request");
@@ -12,7 +13,7 @@ const userProfileLoader = (user) => async () => {
           method: "GET",
           mode: "cors",
           headers: {
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

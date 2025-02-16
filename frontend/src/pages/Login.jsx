@@ -30,52 +30,18 @@ import { useNotificationContext } from "../hooks/useNotificationContext";
 import { MSIdentitySignInButton } from "../components/MSIdentitySignInButton";
 import MSIdentityLogoutButton from "../components/MSIdentityLogoutButton";
 
-// const ProfileContent = () => {
-//   const { instance, accounts } = useMsal();
-//   const [graphData, setGraphData] = useState(null);
-
-//   function RequestProfileData() {
-//     // Silently acquires an access token which is then attached to a request for MS Graph data
-//     instance
-//       .acquireTokenSilent({
-//         ...loginRequest,
-//         account: accounts[0],
-//       })
-//       .then((response) => {
-//         console.log("response", response);
-//         console.log("response.idToken", response.idToken);
-//         console.log("response.accessToken", response.accessToken);
-//         callMsGraph(response.accessToken).then((response) => {
-//           console.log(response);
-//           setGraphData(response);
-//         });
-//       });
-//   }
-
-//   return (
-//     <>
-//       <h5 className="card-title">Welcome {accounts[0].name}</h5>
-//       {graphData ? (
-//         <ProfileData graphData={graphData} />
-//       ) : (
-//         <button variant="secondary" onClick={RequestProfileData}>
-//           Request Profile Information
-//         </button>
-//       )}
-//     </>
-//   );
-// };
-
 export default function Login() {
+  const entraIDSignedIn = useRef(false);
+  console.log("entraIDSignedIn.current", entraIDSignedIn.current);
   const isAuthenticated = useIsAuthenticated();
   const { instance, inProgress, accounts } = useMsal();
 
   const [error, setError] = useState(null);
   const { user, dispatch } = useAuthContext();
   let json = useActionData();
+  console.log("jsonjsonjsonjsonjsonjson", json);
   // let json = null;
-
-  const entraIDSignedIn = useRef(null);
+  // if (json) entraIDSignedIn.current = true;
 
   const navigate = useNavigate();
 
@@ -94,7 +60,7 @@ export default function Login() {
       "Incorrect password",
     ];
     // if (!entraIDSignedIn.current || inProgress === InteractionStatus.None) {
-    if (!entraIDSignedIn.current) {
+    if (!entraIDSignedIn.current && inProgress) {
       // Acquire access tokens
       // make post request to /login
       instance
@@ -103,13 +69,6 @@ export default function Login() {
           account: accounts[0],
         })
         .then((response) => {
-          console.log("response", response);
-          console.log("response.idToken", response.idToken);
-          console.log("response.accessToken", typeof response.accessToken);
-          // let formData = new FormData();
-          // formData.append("accessToken", response.accessToken);
-          // console.log("formData", formData.get("accessToken"));
-          // submit(formData);
           submit(
             { accessToken: response.accessToken },
             {
@@ -118,14 +77,6 @@ export default function Login() {
             }
           );
           entraIDSignedIn.current = true;
-          // submit(response.accessToken, {
-          //   method: "post",
-          //   encType: "text/plain",
-          // });
-          // callMsGraph(response.accessToken).then((response) => {
-          //   console.log(response);
-          //   setGraphData(response);
-          // });
         })
         .catch((error) => {
           if (error instanceof InteractionRequiredAuthError) {
@@ -142,18 +93,8 @@ export default function Login() {
         type: "LOGIN",
         payload: user,
       });
-      return navigate("/dashboard");
-    }
-    // else if (json?.accessToken) {
-    //   const { _id, email, accessToken } = json;
-    //   localStorage.setItem("user", JSON.stringify({ _id, email, accessToken }));
-    //   dispatch({
-    //     type: "LOGIN",
-    //     payload: { _id, email, token },
-    //   });
-    //   return navigate("/dashboard");
-    // }
-    else if (json && userLoginErrorMessages.includes(json.message)) {
+      navigate("/dashboard");
+    } else if (json && userLoginErrorMessages.includes(json.message)) {
       setError(json.message); //incorrect user credentials??
     } else if (json) {
       throw new Error(json.message);
@@ -169,7 +110,7 @@ export default function Login() {
     notificationDispatch,
     revalidator,
     inProgress,
-    entraIDSignedIn.current,
+    // entraIDSignedIn.current,
   ]);
 
   return (
@@ -203,9 +144,7 @@ export default function Login() {
         <>
           <h2>Logged In</h2>
           <MSIdentityLogoutButton />
-          {/* <ProfileContent /> */}
           <h5 className="card-title">Welcome {accounts[0].name}</h5>
-          {/* {graphData && <ProfileData graphData={graphData} />} */}
         </>
       ) : (
         <>
@@ -213,8 +152,6 @@ export default function Login() {
           <MSIdentitySignInButton />
         </>
       )}
-      {/* <AuthenticatedTemplate></AuthenticatedTemplate>
-      <UnauthenticatedTemplate></UnauthenticatedTemplate> */}
     </div>
   );
 }

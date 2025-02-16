@@ -1,6 +1,7 @@
 const projectsLoader =
   (user) =>
   async ({ request }) => {
+    const token = user.token ? user.token : user.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const url = new URL(request.url);
     // from project delete redirect()
@@ -28,7 +29,7 @@ const projectsLoader =
             method: "GET",
             mode: "cors",
             headers: {
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );

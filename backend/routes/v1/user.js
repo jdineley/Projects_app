@@ -1,6 +1,6 @@
 const express = require("express");
 
-const verifyToken = require("../../middleware/requireEntraIDAuth");
+// const verifyToken = require("../../middleware/requireEntraIDAuth");
 
 const {
   signUpUser,
@@ -21,17 +21,17 @@ const router = express.Router();
 
 router.post("/login", loginUser);
 
-router.post("/loginEntraID", verifyToken, loginEntraUser);
+router.post("/loginEntraID", requireEntraIDAuth, loginEntraUser);
 
 router.post("/signup", signUpUser);
 
 router.get("/getUsers", requireAuth, getUsers);
 
-router.get("/getUser", requireEntraIDAuth, getUser);
+router.get("/getUser", requireAuth, requireEntraIDAuth, getUser);
 
 router.get("/readUser", requireAuth, readUser);
 
-router.get("/logout", requireAuth, logoutUser);
+router.get("/logout", requireAuth, requireEntraIDAuth, logoutUser);
 
 router.patch("/:userId", requireAuth, updateUser);
 
