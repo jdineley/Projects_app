@@ -26,7 +26,14 @@ setup("do initialisations", async ({ request, signupPage, rootLayout }) => {
 
 setup(
   "login & MS Project upload",
-  async ({ loginPage, dashboardPage, projectsPage, page, rootLayout }) => {
+  async ({
+    loginPage,
+    dashboardPage,
+    projectsPage,
+    page,
+    rootLayout,
+    accountPage,
+  }) => {
     setup.setTimeout(200000);
     page.on("dialog", (dialog) => dialog.accept());
     await loginPage.goto();
@@ -51,6 +58,8 @@ setup(
       console.log(`${user[1]} uploaded`);
       if (user[0] !== "henryTest@mail.com") {
         await rootLayout.logout();
+        await accountPage.isReady();
+        await loginPage.goto();
         await loginPage.isReady();
       }
     }

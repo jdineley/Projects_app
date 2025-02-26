@@ -53,14 +53,16 @@ async function msProjectUpload(
   for (const task of tasks) {
     const { user } = task;
 
-    const storedUser = await User.findOne({ email: user, isDemo }).populate([
-      "tasks",
-      "vacationRequests",
-      "secondaryTasks",
-    ]);
+    // #1732
+    // user must belong to the host tenant
+    const storedUser = await User.findOne({
+      email: user,
+      isDemo,
+      tenant: currentUser.tenant,
+    }).populate(["tasks", "vacationRequests", "secondaryTasks"]);
     if (!storedUser) {
       throw {
-        errors: `${user} does not currently have an account, please sign up before importing`,
+        errors: `${user} does not currently have an account within the protected domain.`,
         newProjectId: newProject._id,
       };
     }
@@ -75,6 +77,7 @@ async function msProjectUpload(
     });
   }
   await newProject.populate([{ path: "tasks", populate: ["secondaryUsers"] }]);
+  // ("newProject", newProject);
   await resyncProjTasksUsersVacs(newProject);
   await newProject.save();
 

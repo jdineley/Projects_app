@@ -49,8 +49,27 @@ class CommentReply {
   }
 }
 
+export class AccountPage {
+  public url: string = process.env.BASE_FRONTEND_URL! + "account";
+  readonly page: Page;
+  readonly $accountLocator: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.$accountLocator = this.page.getByTestId("account-page");
+  }
+
+  public async goto() {
+    await this.page.goto(this.url);
+  }
+
+  public async isReady() {
+    return expect(this.$accountLocator).toBeVisible({ timeout: 3000 });
+  }
+}
+
 export class LoginPage {
-  public url: string = process.env.BASE_FRONTEND_URL! + "login";
+  public url: string = process.env.BASE_FRONTEND_URL! + "account/login";
   readonly page: Page;
   readonly $loginLocator: Locator;
 
@@ -98,7 +117,7 @@ export class DashboardPage {
 }
 
 export class SignupPage {
-  public url: string = process.env.BASE_FRONTEND_URL! + "signup";
+  public url: string = process.env.BASE_FRONTEND_URL! + "account/signup";
   readonly page: Page;
   readonly $signupLocator: Locator;
   readonly $errorLocator: Locator;
@@ -128,12 +147,12 @@ export class SignupPage {
     password: string,
     confirmPassword: string
   ) {
-    await this.$signupLocator.getByLabel("Email").fill(email);
+    await this.$signupLocator.getByLabel("Email:").fill(email);
     await this.$signupLocator
-      .getByLabel("Password", { exact: true })
+      .getByLabel("Password:", { exact: true })
       .fill(password);
     await this.$signupLocator
-      .getByLabel("Confirm Password", { exact: true })
+      .getByLabel("Confirm Password:", { exact: true })
       .fill(confirmPassword);
     await this.$submitButton.click();
     // await this.emailNotInUse();

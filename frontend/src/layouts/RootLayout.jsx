@@ -17,16 +17,19 @@ import { useEffect, useRef } from "react";
 
 // components
 import AvatarCustom from "../Avatar";
+// import { MSIdentitySignInButton } from "../components/MSIdentitySignInButton";
 
 // radixUI
 import { Button, DropdownMenu, Flex, Avatar, Text } from "@radix-ui/themes";
 
 import BreadCrumbs from "../components/BreadCrumbs";
 
-// incons
+// icons
 import { FcCollaboration } from "react-icons/fc";
 import { IoIosNotifications } from "react-icons/io";
 import { FaGithub } from "react-icons/fa";
+import { VscAccount } from "react-icons/vsc";
+import { FaMicrosoft } from "react-icons/fa";
 
 // hooks
 import useMatchMedia from "../hooks/useMatchMedia";
@@ -39,6 +42,7 @@ export default function RouteLayout() {
 
   const { user, dispatch } = useAuthContext();
   const location = useLocation();
+  console.log("location.pathname", location.pathname);
 
   const submit = useSubmit();
 
@@ -78,10 +82,12 @@ export default function RouteLayout() {
     }
     if (
       !user &&
-      location.pathname !== "/signup" &&
-      location.pathname !== "/learning"
+      location.pathname !== "/account/signup" &&
+      location.pathname !== "/learning" &&
+      location.pathname !== "/account/login" &&
+      location.pathname !== "/account/microsoft"
     ) {
-      navigate("/login");
+      navigate("/account");
     }
     if (notificationsCleared) {
       if (notification) {
@@ -140,7 +146,7 @@ export default function RouteLayout() {
                 </Button>
               </NavLink>
             )}
-            {!user && (
+            {/* {!user && (
               <NavLink to="/login">
                 <Button variant="ghost" color="gray">
                   Login
@@ -153,17 +159,22 @@ export default function RouteLayout() {
                   Signup
                 </Button>
               </NavLink>
-            )}
+            )} */}
             <NavLink to="/learning">
               <Button variant="ghost" color="gray">
                 {!isMobileResolution ? "Learning" : "Learn"}
               </Button>
             </NavLink>
-            <NavLink to="https://jdineley.github.io/Projects_app/">
+            {!user && (
+              <NavLink to="/account">
+                <VscAccount />
+              </NavLink>
+            )}
+            {/* <NavLink to="https://jdineley.github.io/Projects_app/">
               <Button variant="ghost" color="gray">
                 {!isMobileResolution ? "Playwright - CI" : "CI"}
               </Button>
-            </NavLink>
+            </NavLink> */}
             {user && (
               <div className="current-user-container">
                 <DropdownMenu.Root>
@@ -299,7 +310,10 @@ export default function RouteLayout() {
               </div>
             )}
           </nav>
-          {currentPathNoQuery !== "/user" && <BreadCrumbs />}
+          <div className="flex justify-between">
+            {currentPathNoQuery !== "/user" && <BreadCrumbs />}
+            <Text size="1">{user?.email}</Text>
+          </div>
         </header>
         <main className={navigation.state !== "idle" ? "loading" : ""}>
           <Outlet />
@@ -314,3 +328,34 @@ export default function RouteLayout() {
     </div>
   );
 }
+
+// {user && (
+//   <DropdownMenu.Root>
+//     <DropdownMenu.Trigger>
+//       <Flex gap="2" align="center">
+//         <VscAccount />
+//       </Flex>
+//     </DropdownMenu.Trigger>
+//     <DropdownMenu.Content>
+//       <DropdownMenu.Sub>
+//         <DropdownMenu.SubTrigger>
+//           Try Projects
+//         </DropdownMenu.SubTrigger>
+//         <DropdownMenu.SubContent>
+//           <DropdownMenu.Item>
+//             <NavLink to="/signup">Signup</NavLink>
+//           </DropdownMenu.Item>
+//           <DropdownMenu.Item>
+//             <NavLink to="/login">Login</NavLink>
+//           </DropdownMenu.Item>
+//         </DropdownMenu.SubContent>
+//       </DropdownMenu.Sub>
+//       <DropdownMenu.Item>
+//         <Flex align="center" gap="2">
+//           <FaMicrosoft />
+//           <Text>MS Signin</Text>
+//         </Flex>
+//       </DropdownMenu.Item>
+//     </DropdownMenu.Content>
+//   </DropdownMenu.Root>
+// )}

@@ -1,7 +1,7 @@
 const taskDetailLoader =
   (user) =>
   async ({ params, request }) => {
-    const token = user.token ? user.token : user.accessToken;
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { taskId } = params;
     const url = new URL(request.url);

@@ -10,31 +10,36 @@ const {
   getUser,
   updateUser,
   readUser,
-  getLearnerUser,
+  // getLearnerUser,
   loginEntraUser,
+  verifyEmail,
 } = require("../../controllers/userController");
 
 const requireAuth = require("../../middleware/requireAuth");
-const requireEntraIDAuth = require("../../middleware/requireEntraIDAuth");
+// const requireEntraIDAuth = require("../../middleware/requireEntraIDAuth");
+// const checkVerification = require("../../middleware/checkVerification");
 
 const router = express.Router();
 
 router.post("/login", loginUser);
 
-router.post("/loginEntraID", requireEntraIDAuth, loginEntraUser);
+router.post("/loginEntraID", requireAuth, loginEntraUser);
 
 router.post("/signup", signUpUser);
 
 router.get("/getUsers", requireAuth, getUsers);
 
-router.get("/getUser", requireAuth, requireEntraIDAuth, getUser);
+router.get("/getUser", requireAuth, getUser);
 
 router.get("/readUser", requireAuth, readUser);
 
-router.get("/logout", requireAuth, requireEntraIDAuth, logoutUser);
+router.get("/logout", requireAuth, logoutUser);
 
-router.patch("/:userId", requireAuth, updateUser);
+router.patch("/", requireAuth, updateUser);
+// router.patch("/:userId", requireAuth, updateUser);
 
 router.get("/getLearnerUser", getUser);
+
+router.get("/verify/:token", verifyEmail);
 
 module.exports = router;

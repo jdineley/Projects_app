@@ -13,8 +13,9 @@ const learningLoader = async ({ params, request }) => {
       throw Error("something went wrong getting the learner user");
     }
     const userObj = await resp1.json();
+    console.log("learningLoader userObj:", userObj);
     const resp2 = await fetch(
-      `${VITE_REACT_APP_API_URL}/api/v1/projects/getLearnerProject/${userObj.projects[1]._id}`,
+      `${VITE_REACT_APP_API_URL}/api/v1/projects/getLearnerProject/${userObj.projects[0]._id}?intent=getLearnerProject`,
       {
         method: "GET",
         mode: "cors",

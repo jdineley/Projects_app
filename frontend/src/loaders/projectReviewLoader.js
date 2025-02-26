@@ -2,7 +2,7 @@ const projectReviewLoader =
   (user) =>
   async ({ params, request }) => {
     console.log("calling project review loader");
-    const token = user.token ? user.token : user.accessToken;
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, reviewId } = params;
     const url = new URL(request.url);
@@ -35,7 +35,7 @@ const projectReviewLoader =
 
         if (assignUser) {
           const res2 = await fetch(
-            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?assignUser=${assignUser}`,
+            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?assignUser=${assignUser}&intent=reviewAction&projectId=${projectId}`,
             {
               method: "GET",
               mode: "cors",

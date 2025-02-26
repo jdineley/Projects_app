@@ -132,7 +132,10 @@ header nav a {
   display: flex;
   align-items: center;
 }
-header nav a.active {
+/* header nav a.active {
+  border-bottom: 2px solid var(--logo);
+} */
+.active {
   border-bottom: 2px solid var(--logo);
 }
 

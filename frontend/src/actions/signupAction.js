@@ -24,9 +24,9 @@ const signupAction = async ({ request }) => {
       throw Error(json.error);
     }
     console.log("json2:", json);
-    return { user: json };
+    return json;
   } catch (error) {
-    return error;
+    return { error };
   }
 };
 

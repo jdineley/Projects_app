@@ -260,7 +260,7 @@ const Learning = () => {
               </Heading>{" "}
               <Box mb="2">
                 <Text>
-                  Once an MS Project plan is embedded within{" "}
+                  Once a MS Project plan is embedded within{" "}
                   <span className="logo-highlight">Projects</span> the cycle of
                   'project work' to 'project progress review' will begin. During
                   'project work', team members will use{" "}
@@ -337,7 +337,7 @@ const Learning = () => {
               The Project Details Page provides a complete list of all project
               tasks in chronological order. Tasks can be filtered to show only
               currently in-work tasks based on the active date range and also
-              filter to show specific users' tasks. <br /> The project may be
+              filtered to show specific users' tasks. <br /> The project may be
               edited by the PM via the Edit Project Dialog, which provides a
               different set of editing opportunities depending on whether the
               project is derived natively or via a linked MS Project. Native

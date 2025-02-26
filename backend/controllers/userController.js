@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-
+const mongoose = require("mongoose");
 const User = require("../models/User");
 const Tenant = require("../models/Tenant");
 
@@ -22,11 +22,18 @@ const signUpUser = async (req, res) => {
   else isTest = false;
 
   try {
-    const user = await User.signUp(email, password, isTest);
+    const user = await User.signUp({ email, password, isTest });
+    if (user === "verify") {
+      return res.status(200).json({
+        message:
+          "Email verification required. Go to your inbox to complete the verification. Please check your spam folder",
+      });
+    }
     const token = createToken(user._id);
 
-    res.status(201).json({ _id: user._id, email, token });
+    return res.status(201).json({ user: { _id: user._id, email, token } });
   } catch (error) {
+    console.log("signup error", error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -41,6 +48,12 @@ const loginUser = async (req, res) => {
   let payload = {};
   try {
     const user = await User.login(email, password);
+    if (!user) {
+      return res.status(200).json({
+        message:
+          "Email verification required. Go to your inbox to complete the verification. Please check your spam folder",
+      });
+    }
     const token = createToken(user._id);
     payload._id = user._id;
     payload.email = email;
@@ -100,7 +113,7 @@ const logoutUser = async (req, res) => {
       user = await User.findById(req.user._id);
     }
     if (!user) {
-      throw Error("not user found");
+      throw Error("no user found");
     }
     user.isLoggedIn = false;
     await user.save();
@@ -112,33 +125,75 @@ const logoutUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
   console.log("hit getUsers route");
-  const { assignUser } = req.query;
+  const { assignUser, intent, projectId } = req.query;
   const { isDemo } = req.user;
-
-  const users = await User.find({
-    email: { $regex: assignUser, $options: "i" },
-    isDemo,
-  });
-  res.status(200).json(users);
+  console.log("req.user", req.user);
+  try {
+    // const users = await User.find({
+    //   email: { $regex: assignUser, $options: "i" },
+    //   isDemo,
+    // });
+    let users;
+    // #6823
+    // if for task then taken from tenant or global only
+    // let validUsers;
+    if (intent === "task") {
+      console.log("in task");
+      users = await User.find({
+        email: { $regex: assignUser, $options: "i" },
+        tenant: req.user.tenant,
+      });
+      // validUsers = users.filter((user) => {
+      //   if (req.user.organisation) {
+      //     return user.tenant === req.user.tenant;
+      //   }
+      //   return !user.organisation;
+      // });
+    } else if (intent === "reviewAction") {
+      // if for review action then taken from project
+      console.log("in reviewAction");
+      users = await User.find({
+        email: { $regex: assignUser, $options: "i" },
+        $or: [
+          { projects: new mongoose.Types.ObjectId(projectId) },
+          { userInProjects: new mongoose.Types.ObjectId(projectId) },
+        ],
+      });
+      // validUsers = users.filter((user) => {
+      //   if (
+      //     user.userInProjects.map((p) => p.toString()).includes(projectId) ||
+      //     user.projects.map((p) => p.toString()).includes(projectId)
+      //   ) {
+      //     return true;
+      //   }
+      // });
+    } else if (isDemo) {
+      users = await User.find({
+        email: { $regex: assignUser, $options: "i" },
+        isDemo,
+      });
+    }
+    // console.log("validUsers", validUsers);
+    res.status(200).json(users);
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
 };
 
 const getUser = async (req, res) => {
   console.log("hit getUser route");
   const { email } = req.query;
-  console.log(email);
-  console.log("req.user._id", req.user._id);
-  const oid = req.user.decoded?.oid;
-  console.log("oid", oid);
+  const oid = req.user?.decoded?.oid;
   let user;
   try {
     if (email) {
       user = await User.findOne({ email });
-    } else if (req.user._id) {
-      user = await User.findById(req.user._id);
-    } else {
+    } else if (oid) {
       user = await User.findOne({ objectID: oid });
+    } else {
+      user = req.user;
     }
-    console.log("user", user);
+    // console.log("user", user);
     await user.populate([
       {
         path: "tasks",
@@ -174,12 +229,27 @@ const getUser = async (req, res) => {
 const readUser = async (req, res) => {
   console.log("hit readUser route");
   const { userEmail } = req.query;
+  const { decoded } = req.user;
 
   try {
-    const user = await User.findOne({ email: userEmail });
-
+    // #5832
+    // get user within tenant or global scope
+    let user;
+    if (!decoded) {
+      // personal account
+      // user.tenant === null
+      user = await User.findOne({ email: userEmail, tenant: null });
+    } else {
+      // user.tenant !== null
+      user = await User.findOne({ email: userEmail, tenant: decoded.tid });
+      if (!user) {
+        throw Error;
+      }
+    }
     if (!user) {
-      throw Error(`User with that ID not found`);
+      throw Error(
+        "something went wrong finding the user, either the email doesn't exist of the user email belongs to a user outside the target tenant or domain"
+      );
     }
     res.status(200).json(user);
   } catch (error) {
@@ -189,7 +259,8 @@ const readUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   console.log("****************hit updateUser route*********************");
-  const { intent, ...notificationObj } = req.body;
+  const { intent } = req.body;
+  // const { intent, ...notificationObj } = req.body;
   console.log("intent", intent);
 
   try {
@@ -197,49 +268,80 @@ const updateUser = async (req, res) => {
     if (intent === "clear-notifications") {
       user.recievedNotifications = [];
       await user.save();
-      res.status(200).json(user);
+      return res.status(200).json(user);
     }
-    if (intent === "filter-notifications") {
-      const notificationType = Object.keys(notificationObj)[0];
-      const url = notificationObj[notificationType];
-      let receivedNotications = "";
-      switch (notificationType) {
-        case "comment":
-          receivedNotications = "recentReceivedComments";
-          break;
-        case "reply":
-          receivedNotications = "recentReceivedReply";
-          break;
-        case "task":
-          receivedNotications = "recentReceivedTasks";
-          break;
-        case "vacation":
-          receivedNotications = "recentReceivedVacRequest";
-          break;
-        case "vacation-accepted":
-          receivedNotications = "recentReceivedVacAccepted";
-          break;
-        case "vacation-rejected":
-          receivedNotications = "recentReceivedVacRejected";
-          break;
-        case "vacation-approved":
-          receivedNotications = "recentReceivedVacApproved";
-          break;
-        default:
-          console.log("no match.. try again");
-      }
-      if (user[receivedNotications].length > 0) {
-        user[receivedNotications] = user[receivedNotications].filter((not) => {
-          return not !== url;
-        });
-        console.log("receivedNotications 2", user[receivedNotications]);
-        await user.save();
-      }
 
-      res.status(200).json(user);
-    }
+    // if (intent === "filter-notifications") {
+    //   const notificationType = Object.keys(notificationObj)[0];
+    //   const url = notificationObj[notificationType];
+    //   let receivedNotications = "";
+    //   switch (notificationType) {
+    //     case "comment":
+    //       receivedNotications = "recentReceivedComments";
+    //       break;
+    //     case "reply":
+    //       receivedNotications = "recentReceivedReply";
+    //       break;
+    //     case "task":
+    //       receivedNotications = "recentReceivedTasks";
+    //       break;
+    //     case "vacation":
+    //       receivedNotications = "recentReceivedVacRequest";
+    //       break;
+    //     case "vacation-accepted":
+    //       receivedNotications = "recentReceivedVacAccepted";
+    //       break;
+    //     case "vacation-rejected":
+    //       receivedNotications = "recentReceivedVacRejected";
+    //       break;
+    //     case "vacation-approved":
+    //       receivedNotications = "recentReceivedVacApproved";
+    //       break;
+    //     default:
+    //       console.log("no match.. try again");
+    //   }
+    //   if (user[receivedNotications].length > 0) {
+    //     user[receivedNotications] = user[receivedNotications].filter((not) => {
+    //       return not !== url;
+    //     });
+    //     console.log("receivedNotications 2", user[receivedNotications]);
+    //     await user.save();
+    //   }
+
+    //   res.status(200).json(user);
+    // }
   } catch (error) {
     res.status(400).json(error.message);
+  }
+};
+
+const verifyEmail = async (req, res) => {
+  console.log("in verifyEmail route");
+  const { token } = req.params;
+
+  // Find user by token
+  try {
+    const user = await User.findOne({ verificationToken: token });
+    if (!user) {
+      return res.redirect(
+        `${process.env.VITE_REACT_URL}/account/login?email=notVerified`
+      );
+    }
+
+    // Verify user
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
+
+    return res.redirect(
+      `${process.env.VITE_REACT_URL}/account/login?email=verified`
+    );
+    // res.status(200).json({ message: "Email verified successfully" });
+  } catch (error) {
+    return res.redirect(
+      `${process.env.VITE_REACT_URL}/account/login?email=notVerified`
+    );
+    // res.status(403).json({ error: error.message });
   }
 };
 
@@ -257,4 +359,5 @@ module.exports = {
   readUser,
   // getLearnerUser,
   loginEntraUser,
+  verifyEmail,
 };

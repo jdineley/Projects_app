@@ -127,11 +127,13 @@ const TaskEditDialog = ({
                 setTaskSearchActive(false);
                 setOpen(false);
               }
+              saving = false;
             } else if (deleting) {
               if (window.confirm("Are you sure you want to delete?")) {
                 submit(deleteButtonRef.current);
                 setOpen(false);
               }
+              deleting = false;
             } else {
               if (window.confirm("Are you sure you want to cancel?")) {
                 setNewTaskTitle("");

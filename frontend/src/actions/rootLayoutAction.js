@@ -11,7 +11,8 @@ const rootLayoutAction =
     try {
       if (intent === "clear-notifications") {
         const res = await fetch(
-          `${VITE_REACT_APP_API_URL}/api/v1/users/${user._id}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/users`,
+          // `${VITE_REACT_APP_API_URL}/api/v1/users/${user._id}`,
           {
             method: "PATCH",
             mode: "cors",

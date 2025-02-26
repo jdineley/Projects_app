@@ -119,6 +119,7 @@ const AddProjectDialog = ({
               submit(button);
               setOpen(false);
             }
+            saving = false;
           } else {
             if (window.confirm("Are you sure you want to cancel?")) {
               setValidEmailError("");

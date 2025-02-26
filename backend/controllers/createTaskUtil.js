@@ -9,7 +9,8 @@ const { resyncUserAndVacs } = require("../util");
 
 async function createTaskUtil({ task, ...rest }) {
   console.log("in create task utility");
-  console.log(task, rest);
+  // console.log(task, rest);
+
   const {
     GUID,
     UID,
@@ -21,6 +22,7 @@ async function createTaskUtil({ task, ...rest }) {
     secondaryUsers,
     milestone,
   } = task;
+  // console.log("title:", title);
   const {
     storedUser,
     newProject,
@@ -29,14 +31,20 @@ async function createTaskUtil({ task, ...rest }) {
     isDemo,
     isTest,
   } = rest;
+  // console.log("storedUser", storedUser.email);
   const secondaryUsersIds = [];
   if (secondaryUsers.length > 0) {
     for (const secondUser of secondaryUsers) {
-      const storedSecondUser = await User.findOne({ email: secondUser });
+      // #6111
+      // secondary user must belong to host tenant
+      const storedSecondUser = await User.findOne({
+        email: secondUser,
+        tenant: currentUser.tenant,
+      });
       if (!storedSecondUser) {
         if (projectToUpdate) {
           throw Error(
-            `A user with email address ${secondUser} was not found, register the user before importing the msProject`
+            `A user with email address ${secondUser} was not found within the protected tenant domain`
           );
         }
         // else if(newProject) = remove entire project and start again...

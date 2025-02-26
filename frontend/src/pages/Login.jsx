@@ -4,8 +4,11 @@ import {
   useNavigate,
   useRevalidator,
   useSubmit,
+  useLocation,
+  useSearchParams,
 } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { Button, DropdownMenu, Flex, Avatar, Text } from "@radix-ui/themes";
 
 import {
   AuthenticatedTemplate,
@@ -31,12 +34,17 @@ import { MSIdentitySignInButton } from "../components/MSIdentitySignInButton";
 import MSIdentityLogoutButton from "../components/MSIdentityLogoutButton";
 
 export default function Login() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParamsObject = Object.fromEntries(searchParams);
+
+  console.log("searchParamsObject", searchParamsObject);
   const entraIDSignedIn = useRef(false);
   console.log("entraIDSignedIn.current", entraIDSignedIn.current);
   const isAuthenticated = useIsAuthenticated();
   const { instance, inProgress, accounts } = useMsal();
 
   const [error, setError] = useState(null);
+  const [emailVerify, setEmailVerify] = useState("");
   const { user, dispatch } = useAuthContext();
   let json = useActionData();
   console.log("jsonjsonjsonjsonjsonjson", json);
@@ -51,6 +59,8 @@ export default function Login() {
 
   let submit = useSubmit();
   // const [graphData, setGraphData] = useState(null);
+
+  const location = useLocation();
 
   useEffect(() => {
     console.log("in useEffect Login");
@@ -96,8 +106,21 @@ export default function Login() {
       navigate("/dashboard");
     } else if (json && userLoginErrorMessages.includes(json.message)) {
       setError(json.message); //incorrect user credentials??
+    } else if (
+      json?.message ===
+      "Email verification required. Go to your inbox to complete the verification. Please check your spam folder"
+    ) {
+      setEmailVerify(json.message);
     } else if (json) {
       throw new Error(json.message);
+    }
+    if (searchParamsObject.email === "verified") {
+      setEmailVerify("Your email address has been verified, please login.");
+    }
+    if (searchParamsObject.email === "notVerified") {
+      setEmailVerify(
+        "Something went wrong verifying your email, please try again. If the problem persists please contact projects"
+      );
     }
     if (user) {
       navigate("/dashboard");
@@ -110,48 +133,49 @@ export default function Login() {
     notificationDispatch,
     revalidator,
     inProgress,
+    searchParams,
     // entraIDSignedIn.current,
   ]);
 
   return (
-    <div className="login">
-      <h2>Login</h2>
-      {error && <div className="error">{error}</div>}
-      <Form method="POST">
-        <label htmlFor="email">
-          Email
-          <input
-            type="email"
-            name="email"
-            id="email"
-            onChange={() => setError(null)}
-            required
-          />
-        </label>
-        <label htmlFor="password">
-          Password
-          <input
-            type="password"
-            id="password"
-            name="password"
-            onChange={() => setError(null)}
-            required
-          />
-        </label>
-        <button>Submit</button>
-      </Form>
-      {isAuthenticated ? (
-        <>
-          <h2>Logged In</h2>
-          <MSIdentityLogoutButton />
-          <h5 className="card-title">Welcome {accounts[0].name}</h5>
-        </>
+    <>
+      {location.pathname === "/account/login" ? (
+        <div className="login mt-6">
+          {/* <h2>Login</h2> */}
+          {error && <div className="error">{error}</div>}
+          {emailVerify && <Text color="orange">{emailVerify}</Text>}
+          <Form method="POST">
+            <label htmlFor="email">
+              Email
+              <input
+                type="email"
+                name="email"
+                id="email"
+                onChange={() => setError(null)}
+                required
+              />
+            </label>
+            <label htmlFor="password">
+              Password
+              <input
+                type="password"
+                id="password"
+                name="password"
+                onChange={() => setError(null)}
+                required
+              />
+            </label>
+            <button>Submit</button>
+          </Form>
+        </div>
       ) : (
-        <>
-          <h2>Not logged in</h2>
+        <div className="mt-6 flex gap-4">
+          <Text size="3" className="flex items-center">
+            Login with your personal, education or work Microsoft account:
+          </Text>
           <MSIdentitySignInButton />
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 }

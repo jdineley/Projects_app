@@ -2,6 +2,7 @@ const projectAction =
   (user) =>
   async ({ request }) => {
     console.log("in project action");
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const data = await request.formData();
     const { intent, ...list } = Object.fromEntries(data);
@@ -45,7 +46,7 @@ const projectAction =
           mode: "cors",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ intent, title, start, end, ...reviews }),
         });

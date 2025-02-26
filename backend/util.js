@@ -10,6 +10,9 @@ const path = require("path");
 const { differenceInBusinessDays, isWithinInterval } = require("date-fns");
 
 const { projectReviewObjectives, projectReviewActions } = require("./seedData");
+
+const nodemailer = require("nodemailer");
+
 // const {
 //   default: userProfileAction,
 // } = require("../frontend/src/actions/userProfileAction");
@@ -339,7 +342,10 @@ async function resyncProjTasksUsersVacs(storedProject) {
       //keep vacationRequests in sync with project.users
       let vacationRequests = [];
       for (const userId of storedProject.users) {
+        console.log("userId", userId);
+        console.log("User", User);
         const user = await User.findById(userId).populate("vacationRequests");
+        console.log("user", user);
         if (user.vacationRequests.length > 0) {
           for (userVacReq of user.vacationRequests) {
             if (
@@ -373,6 +379,32 @@ async function removeAllFilesAsync(directory) {
   }
 }
 
+// const sendVerificationEmail = async (to, url) => {
+//   console.log("in sendVerificationEmail util function");
+//   const transporter = nodemailer.createTransport({
+//     host: "smtp.ethereal.email",
+//     port: 587,
+//     secure: false,
+//     auth: {
+//       user: "bettie.little24@ethereal.email",
+//       pass: "ZCUpeVqDgvAHyTRWzv",
+//     },
+//   });
+//   try {
+//     const info = await transporter.sendMail({
+//       from: `<no-reply>`,
+//       to,
+//       subject: "Verify your email address",
+//       html: `<h2>Welcome to Projects!</h2>
+//              <p>Please verify your email by clicking the link below:</p>
+//              <a href="${url}">Click to Verify your email</a>`,
+//     });
+//   } catch (error) {
+//     console.log("sendVerificationEmailError:", error);
+//     throw Error(error);
+//   }
+// };
+
 module.exports = {
   generateRandomNumber,
   generateRandomElement,
@@ -386,4 +418,5 @@ module.exports = {
   correctRemainingVacDays,
   resyncProjTasksUsersVacs,
   removeAllFilesAsync,
+  // sendVerificationEmail,
 };

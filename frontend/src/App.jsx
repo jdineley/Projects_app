@@ -28,6 +28,7 @@ import Error from "./pages/errors/Error";
 import ProjectReview from "./pages/ProjectReview";
 import UserProfile from "./pages/UserProfile";
 import Learning from "./pages/Learning";
+import Account from "./pages/Account";
 
 // loaders
 import projectsLoader from "./loaders/projectLoader";
@@ -67,21 +68,34 @@ function App() {
             action={rootLayoutAction(user)}
           >
             <Route
+              path="account"
+              element={<Account />}
+              // loader={dashboardLoader(user)}
+            >
+              <Route
+                path="login"
+                element={<Login />}
+                action={loginAction}
+                errorElement={<LoginError />}
+              />
+              <Route
+                path="signup"
+                element={<Signup />}
+                action={signupAction}
+                errorElement={<LoginError />}
+              />
+              <Route
+                path="microsoft"
+                // index
+                element={<Login />}
+                action={loginAction}
+                errorElement={<LoginError />}
+              />
+            </Route>
+            <Route
               path="dashboard"
               element={<Dashboard />}
               loader={dashboardLoader(user)}
-            />
-            <Route
-              path="login"
-              element={<Login />}
-              action={loginAction}
-              errorElement={<LoginError />}
-            />
-            <Route
-              path="signup"
-              element={<Signup />}
-              action={signupAction}
-              errorElement={<LoginError />}
             />
             <Route
               path="learning"

@@ -44,7 +44,7 @@ const ProjectTimeline = ({
 }) => {
   const [showApprovedVacs, setShowApprovedVacs] = useState(false);
   const [hoverDisplay, setHoverDisplay] = useState(true);
-
+  console.log("project:", project);
   const { user } = useAuthContext();
 
   const projectDurationComposed = intervalToDuration({

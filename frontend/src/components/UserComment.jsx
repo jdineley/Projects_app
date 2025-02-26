@@ -156,7 +156,7 @@ export default function UserComment({
               {comment.videos.map((vid) => {
                 // console.log("vid", vid);
                 return (
-                  <a href={vid.url} target="_blank">
+                  <a key={vid.url} href={vid.url} target="_blank">
                     <VideoLinkSent fileName={vid.originalname} />
                   </a>
                 );

@@ -28,6 +28,7 @@ const Review = require("./models/Review");
 const ReviewObjective = require("./models/ReviewObjective");
 const ReviewAction = require("./models/ReviewAction");
 const Vacation = require("./models/Vacation");
+const Tenant = require("./models/Tenant");
 
 // Seed data
 const {
@@ -53,6 +54,7 @@ mongoose
         // await ReviewObjective.deleteMany({});
         // await ReviewAction.deleteMany({});
         // await Vacation.deleteMany({});
+        // await Tenant.deleteMany({}); //OPTIONAL
 
         await Project.deleteMany({ isDemo: true });
         await User.deleteMany({ isDemo: true });
@@ -94,9 +96,13 @@ mongoose
         // Create users #1
         async function createUsers() {
           const userCreateHandler = async (user) => {
-            const demoUser = await User.signUp(user.email, user.password);
-            demoUser.isDemo = true;
-            await demoUser.save();
+            const demoUser = await User.signUp({
+              email: user.email,
+              password: user.password,
+              isDemo: true,
+            });
+            // demoUser.isDemo = true;
+            // await demoUser.save();
           };
           for (const user of users) {
             await userCreateHandler(user);

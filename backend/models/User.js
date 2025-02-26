@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const { v4: uuidv4 } = require("uuid");
+const Tenant = require("./Tenant");
+
+// const { sendVerificationEmail } = require("../util");
+const sendVerificationEmail = require("../utility/sendVerificationEmail");
 
 const { format, differenceInBusinessDays } = require("date-fns");
 
@@ -9,6 +14,7 @@ const userSchema = new mongoose.Schema(
     tenant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tenant",
+      default: null,
       // required: function () {
       //   return !this.email;
       // },
@@ -73,11 +79,23 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isVerified: {
+      type: Boolean,
+      default: function () {
+        return this.tenant !== null || this.isDemo || this.isTest || false;
+      },
+    },
+    verificationToken: { type: String },
   },
   { timestamps: true }
 );
 
-userSchema.statics.signUp = async function (email, password, isTest) {
+userSchema.statics.signUp = async function ({
+  email,
+  password,
+  isTest,
+  isDemo,
+}) {
   console.log("In sign up");
   // Check if email and password are present
   if (!email || !password) {
@@ -90,20 +108,44 @@ userSchema.statics.signUp = async function (email, password, isTest) {
   if (!validator.isStrongPassword(password)) {
     throw Error("Password not strong enough");
   }
+  try {
+    // Double check the email isn't already in the db
+    const exists = await this.findOne({ email });
 
-  // Double check the email isn't already in the db
-  const exists = await this.findOne({ email });
+    if (exists) {
+      throw new Error("Email already in use");
+    }
 
-  if (exists) {
-    throw Error("Email already in use");
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
+    const verificationToken = uuidv4();
+
+    const user = await this.create({
+      email,
+      password: hash,
+      isTest,
+      isDemo,
+      verificationToken,
+    });
+
+    // Send verification email
+    if (!isTest && !isDemo) {
+      console.log(
+        "send verification email to:",
+        `${process.env.VITE_REACT_APP_API_URL}/api/v1/users/verify/${verificationToken}`
+      );
+      const verificationUrl = `${process.env.VITE_REACT_APP_API_URL}/api/v1/users/verify/${verificationToken}`;
+      await sendVerificationEmail(email, verificationUrl);
+      return "verify";
+    }
+
+    console.log("End of sign up");
+    return user;
+  } catch (error) {
+    console.log("signup Error:", error);
+    throw new Error(error.message);
   }
-
-  const salt = await bcrypt.genSalt(10);
-  const hash = await bcrypt.hash(password, salt);
-
-  const user = await this.create({ email, password: hash, isTest });
-  console.log("End of sign up");
-  return user;
 };
 
 userSchema.statics.login = async function (email, password) {
@@ -117,6 +159,10 @@ userSchema.statics.login = async function (email, password) {
     throw Error("Email does not exist");
   }
 
+  if (!user.isVerified) {
+    return null;
+  }
+
   const match = await bcrypt.compare(password, user.password);
 
   if (!match) {
@@ -128,6 +174,28 @@ userSchema.statics.login = async function (email, password) {
 
   return user;
 };
+
+userSchema.methods.getOrganisation = async function () {
+  if (!this.tenant) return false;
+  const tenant = Tenant.findById(this.tenant);
+  if (!tenant) result = false;
+  return tenant.tenantId !== "9188040d-6c67-4c5b-b112-36a304b66dad";
+};
+// Virtual property for 'organisation'
+// userSchema.virtual("organisation").get(function () {
+//   console.log("in organisation virtual");
+//   if (!this.tenant) return false;
+//   async function innerFunc() {
+//    const tenant = Tenant.findById(this.tenant)
+//    if (!tenant) result = false;
+//    return tenant.tenantId !== "9188040d-6c67-4c5b-b112-36a304b66dad";
+//   }
+//   const result = await innerFunc()
+// });
+
+// Ensure virtual fields are included in JSON output
+// userSchema.set("toJSON", { virtuals: true });
+// userSchema.set("toObject", { virtuals: true });
 
 //check if tasks have changed and set logic to reset all vac requests if necessary
 // userSchema.pre("save", async function (next) {

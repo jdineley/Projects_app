@@ -44,14 +44,16 @@ async function msProjectUpdate(
       milestone,
     } = task;
 
-    const storedUser = await User.findOne({ email: user, isDemo }).populate([
-      "tasks",
-      "vacationRequests",
-      "secondaryTasks",
-    ]);
+    // #5521
+    // user must belong to the host tenant
+    const storedUser = await User.findOne({
+      email: user,
+      isDemo,
+      tenant: currentUser.tenant,
+    }).populate(["tasks", "vacationRequests", "secondaryTasks"]);
     if (!storedUser) {
       throw Error(
-        `${user} does not currently have an account, please sign up before importing`
+        `${user} does not currently have an account within the protected domain.`
       );
     }
 

@@ -3,6 +3,15 @@ import { useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 import validator from "validator";
 
+import {
+  Button,
+  DropdownMenu,
+  Flex,
+  Avatar,
+  Text,
+  Heading,
+} from "@radix-ui/themes";
+
 export default function Signup() {
   const [error, setError] = useState(null);
   const [email, setEmail] = useState("");
@@ -11,12 +20,13 @@ export default function Signup() {
   const [passwordError, setPasswordError] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState(null);
+  const [emailVerify, setEmailVerify] = useState("");
 
   console.log(passwordError);
 
   const { dispatch } = useAuthContext();
   const json = useActionData();
-  // console.log("signup json:", json);
+  console.log("signup json:", json);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,9 +59,14 @@ export default function Signup() {
         type: "LOGIN",
         payload: json.user,
       });
-      return navigate("/");
-    } else if (json && userLoginErrorMessages.includes(json.message)) {
-      setError(json.message);
+      navigate("/");
+    } else if (json && userLoginErrorMessages.includes(json.error?.message)) {
+      setError(json.error.message);
+    } else if (
+      json?.message ===
+      "Email verification required. Go to your inbox to complete the verification. Please check your spam folder"
+    ) {
+      setEmailVerify(json.message);
     } else if (json) {
       throw new Response("", {
         status: 404,
@@ -62,12 +77,18 @@ export default function Signup() {
   }, [json, dispatch, navigate, password, confirmPassword]);
 
   return (
-    <div className="signup">
-      <h2>Sign up</h2>
+    <div className="signup mt-6">
+      {/* <Heading>Sign up</Heading> */}
+      <Text>
+        Your account will require verification. Check your email inbox for a
+        welcome email and click the verification link to activate your account.
+      </Text>
+      <br />
+      {emailVerify && <Text color="red">{emailVerify}</Text>}
       {error && <div className="error">{error}</div>}
       <Form method="POST">
         <label htmlFor="email">
-          Email
+          Email:
           <input
             type="email"
             name="email"
@@ -82,7 +103,7 @@ export default function Signup() {
 
           // className="mb-1"
         >
-          Password
+          Password:
           <input
             type="password"
             id="password"
@@ -100,7 +121,7 @@ export default function Signup() {
           </p>
         </label>
         <label htmlFor="confirm-password">
-          Confirm Password
+          Confirm Password:
           <input
             type="password"
             id="confirm-password"

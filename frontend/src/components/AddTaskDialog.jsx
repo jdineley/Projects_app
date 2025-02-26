@@ -204,6 +204,7 @@ export const AddTaskDialog = ({
                 setSelectedDependencies([]);
                 setOpen(false);
               }
+              saving = false;
             } else {
               if (window.confirm("Are you sure you want to cancel?")) {
                 setSelectionErrors([]);

@@ -131,6 +131,7 @@ const ProjectTitleEditDialog = ({
                 submit(editProjectButton);
                 setOpen(false);
               }
+              saving = false;
             }
             // else if (deleting) {
             //   if (window.confirm("Are you sure you want to delete?")) {
@@ -143,6 +144,7 @@ const ProjectTitleEditDialog = ({
                 submit(archiveProjectButton);
                 setOpen(false);
               }
+              archiving = false;
             } else if (freezing) {
               if (
                 window.confirm(
@@ -154,6 +156,7 @@ const ProjectTitleEditDialog = ({
                 else submit(unFreezeProjectButton);
                 setOpen(false);
               }
+              freezing = false;
             }
             // else if (!freezing) {
             //   if (

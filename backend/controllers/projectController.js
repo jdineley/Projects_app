@@ -17,25 +17,25 @@ const xml2js = require("xml2js");
 const { fixReviews } = require("../util");
 const { msProjectUpload } = require("./msProjectUpload");
 const { msProjectUpdate } = require("./msProjectUpdate");
-const { msProjectExportXML } = require("./msProjectExportXML");
+// const { msProjectExportXML } = require("./msProjectExportXML");
 // const { channel } = require("node:diagnostics_channel");
 const { resyncUserAndVacs, resyncProjTasksUsersVacs } = require("../util");
 
 const { channel } = require("../routes/v1/sse");
 
-const getAllProjects = async (req, res) => {
-  console.log("In get all projects..");
-  try {
-    const projects = await Project.find()
-      .populate(["owner", "tasks", "reviews"])
-      .sort({
-        createdAt: -1,
-      });
-    res.status(200).json(projects);
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
-};
+// const getAllProjects = async (req, res) => {
+//   console.log("In get all projects..");
+//   try {
+//     const projects = await Project.find()
+//       .populate(["owner", "tasks", "reviews"])
+//       .sort({
+//         createdAt: -1,
+//       });
+//     res.status(200).json(projects);
+//   } catch (error) {
+//     res.status(404).json({ error: error.message });
+//   }
+// };
 
 const getProject = async (req, res) => {
   console.log("hit project get project route");
@@ -47,16 +47,33 @@ const getProject = async (req, res) => {
     return res.status(404).json({ error: "No such Project" });
   }
   try {
-    const project = await Project.findById(projectId).populate([
+    // #2473
+    // req.user.projects[] OR req.user.userInProjects[] must contain projectId
+    let project;
+    if (intent === "getLearnerProject") {
+      project = await Project.findById(projectId);
+    } else {
+      project = await Project.findOne({
+        _id: projectId,
+        $or: [
+          { _id: { $in: req.user.projects } },
+          { _id: { $in: req.user.userInProjects } },
+        ],
+      });
+    }
+    if (!project) {
+      throw Error("Not Authorised to view this Project");
+      // return res
+      //   .status(401)
+      //   .json({ error: "Not Authorised to view this Project" });
+    }
+    await project.populate([
       "owner",
       // "tasks",
       "reviews",
       "users",
       { path: "vacationRequests", populate: "user" },
     ]);
-    if (!project) {
-      return res.status(404).json({ error: "No such Project" });
-    }
 
     let projectTasks = [];
     for (const task of project.tasks) {
@@ -86,9 +103,9 @@ const getProject = async (req, res) => {
     //   });
     // }
 
-    res.status(200).json({ project, projectTasks });
+    return res.status(200).json({ project, projectTasks });
   } catch (error) {
-    res.status(404).json({ error: error.message });
+    return res.status(401).json({ error: error.message });
   }
 };
 
@@ -233,7 +250,12 @@ const updateProject = async (req, res) => {
   console.log(reviewArray);
 
   try {
-    const projectToUpdate = await Project.findById(projectId).populate([
+    // #4198
+    // project must belong to current user
+    const projectToUpdate = await Project.findOne({
+      _id: projectId,
+      owner: userId,
+    }).populate([
       // "owner",
       // "tasks",
       // "users",
@@ -241,10 +263,17 @@ const updateProject = async (req, res) => {
       { path: "tasks", populate: ["secondaryUsers"] },
     ]);
 
-    if (projectToUpdate.owner.toString() !== req.user._id.toString()) {
+    if (
+      !projectToUpdate &&
+      projectToUpdate.owner.toString() !== req.user._id.toString()
+    ) {
       return res
         .status(401)
         .json({ error: "Not authorised to update project" });
+    } else if (!projectToUpdate) {
+      return res
+        .status(404)
+        .json({ error: "The target project could not be found" });
     }
 
     const currentUser = await User.findById(userId);
@@ -294,18 +323,24 @@ const updateProject = async (req, res) => {
 
     if (intent === "edit-project") {
       console.log("in edit project, thingy");
-      const project = await Project.findOneAndUpdate(
-        { _id: projectId },
-        {
-          title,
-          start,
-          end,
-        },
-        { returnDocument: "after" }
-      );
-      if (!project) {
-        res.status(404).json({ error: "no such project" });
-      }
+      projectToUpdate.title = title;
+      projectToUpdate.start = start;
+      projectToUpdate.end = end;
+      await projectToUpdate.save();
+      // const project = await Project.findOneAndUpdate(
+      //   { _id: projectId, owner: userId },
+      //   {
+      //     title,
+      //     start,
+      //     end,
+      //   },
+      //   { returnDocument: "after" }
+      // );
+      // if (!project) {
+      //   res.status(404).json({
+      //     error: "The project was not found",
+      //   });
+      // }
 
       // Address number of reviews has changed:
       if (
@@ -331,7 +366,7 @@ const updateProject = async (req, res) => {
 
       // Update modified existing reviews:
       for (let review of reviewArray) {
-        const reviewNew = await Review.findOneAndUpdate(
+        await Review.findOneAndUpdate(
           {
             _id: review.reviewId,
           },
@@ -342,28 +377,37 @@ const updateProject = async (req, res) => {
           { returnDocument: "after" }
         );
       }
-      res.status(200).json({ project, result: intent });
+      res.status(200).json({ projectToUpdate, result: intent });
     } else if (intent === "archive-project") {
       console.log("in achived project");
-      const archivedProject = await Project.findOneAndUpdate(
-        { _id: projectId },
-        {
-          archived: true,
-        },
-        { returnDocument: "after" }
-      );
+
+      projectToUpdate.archived = true;
+      await projectToUpdate.save();
+
+      // const archivedProject = await Project.findOneAndUpdate(
+      //   { _id: projectId, owner: userId },
+      //   {
+      //     archived: true,
+      //   },
+      //   { returnDocument: "after" }
+      // );
+      // if (!archivedProject) {
+      //   res.status(404).json({
+      //     error: "The project was not found",
+      //   });
+      // }
       const user = await User.findById(req.user._id);
-      user.archivedProjects.push(archivedProject._id);
+      user.archivedProjects.push(projectToUpdate._id);
       await user.save();
       // for (const userId of archivedProject.users) {
       //   const user = await User.findById(userId);
       //   user.hasArchivedProjects = true;
       //   await user.save();
       // }
-      console.log(archivedProject);
+      // console.log(archivedProject);
       let allArchivedProjectDescendentIds = {};
-      if (archivedProject.reviews.length > 0) {
-        for (const reviewid of archivedProject.reviews) {
+      if (projectToUpdate.reviews.length > 0) {
+        for (const reviewid of projectToUpdate.reviews) {
           const review = await Review.findById(reviewid);
           review.archived = true;
           await review.save();
@@ -419,8 +463,8 @@ const updateProject = async (req, res) => {
           }
         }
       }
-      if (archivedProject.tasks.length > 0) {
-        for (const taskId of archivedProject.tasks) {
+      if (projectToUpdate.tasks.length > 0) {
+        for (const taskId of projectToUpdate.tasks) {
           const task = await Task.findById(taskId);
           task.archived = true;
           await task.save();
@@ -452,18 +496,18 @@ const updateProject = async (req, res) => {
           }
         }
       }
-      if (archivedProject.vacationRequests.length > 0) {
+      if (projectToUpdate.vacationRequests.length > 0) {
         // check if project had passed an acceptance/rejection to vacReq
         // If it had then this instance should be removed from the approval map
         // The project should remain everywhere is was before but as an archived project
-        for (const vacReqId of archivedProject.vacationRequests) {
+        for (const vacReqId of projectToUpdate.vacationRequests) {
           const vacReq = await Vacation.findById(vacReqId).populate("projects");
           // .populate({
           //   path: "user",
           //   populate: ["tasks", "vacationRequests", "secondaryTasks"],
           // });
-          if (vacReq.approvals.get(archivedProject._id)) {
-            vacReq.approvals.delete(archivedProject._id);
+          if (vacReq.approvals.get(projectToUpdate._id)) {
+            vacReq.approvals.delete(projectToUpdate._id);
           }
           const approvalValuesArray = Object.values(
             Object.fromEntries(vacReq.approvals)
@@ -488,38 +532,39 @@ const updateProject = async (req, res) => {
           // await resyncUserAndVacs(vacReq.user);
         }
       }
-      archivedProject.descendentsAtArchive = allArchivedProjectDescendentIds;
-      await archivedProject.save();
+      projectToUpdate.descendentsAtArchive = allArchivedProjectDescendentIds;
+      await projectToUpdate.save();
       console.log(
         "@@@ allArchivedProjectDescendentIds @@@",
         allArchivedProjectDescendentIds
       );
-      console.log("%%% archivedProject %%%", archivedProject);
-      res.status(200).json({ archivedProject, result: intent });
+      console.log("%%% projectToUpdate %%%", projectToUpdate);
+      res.status(200).json({ projectToUpdate, result: intent });
     } else if (intent === "unarchive-project") {
-      const projectToUnarchive = await Project.findById(projectId);
-      if (!projectToUnarchive) {
-        res.status(404).json({ error: "no such project" });
-      }
-      console.log(
-        "projectToUnarchive.descendentsAtArchive",
-        projectToUnarchive.descendentsAtArchive
-      );
-      projectToUnarchive.archived = false;
+      // const projectToUnarchive = await Project.findOne({
+      //   _id: projectId,
+      //   owner: userId,
+      // });
+      // if (!projectToUnarchive) {
+      //   res.status(404).json({ error: "no project was found" });
+      // }
+      // console.log(
+      //   "projectToUnarchive.descendentsAtArchive",
+      //   projectToUnarchive.descendentsAtArchive
+      // );
+      projectToUpdate.archived = false;
 
-      if (projectToUnarchive.descendentsAtArchive?.Review?.length > 0) {
+      if (projectToUpdate.descendentsAtArchive?.Review?.length > 0) {
         console.log("in Review");
-        for (const reviewId of projectToUnarchive.descendentsAtArchive.Review) {
+        for (const reviewId of projectToUpdate.descendentsAtArchive.Review) {
           const review = await Review.findById(reviewId);
           review.archived = false;
           await review.save();
         }
       }
-      if (
-        projectToUnarchive.descendentsAtArchive?.ReviewObjective?.length > 0
-      ) {
+      if (projectToUpdate.descendentsAtArchive?.ReviewObjective?.length > 0) {
         console.log("in ReviewObjective");
-        for (const reviewObjectiveId of projectToUnarchive.descendentsAtArchive
+        for (const reviewObjectiveId of projectToUpdate.descendentsAtArchive
           .ReviewObjective) {
           const reviewObjective = await ReviewObjective.findById(
             reviewObjectiveId
@@ -528,9 +573,9 @@ const updateProject = async (req, res) => {
           await reviewObjective.save();
         }
       }
-      if (projectToUnarchive.descendentsAtArchive?.ReviewAction?.length > 0) {
+      if (projectToUpdate.descendentsAtArchive?.ReviewAction?.length > 0) {
         console.log("in ReviewAction");
-        for (const reviewActionId of projectToUnarchive.descendentsAtArchive
+        for (const reviewActionId of projectToUpdate.descendentsAtArchive
           .ReviewAction) {
           console.log("reviewActionId", reviewActionId);
           const reviewAction = await ReviewAction.findById(reviewActionId);
@@ -539,34 +584,33 @@ const updateProject = async (req, res) => {
           await reviewAction.save();
         }
       }
-      if (projectToUnarchive.descendentsAtArchive?.Comment?.length > 0) {
+      if (projectToUpdate.descendentsAtArchive?.Comment?.length > 0) {
         console.log("in Comment");
-        for (const commentId of projectToUnarchive.descendentsAtArchive
-          .Comment) {
+        for (const commentId of projectToUpdate.descendentsAtArchive.Comment) {
           const comment = await Comment.findById(commentId);
           comment.archived = false;
           await comment.save();
         }
       }
-      if (projectToUnarchive.descendentsAtArchive?.Task?.length > 0) {
+      if (projectToUpdate.descendentsAtArchive?.Task?.length > 0) {
         console.log("in Task");
-        for (const taskId of projectToUnarchive.descendentsAtArchive.Task) {
+        for (const taskId of projectToUpdate.descendentsAtArchive.Task) {
           const task = await Task.findById(taskId);
           task.archived = false;
           await task.save();
         }
       }
-      if (projectToUnarchive.descendentsAtArchive?.Reply?.length > 0) {
+      if (projectToUpdate.descendentsAtArchive?.Reply?.length > 0) {
         console.log("in Reply");
-        for (const replyId of projectToUnarchive.descendentsAtArchive.Reply) {
+        for (const replyId of projectToUpdate.descendentsAtArchive.Reply) {
           const reply = await Reply.findById(replyId);
           reply.archived = false;
           await reply.save();
         }
       }
-      await projectToUnarchive.save();
-      if (projectToUnarchive.vacationRequests?.length > 0) {
-        for (const vacReqId of projectToUnarchive.vacationRequests) {
+      await projectToUpdate.save();
+      if (projectToUpdate.vacationRequests?.length > 0) {
+        for (const vacReqId of projectToUpdate.vacationRequests) {
           const vacReq = await Vacation.findById(vacReqId).populate("projects");
           const approvalValuesArray = Object.values(
             Object.fromEntries(vacReq.approvals)
@@ -592,11 +636,11 @@ const updateProject = async (req, res) => {
 
       const user = await User.findByIdAndUpdate(req.user._id, {
         $pull: {
-          archivedProjects: projectToUnarchive._id,
+          archivedProjects: projectToUpdate._id,
         },
       });
 
-      res.status(200).json({ projectToUnarchive, result: intent });
+      res.status(200).json({ projectToUpdate, result: intent });
     } else if (intent === "change-freeze-state") {
       if (freeze === "true") {
         projectToUpdate.inWork = false;
@@ -650,6 +694,8 @@ const deleteProject = async (req, res) => {
   try {
     const currentUser = await User.findById(userId);
     const projectToDelete = await Project.findById(projectId);
+    // #3287
+    // project must be owned by current user
     if (projectToDelete.owner._id.toString() !== userId.toString()) {
       return res
         .status(401)
@@ -739,24 +785,8 @@ const deleteProject = async (req, res) => {
   }
 };
 
-const getLocalMSProject = async (req, res) => {
-  console.log("in export local project for MS Project update");
-  // Return object with following format:
-  // {
-  //    projectGUID: String,
-  //    exportDate: Date,
-  //    tasks: [
-  //              {
-  //                GUID: String,
-  //                percentageComplete: Number,
-  //                Description: String
-  //              }, ....
-  //           ]
-  // }
-};
-
 module.exports = {
-  getAllProjects,
+  // getAllProjects,
   getProject,
   createProject,
   updateProject,

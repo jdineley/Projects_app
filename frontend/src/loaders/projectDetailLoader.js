@@ -2,7 +2,7 @@ const projectDetailLoader =
   (user) =>
   async ({ params, request }) => {
     console.log("calling project detail loader..");
-    const token = user.token ? user.token : user.accessToken;
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, reviewId } = params;
     const url = new URL(request.url);
@@ -30,11 +30,11 @@ const projectDetailLoader =
           }
         );
         if (!res1.ok) {
-          throw Error();
+          throw Error((await res1.json()).error);
         }
         if (assignUser) {
           const res2 = await fetch(
-            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?assignUser=${assignUser}`,
+            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?assignUser=${assignUser}&intent=task`,
             {
               method: "GET",
               mode: "cors",
@@ -93,7 +93,7 @@ const projectDetailLoader =
           reviewId: null,
         };
     } catch (error) {
-      throw Error("Couldnt fetch the project");
+      throw Error(error.message);
     }
   };
 

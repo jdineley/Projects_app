@@ -10,12 +10,13 @@ const {
 } = require("../../controllers/projectController");
 
 const requireAuth = require("../../middleware/requireAuth");
+// const requireEntraIDAuth = require("../../middleware/requireEntraIDAuth");
 
 const router = express.Router();
 
 // router.use(requireAuth);
 
-router.get("/", requireAuth, getAllProjects);
+// router.get("/", requireAuth, getAllProjects);
 
 router.get("/:projectId", requireAuth, getProject);
 
