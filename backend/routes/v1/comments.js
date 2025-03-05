@@ -3,9 +3,9 @@ const multer = require("multer");
 const upload = multer({ dest: "./public/temp/" });
 
 const {
-  getAllComments,
+  // getAllComments,
   createComment,
-  getTaskComments,
+  // getTaskComments,
 } = require("../../controllers/commentController");
 
 const requireAuth = require("../../middleware/requireAuth");
@@ -15,7 +15,7 @@ const router = express.Router();
 router.use(requireAuth);
 
 // /api/v1/comments
-router.get("/", getAllComments);
+// router.get("/", getAllComments);
 
 //  /api/v1/comments
 router.post(
@@ -25,6 +25,6 @@ router.post(
 );
 
 //  /api/v1/comments
-router.get("/:taskId", getTaskComments);
+// router.get("/:taskId", getTaskComments);
 
 module.exports = router;

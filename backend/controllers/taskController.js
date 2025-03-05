@@ -13,17 +13,18 @@ const { format } = require("date-fns");
 // util
 const { resyncUserAndVacs, resyncProjTasksUsersVacs } = require("../util");
 const Vacation = require("../models/Vacation");
+const { json } = require("express");
 
-const getAllTasks = async (req, res) => {
-  try {
-    const tasks = await Task.find().sort({
-      createdAt: -1,
-    });
-    res.status(200).json(tasks);
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
-};
+// const getAllTasks = async (req, res) => {
+//   try {
+//     const tasks = await Task.find().sort({
+//       createdAt: -1,
+//     });
+//     res.status(200).json(tasks);
+//   } catch (error) {
+//     res.status(404).json({ error: error.message });
+//   }
+// };
 
 // get searched tasks
 const getTasks = async (req, res) => {
@@ -35,26 +36,66 @@ const getTasks = async (req, res) => {
     res.status(200).json([]);
     return;
   }
-  const searchedTasks = await Task.find({
-    title: { $regex: task, $options: "i" },
-    isDemo,
-  });
-  res.status(200).json(searchedTasks);
+  try {
+    // #9532
+    // tasks to be taken from within home tenant
+    // (not just from the home project, since it is quite possible that tasks from other projects could be dependencies)
+    let query = {
+      isDemo,
+      tenant: req.user.tenant,
+    };
+    if (task === "*") {
+      // Match all titles by omitting the $regex condition
+    } else {
+      query.title = { $regex: task, $options: "i" };
+    }
+    const searchedTasks = await Task.find(query);
+    return res.status(200).json(searchedTasks);
+  } catch (error) {
+    console.log("getTasks error", error);
+    return res.status(404).json({ error: error.message });
+  }
 };
 
 // get a task
 const getTask = async (req, res) => {
+  console.log("hit get task route");
   const { taskId } = req.params;
+  const { intent } = req.query;
   if (!mongoose.Types.ObjectId.isValid(taskId)) {
     return res.status(404).json({ error: "No such task" });
   }
+  // spread tasks relevant to req.user into a single array for comparison
+
+  // console.log(
+  //   "tasksDomain",
+  //   tasksDomain.map((t) => t.toString())
+  // );
+  // console.log("ObjectId(taskId)", new mongoose.Types.ObjectId(taskId));
+  // console.log(
+  //   "taskDomain check",
+  //   tasksDomain.map((t) => t.toString()).includes(taskId)
+  // );
   try {
-    const task = await Task.findById(taskId).populate([
-      "user",
-      "project",
-      "dependencies",
-      "secondaryUsers",
-    ]);
+    // #5964
+    // return task only if task is in tasksDomain
+    let task;
+    if (intent === "getLearnerProject") {
+      task = await Task.findById(taskId).populate([
+        "user",
+        "project",
+        "dependencies",
+        "secondaryUsers",
+      ]);
+    } else {
+      const projectsDomain = [...req.user.projects, ...req.user.userInProjects];
+      const tasksDomain = projectsDomain.reduce((acc, cur) => {
+        return [...acc, ...cur.tasks];
+      }, []);
+      task = await Task.findOne({
+        $and: [{ _id: taskId }, { _id: { $in: tasksDomain } }],
+      }).populate(["user", "project", "dependencies", "secondaryUsers"]);
+    }
     if (!task) {
       return res.status(404).json({ error: "No such task" });
     }
@@ -89,9 +130,14 @@ const createTask = async (req, res) => {
   }
 
   try {
-    const project = await Project.findById(projectId).populate([
-      { path: "tasks", populate: ["secondaryUsers"] },
-    ]);
+    // #1067
+    // return if projectId is present in [...req.user.projects, req.user.userInProjects]
+    const project = await Project.findOne({
+      $and: [
+        { _id: projectId },
+        { _id: { $in: [...req.user.projects, ...req.user.userInProjects] } },
+      ],
+    }).populate([{ path: "tasks", populate: ["secondaryUsers"] }]);
     if (!project) {
       return res.status(404).json({ error: "No such project" });
     }
@@ -171,13 +217,18 @@ const updateTask = async (req, res) => {
   }
 
   try {
-    const taskToUpdate = await Task.findById(taskId).populate("project");
+    // #6264
+    // task.user === req.user._id. The user must own the task to update it
+    const taskToUpdate = await Task.findOne({
+      _id: taskId,
+      user: req.user._id,
+    }).populate("project");
     if (!taskToUpdate) {
       return res.status(404).json({ error: "No such task" });
     }
-    if (taskToUpdate.user._id.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ error: "Not authorised to update task" });
-    }
+    // if (taskToUpdate.user._id.toString() !== req.user._id.toString()) {
+    //   return res.status(401).json({ error: "Not authorised to update task" });
+    // }
     if (!taskToUpdate.project.inWork) {
       return res
         .status(401)
@@ -191,7 +242,7 @@ const updateTask = async (req, res) => {
       await taskToUpdate.save();
     }
 
-    taskToUpdate.percentageCompleteHistory;
+    // taskToUpdate.percentageCompleteHistory;
     const task = await Task.findOneAndUpdate(
       { _id: taskId },
       {
@@ -229,13 +280,18 @@ const deleteTask = async (req, res) => {
   }
 
   try {
-    const taskToDelete = await Task.findById(taskId);
+    // #3132
+    // task.user === req.user._id. The user must own the task to delete it
+    const taskToDelete = await Task.findOne({
+      _id: taskId,
+      user: req.user._id,
+    });
     if (!taskToDelete) {
       return res.status(404).json({ error: "No such task" });
     }
-    if (taskToDelete.user._id.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ error: "Not authorised to delete task" });
-    }
+    // if (taskToDelete.user._id.toString() !== req.user._id.toString()) {
+    //   return res.status(401).json({ error: "Not authorised to delete task" });
+    // }
     // const task = await Task.findByIdAndDelete(taskId);
     // if (!task) {
     //   return res.status(404).json({ error: "No such task" });
@@ -279,7 +335,7 @@ const deleteTask = async (req, res) => {
 };
 
 module.exports = {
-  getAllTasks,
+  // getAllTasks,
   getTask,
   getTasks,
   createTask,

@@ -134,15 +134,25 @@ const getUsers = async (req, res) => {
     //   isDemo,
     // });
     let users;
+    let query;
     // #6823
     // if for task then taken from tenant or global only
-    // let validUsers;
     if (intent === "task") {
       console.log("in task");
-      users = await User.find({
-        email: { $regex: assignUser, $options: "i" },
+      query = {
         tenant: req.user.tenant,
-      });
+        isDemo,
+      };
+      if (assignUser === "*") {
+        // Match all titles by omitting the $regex condition
+      } else {
+        query.email = { $regex: assignUser, $options: "i" };
+      }
+      users = await User.find(query);
+      // users = await User.find({
+      //   email: { $regex: assignUser, $options: "i" },
+      //   tenant: req.user.tenant,
+      // });
       // validUsers = users.filter((user) => {
       //   if (req.user.organisation) {
       //     return user.tenant === req.user.tenant;
@@ -152,13 +162,27 @@ const getUsers = async (req, res) => {
     } else if (intent === "reviewAction") {
       // if for review action then taken from project
       console.log("in reviewAction");
-      users = await User.find({
-        email: { $regex: assignUser, $options: "i" },
+      query = {
         $or: [
           { projects: new mongoose.Types.ObjectId(projectId) },
           { userInProjects: new mongoose.Types.ObjectId(projectId) },
         ],
-      });
+        isDemo,
+      };
+      if (assignUser === "*") {
+        // Match all titles by omitting the $regex condition
+      } else {
+        query.email = { $regex: assignUser, $options: "i" };
+      }
+
+      users = await User.find(query);
+      // users = await User.find({
+      //   email: { $regex: assignUser, $options: "i" },
+      //   $or: [
+      //     { projects: new mongoose.Types.ObjectId(projectId) },
+      //     { userInProjects: new mongoose.Types.ObjectId(projectId) },
+      //   ],
+      // });
       // validUsers = users.filter((user) => {
       //   if (
       //     user.userInProjects.map((p) => p.toString()).includes(projectId) ||
@@ -167,12 +191,13 @@ const getUsers = async (req, res) => {
       //     return true;
       //   }
       // });
-    } else if (isDemo) {
-      users = await User.find({
-        email: { $regex: assignUser, $options: "i" },
-        isDemo,
-      });
     }
+    // else if (isDemo) {
+    //   users = await User.find({
+    //     email: { $regex: assignUser, $options: "i" },
+    //     isDemo,
+    //   });
+    // }
     // console.log("validUsers", validUsers);
     res.status(200).json(users);
   } catch (error) {

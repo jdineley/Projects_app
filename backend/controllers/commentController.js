@@ -17,15 +17,15 @@ console.log("cloudinary", cloudinary.config().cloud_name);
 const { removeAllFilesAsync } = require("../util");
 
 // get all comments
-const getAllComments = async (req, res) => {
-  console.log("hit getAllComments route");
-};
+// const getAllComments = async (req, res) => {
+//   console.log("hit getAllComments route");
+// };
 
 // get comment
 
-const getComment = async (req, res) => {
-  console.log("hit getComment route");
-};
+// const getComment = async (req, res) => {
+//   console.log("hit getComment route");
+// };
 
 // create comment
 const createComment = async (req, res) => {
@@ -165,33 +165,33 @@ const createComment = async (req, res) => {
 
 // get all comments for a single task.  Including
 
-const getTaskComments = async (req, res) => {
-  const { taskId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(taskId)) {
-    return res.status(404).json({ error: "No such task" });
-  }
+// const getTaskComments = async (req, res) => {
+//   const { taskId } = req.params;
+//   if (!mongoose.Types.ObjectId.isValid(taskId)) {
+//     return res.status(404).json({ error: "No such task" });
+//   }
 
-  try {
-    const task = Task.findById(taskId).populate("comments");
-    if (!task) {
-      return res.status(404).json({ error: "No such task" });
-    }
-    let taskComments = [];
-    for (const comment of task.comments) {
-      const populatedComment = await Comment.findById(comment._id).populate([
-        "user",
-        "replies",
-      ]);
-      taskComments.push(populatedComment);
-    }
-    res.status(200).json(taskComments);
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
-};
+//   try {
+//     const task = Task.findById(taskId).populate("comments");
+//     if (!task) {
+//       return res.status(404).json({ error: "No such task" });
+//     }
+//     let taskComments = [];
+//     for (const comment of task.comments) {
+//       const populatedComment = await Comment.findById(comment._id).populate([
+//         "user",
+//         "replies",
+//       ]);
+//       taskComments.push(populatedComment);
+//     }
+//     res.status(200).json(taskComments);
+//   } catch (error) {
+//     res.status(404).json({ error: error.message });
+//   }
+// };
 
 module.exports = {
-  getAllComments,
+  // getAllComments,
   createComment,
-  getTaskComments,
+  // getTaskComments,
 };

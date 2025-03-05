@@ -614,8 +614,8 @@ function handleSubmitMessage({
   reviewId,
 }) {
   console.log("in handleSubmitMessage..");
-  console.log("$$$$$$$$$$$$$$INTENT$$$$$$$$$$$$", intent);
-  console.log("@@@@@@@@@@@@TARGET@@@@@@@@@@@", target._id);
+  // console.log("$$$$$$$$$$$$$$INTENT$$$$$$$$$$$$", intent);
+  // console.log("@@@@@@@@@@@@TARGET@@@@@@@@@@@", target._id);
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   setIsSending(true);
   setIsCommenting(false);
@@ -630,10 +630,12 @@ function handleSubmitMessage({
   formData.append("content", comment);
   formData.append(intent, target._id);
   formData.append("user", user._id);
-  if (intent === "action") {
-    formData.append("projectId", projectId);
-    formData.append("reviewId", reviewId);
-  }
+  formData.append("projectId", projectId || null);
+  formData.append("reviewId", reviewId || null);
+  // if (intent === "action") {
+  //   formData.append("projectId", projectId);
+  //   formData.append("reviewId", reviewId);
+  // }
   if (inputImages.length > 0) {
     for (const image of inputImages) {
       formData.append("uploaded_images", image);

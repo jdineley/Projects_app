@@ -21,13 +21,31 @@ const {
 const getReview = async (req, res) => {
   console.log("Hit getReview route");
   const { reviewId } = req.params;
-
+  const { intent } = req.query;
   if (!mongoose.Types.ObjectId.isValid(reviewId)) {
     return res.status(404).json({ error: "No such review!" });
   }
-
   try {
-    const review = await Review.findById(reviewId).populate([
+    // #7777
+    // Get, only if user is member of review.project
+    let review;
+    if (intent === "getLearnerProject") {
+      review = await Review.findById(reviewId);
+    } else {
+      const userProjInvolve = [
+        ...req.user.projects.map((p) => p._id.toString()),
+        ...req.user.userInProjects.map((p) => p._id.toString()),
+      ];
+      review = await Review.findOne({
+        _id: reviewId,
+        project: { $in: userProjInvolve },
+      });
+    }
+    if (!review) {
+      throw Error("Couldn't fetch Review");
+    }
+
+    await review.populate([
       {
         path: "objectives",
         populate: {
@@ -44,13 +62,9 @@ const getReview = async (req, res) => {
       "project",
     ]);
 
-    if (!review) {
-      res.status(404).json({ error: "no such review" });
-    }
-
-    res.status(200).json(review);
+    return res.status(200).json(review);
   } catch (error) {
-    res.status(error.status || 400).json({ error: error.message });
+    return res.status(error.status || 400).json({ error: error.message });
   }
 };
 
@@ -74,18 +88,22 @@ const updateReview = async (req, res) => {
   }
 
   try {
-    const reviewToUpdate = await Review.findById(reviewId);
-    if (!reviewToUpdate) {
-      res.status(404).json({ error: "no such review" });
-    }
+    // #8888
+    // update only if user is project owner
     const project = await Project.findById(projectId);
     if (!project) {
       res.status(404).json({ error: "no such project" });
     }
     if (req.user._id.toString() !== project.owner.toString()) {
-      return res
-        .status(401)
-        .json({ error: "Not authorised to update project review" });
+      throw Error("Not authorised to update project review");
+      // return res
+      //   .status(401)
+      //   .json({ error: "Not authorised to update project review" });
+    }
+    const reviewToUpdate = await Review.findById(reviewId);
+    if (!reviewToUpdate) {
+      throw Error("Couldn't fetch review");
+      // res.status(404).json({ error: "Couldn't fetch review" });
     }
 
     // update title:
@@ -195,10 +213,10 @@ const updateReview = async (req, res) => {
       }
     }
 
-    res.status(200).json(reviewToUpdate);
+    return res.status(200).json(reviewToUpdate);
   } catch (error) {
-    console.log("patch error", error.message);
-    res.status(error.status || 400).json({ error: error.message });
+    // console.log("patch error", error.message);
+    return res.status(error.status || 400).json({ error: error.message });
   }
 };
 

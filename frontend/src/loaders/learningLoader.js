@@ -30,7 +30,7 @@ const learningLoader = async ({ params, request }) => {
     const { project, projectTasks } = await resp2.json();
 
     const resp3 = await fetch(
-      `${VITE_REACT_APP_API_URL}/api/v1/reviews/getLearnerReview/${project.reviews[1]._id}`,
+      `${VITE_REACT_APP_API_URL}/api/v1/reviews/getLearnerReview/${project.reviews[1]._id}?intent=getLearnerProject`,
       {
         method: "GET",
         mode: "cors",
@@ -42,7 +42,7 @@ const learningLoader = async ({ params, request }) => {
     const review = await resp3.json();
 
     const resp4 = await fetch(
-      `${VITE_REACT_APP_API_URL}/api/v1/tasks/getLearnerTask/${project.tasks[2]}`,
+      `${VITE_REACT_APP_API_URL}/api/v1/tasks/getLearnerTask/${project.tasks[2]}?intent=getLearnerProject`,
       {
         method: "GET",
         mode: "cors",

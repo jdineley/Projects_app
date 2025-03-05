@@ -15,13 +15,15 @@ const getReviewObjective = async (req, res) => {
   }
 
   try {
+    // #1111
+    // Get, only if user is member of review.project
     const objective = await ReviewObjective.findById(objectiveId).populate(
       "actions"
     );
     if (!objective) {
       res.status(404).json({ error: "no such objective" });
     }
-    res.status(200).json({ objective });
+    return res.status(200).json({ objective });
   } catch (error) {}
 };
 

@@ -40,7 +40,8 @@ const MessageForm = ({
 }) => {
   const hasAttachedFiles =
     [...inputImages, ...inputVideos].length > 0 ? true : false;
-
+  console.log("**************message form***************");
+  console.log("projectId", projectId);
   // const URL_REGEX =
   //   /https?:\/\/.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*/g;
   // const urlsArr = comment.match(URL_REGEX) || null;

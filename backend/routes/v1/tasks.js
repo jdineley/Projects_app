@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  getAllTasks,
+  // getAllTasks,
   getTask,
   createTask,
   updateTask,
@@ -14,7 +14,7 @@ const router = express.Router();
 
 // router.use(requireAuth);
 
-router.get("/", requireAuth, getAllTasks);
+// router.get("/", requireAuth, getAllTasks);
 
 router.get("/getTasks", requireAuth, getTasks);
 

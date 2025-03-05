@@ -4,8 +4,8 @@ const multer = require("multer");
 const upload = multer({ dest: "./public/temp/" });
 
 const {
-  getReplies,
-  getReply,
+  // getReplies,
+  // getReply,
   createReply,
   updateReply,
   deleteReply,
@@ -15,9 +15,9 @@ const router = express.Router();
 
 router.use(requireAuth);
 
-router.get("/", getReplies);
+// router.get("/", getReplies);
 
-router.get("/:replyId", getReply);
+// router.get("/:replyId", getReply);
 
 router.post(
   "/",
@@ -25,8 +25,8 @@ router.post(
   createReply
 );
 
-router.patch("/replyId", updateReply);
+// router.patch("/replyId", updateReply);
 
-router.delete("/:replyId", deleteReply);
+// router.delete("/:replyId", deleteReply);
 
 module.exports = router;

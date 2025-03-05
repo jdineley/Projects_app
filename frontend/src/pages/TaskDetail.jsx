@@ -40,20 +40,24 @@ import { mobileScreenWidth, tabletScreenWidth } from "../utility";
 // import { CiImageOn } from "react-icons/ci";
 // import { CiVideoOn } from "react-icons/ci";
 
-export default function TaskDetail({ learning, task, taskComments, user }) {
+export default function TaskDetail() {
+  // export default function TaskDetail({ learning, task, taskComments, user }) {
   // const { VITE_REACT_APP_API_URL } = import.meta.env;
-  console.log("USER", user);
+  // console.log("USER", user);
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
   const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
-  const loaderData = !learning ? useLoaderData() : {};
-  if (!learning) {
-    ({ task, taskComments } = loaderData);
-  }
+  const loaderData = useLoaderData();
+  // const loaderData = !learning ? useLoaderData() : {};
+  const { task, taskComments } = loaderData;
+  // if (!learning) {
+  //   ({ task, taskComments } = loaderData);
+  // }
   const { newCommentId, taskDep, searchedTasks } = loaderData;
 
   // const { task, taskComments, newCommentId, taskDep, searchedTasks } =
   //   useLoaderData();
-  ({ user } = !learning ? useAuthContext() : { user });
+  const { user } = useAuthContext();
+  // ({ user } = !learning ? useAuthContext() : { user });
   console.log("newCommentId", newCommentId);
   const [isCommenting, setIsCommenting] = useState(false);
   const [comment, setComment] = useState("");
@@ -258,7 +262,7 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
           key={comment._id}
           comment={comment}
           newCommentId={newCommentId}
-          learning={learning}
+          // learning={learning}
         />
       ))}
       {isSending && (
@@ -293,7 +297,7 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
           user={user}
           endPoint="/api/v1/comments"
           setIsSending={setIsSending}
-          learning={learning}
+          // learning={learning}
         />
         // <form
         //   onSubmit={(e) => handleSubmitComment(e, comment)}

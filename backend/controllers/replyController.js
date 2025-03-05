@@ -20,20 +20,20 @@ console.log("cloudinary", cloudinary.config().cloud_name);
 const { removeAllFilesAsync } = require("../util");
 
 // get all replies
-const getReplies = async (req, res) => {};
+// const getReplies = async (req, res) => {};
 
 // get reply
-const getReply = async (req, res) => {
-  // console;
-  const { replyId } = req.params;
+// const getReply = async (req, res) => {
+//   // console;
+//   const { replyId } = req.params;
 
-  try {
-    const reply = await Reply.findById(replyId).populate("user");
-    return res.status(200).json(reply);
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
-};
+//   try {
+//     const reply = await Reply.findById(replyId).populate("user");
+//     return res.status(200).json(reply);
+//   } catch (error) {
+//     res.status(404).json({ error: error.message });
+//   }
+// };
 
 // create reply
 const createReply = async (req, res) => {
@@ -45,18 +45,45 @@ const createReply = async (req, res) => {
     projectId,
     reviewId,
   } = req.body;
-  console.log("req.body", req.body);
-  console.log("commentId", commentId);
+  // console.log("req.body", req.body);
+  // console.log("commentId", commentId);
   const {
     _id: currentUserId,
     email: currentUserEmail,
     isDemo,
     isTest,
   } = req.user;
-  console.log("current user id", currentUserId, currentUserEmail);
+  // console.log("current user id", currentUserId, currentUserEmail);
+  const userProjInvolve = [
+    ...req.user.projects.map((p) => p._id.toString()),
+    ...req.user.userInProjects.map((p) => p._id.toString()),
+  ];
   try {
+    // #4290
+    // reply to be attached to a comment within user's projects
     const comment = await Comment.findById(commentId);
-    console.log(comment);
+    // if (comment.task) {
+    //   await comment.populate("task");
+    //   if (!userProjInvolve.includes(comment.task.project.toString())) {
+    //     throw Error("Unauthorised to complete this action");
+    //   }
+    // }
+    // if (comment.action) {
+    //   await comment.populate([
+    //     {
+    //       path: "action",
+    //       populate: [{ path: "reviewObjective", populate: "review" }],
+    //     },
+    //   ]);
+    //   if (
+    //     !userProjInvolve.includes(
+    //       comment.action.reviewObjective.review.project.toString()
+    //     )
+    //   ) {
+    //     throw Error("Unauthorised to complete this action");
+    //   }
+    // }
+    // console.log(comment);
     if (!comment) {
       throw Error("no associated comment found");
     }
@@ -64,19 +91,37 @@ const createReply = async (req, res) => {
     let action;
     let actionees;
     if (comment.task) {
+      // console.log("!!!", comment.task);
+      await comment.populate("task");
+      if (!userProjInvolve.includes(comment.task.project.toString())) {
+        throw Error("Unauthorised to complete this action");
+      }
       task = await Task.findById(comment.task);
-      console.log("task", task);
+      // console.log("task", task);
       if (!task) {
         throw Error("no associated task found");
       }
     }
     if (comment.action) {
+      await comment.populate([
+        {
+          path: "action",
+          populate: [{ path: "reviewObjective", populate: "review" }],
+        },
+      ]);
+      if (
+        !userProjInvolve.includes(
+          comment.action.reviewObjective.review.project.toString()
+        )
+      ) {
+        throw Error("Unauthorised to complete this action");
+      }
       action = await ReviewAction.findById(comment.action);
       if (!action) {
         throw Error("no associated action found");
       }
       actionees = action.actionees.map((a) => a.toString());
-      console.log("actionees", actionees);
+      // console.log("actionees", actionees);
     }
     const reply = await Reply.create({ ...req.body, isDemo, isTest });
     if (req.files) {
@@ -175,15 +220,15 @@ const createReply = async (req, res) => {
 };
 
 // update reply
-const updateReply = async (req, res) => {};
+// const updateReply = async (req, res) => {};
 
 // delete reply
-const deleteReply = async (req, res) => {};
+// const deleteReply = async (req, res) => {};
 
 module.exports = {
-  getReplies,
-  getReply,
+  // getReplies,
+  // getReply,
   createReply,
-  updateReply,
-  deleteReply,
+  // updateReply,
+  // deleteReply,
 };

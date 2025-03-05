@@ -20,7 +20,8 @@ export default function UserComment({
   reviewId,
   learning,
 }) {
-  // console.log("**********COMMENT*************", comment);
+  console.log("**********COMMENT*************", comment);
+  console.log("projectId", projectId);
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   const hasOnlyImageAttached =
     comment.content === "" &&

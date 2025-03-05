@@ -26,7 +26,7 @@ const ProjectReview = () => {
     newActionId,
   } = useLoaderData();
 
-  console.dir(review);
+  console.log("projectId", projectId);
 
   const { user } = useAuthContext();
 

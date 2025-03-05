@@ -32,7 +32,10 @@ const requireAuth = async (req, res, next) => {
     //verify provides the payload unhashed if no error {_id: 5443wfr435...}
     const { _id } = jwt.verify(token, process.env.SECRET);
 
-    req.user = await User.findOne({ _id });
+    req.user = await User.findOne({ _id }).populate([
+      "projects",
+      "userInProjects",
+    ]);
     // .select([
     //   "_id",
     //   "email",
@@ -40,7 +43,7 @@ const requireAuth = async (req, res, next) => {
     //   "isTest",
     //   "isVerified",
     // ]);
-    console.log("req.user", req.user);
+    // console.log("req.user", req.user);
     if (!req.user.isVerified) {
       return res
         .status(401)
@@ -62,7 +65,7 @@ const requireAuth = async (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-    console.log("token", token);
+    // console.log("token", token);
     jwt.verify(
       token,
       getKey,
@@ -91,10 +94,12 @@ const requireAuth = async (req, res, next) => {
           console.error("Token Verification Error:", err);
           return res.status(401).json({ error: "Invalid token" });
         }
-        console.log("Decoded Token:", decoded);
+        // console.log("Decoded Token:", decoded);
         const { scp } = decoded;
         if (scp === "Data.ReadAndWrite") {
-          const user = await User.findOne({ objectID: decoded.oid }).lean();
+          const user = await User.findOne({ objectID: decoded.oid })
+            .populate(["projects", "userInProjects"])
+            .lean();
           req.user = { ...user, decoded, accessToken: token };
           // _id: user?._id
           next();

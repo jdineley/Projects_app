@@ -5,6 +5,7 @@ const projectReviewLoader =
     const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, reviewId } = params;
+    console.log("projectId", projectId);
     const url = new URL(request.url);
 
     // from Form method=GET
