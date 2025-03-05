@@ -49,20 +49,21 @@ const getProject = async (req, res) => {
   try {
     // #2473
     // req.user.projects[] OR req.user.userInProjects[] must contain projectId
-    let project;
-    if (intent === "getLearnerProject") {
-      project = await Project.findById(projectId);
-    } else {
-      project = await Project.findOne({
-        _id: projectId,
-        $or: [
-          { _id: { $in: req.user.projects } },
-          { _id: { $in: req.user.userInProjects } },
-        ],
-      });
-    }
+    // let project;
+    // if (intent === "getLearnerProject") {
+    //   project = await Project.findById(projectId);
+    // } else {
+    //   project = await Project.findOne({
+    //     _id: projectId,
+    //     $or: [
+    //       { _id: { $in: req.user.projects } },
+    //       { _id: { $in: req.user.userInProjects } },
+    //     ],
+    //   });
+    // }
+    const project = await Project.findById(projectId);
     if (!project) {
-      throw Error("Not Authorised to view this Project");
+      throw Error("Project not found");
       // return res
       //   .status(401)
       //   .json({ error: "Not Authorised to view this Project" });

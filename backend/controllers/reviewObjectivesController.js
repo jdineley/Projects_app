@@ -6,31 +6,31 @@ const Review = require("../models/Review");
 // shared controller
 const updateObjective = require("./sharedController");
 
-const getReviewObjective = async (req, res) => {
-  console.log("hit getReviewObjective route");
-  const { objectiveId } = req.params;
+// const getReviewObjective = async (req, res) => {
+//   console.log("hit getReviewObjective route");
+//   const { objectiveId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(objectiveId)) {
-    return res.status(404).json({ error: "No such objective!" });
-  }
+//   if (!mongoose.Types.ObjectId.isValid(objectiveId)) {
+//     return res.status(404).json({ error: "No such objective!" });
+//   }
 
-  try {
-    // #1111
-    // Get, only if user is member of review.project
-    const objective = await ReviewObjective.findById(objectiveId).populate(
-      "actions"
-    );
-    if (!objective) {
-      res.status(404).json({ error: "no such objective" });
-    }
-    return res.status(200).json({ objective });
-  } catch (error) {}
-};
+//   try {
+//     // #1111
+//     // Get, only if user is member of review.project
+//     const objective = await ReviewObjective.findById(objectiveId).populate(
+//       "actions"
+//     );
+//     if (!objective) {
+//       res.status(404).json({ error: "no such objective" });
+//     }
+//     return res.status(200).json({ objective });
+//   } catch (error) {}
+// };
 
 const createReviewObjective = async (req, res) => {
   console.log("hit createReviewObjective route");
   const { reviewId } = req.params;
-  const { title } = req.body;
+  const { title, project } = req.body;
   const { isDemo, isTest } = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(reviewId)) {
@@ -44,6 +44,7 @@ const createReviewObjective = async (req, res) => {
     }
     const newObjective = await ReviewObjective.create({
       title,
+      project,
       review: reviewId,
       isDemo,
       isTest,
@@ -73,11 +74,11 @@ const createReviewObjective = async (req, res) => {
   }
 };
 
-const updateReviewObjective = async (req, res) => {
-  console.log("hit updateReview route");
-};
+// const updateReviewObjective = async (req, res) => {
+//   console.log("hit updateReview route");
+// };
 
 module.exports = {
   createReviewObjective,
-  getReviewObjective,
+  // getReviewObjective,
 };

@@ -11,7 +11,7 @@ const reviewAction =
       if (intent === "newComment") {
         console.log("in newComment");
         const response = await fetch(
-          `${VITE_REACT_APP_API_URL}/api/v1/comments`,
+          `${VITE_REACT_APP_API_URL}/api/v1/comments/project/${projectId}`,
           {
             method: "POST",
             headers: {

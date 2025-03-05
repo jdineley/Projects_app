@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const reviewActionSchema = new mongoose.Schema({
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+    required: true,
+  },
   reviewObjective: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "ReviewObjective",

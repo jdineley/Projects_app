@@ -47,6 +47,7 @@ const createReply = async (req, res) => {
   } = req.body;
   // console.log("req.body", req.body);
   // console.log("commentId", commentId);
+  console.log("&&&&&&&&&&&&&projectId&&&&&&&&&&&&&&&&&&&", projectId);
   const {
     _id: currentUserId,
     email: currentUserEmail,
@@ -54,10 +55,10 @@ const createReply = async (req, res) => {
     isTest,
   } = req.user;
   // console.log("current user id", currentUserId, currentUserEmail);
-  const userProjInvolve = [
-    ...req.user.projects.map((p) => p._id.toString()),
-    ...req.user.userInProjects.map((p) => p._id.toString()),
-  ];
+  // const userProjInvolve = [
+  //   ...req.user.projects.map((p) => p._id.toString()),
+  //   ...req.user.userInProjects.map((p) => p._id.toString()),
+  // ];
   try {
     // #4290
     // reply to be attached to a comment within user's projects
@@ -92,10 +93,10 @@ const createReply = async (req, res) => {
     let actionees;
     if (comment.task) {
       // console.log("!!!", comment.task);
-      await comment.populate("task");
-      if (!userProjInvolve.includes(comment.task.project.toString())) {
-        throw Error("Unauthorised to complete this action");
-      }
+      // await comment.populate("task");
+      // if (!userProjInvolve.includes(comment.task.project.toString())) {
+      //   throw Error("Unauthorised to complete this action");
+      // }
       task = await Task.findById(comment.task);
       // console.log("task", task);
       if (!task) {
@@ -103,19 +104,19 @@ const createReply = async (req, res) => {
       }
     }
     if (comment.action) {
-      await comment.populate([
-        {
-          path: "action",
-          populate: [{ path: "reviewObjective", populate: "review" }],
-        },
-      ]);
-      if (
-        !userProjInvolve.includes(
-          comment.action.reviewObjective.review.project.toString()
-        )
-      ) {
-        throw Error("Unauthorised to complete this action");
-      }
+      // await comment.populate([
+      //   {
+      //     path: "action",
+      //     populate: [{ path: "reviewObjective", populate: "review" }],
+      //   },
+      // ]);
+      // if (
+      //   !userProjInvolve.includes(
+      //     comment.action.reviewObjective.review.project.toString()
+      //   )
+      // ) {
+      //   throw Error("Unauthorised to complete this action");
+      // }
       action = await ReviewAction.findById(comment.action);
       if (!action) {
         throw Error("no associated action found");
@@ -123,7 +124,12 @@ const createReply = async (req, res) => {
       actionees = action.actionees.map((a) => a.toString());
       // console.log("actionees", actionees);
     }
-    const reply = await Reply.create({ ...req.body, isDemo, isTest });
+    const reply = await Reply.create({
+      ...req.body,
+      project: projectId,
+      isDemo,
+      isTest,
+    });
     if (req.files) {
       if (req.files.uploaded_images) {
         const imagePaths = req.files.uploaded_images.map((image) => {

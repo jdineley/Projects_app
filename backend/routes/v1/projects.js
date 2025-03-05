@@ -10,6 +10,7 @@ const {
 } = require("../../controllers/projectController");
 
 const requireAuth = require("../../middleware/requireAuth");
+const projectViewVerification = require("../../middleware/projectViewVerification");
 // const requireEntraIDAuth = require("../../middleware/requireEntraIDAuth");
 
 const router = express.Router();
@@ -18,7 +19,7 @@ const router = express.Router();
 
 // router.get("/", requireAuth, getAllProjects);
 
-router.get("/:projectId", requireAuth, getProject);
+router.get("/:projectId", requireAuth, projectViewVerification, getProject);
 
 // router.post("/", requireAuth, upload.single("file"), createProject);
 router.post("/", requireAuth, createProject);

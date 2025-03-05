@@ -5,6 +5,7 @@ const {
 } = require("../../controllers/reviewController");
 
 const requireAuth = require("../../middleware/requireAuth");
+const projectViewVerification = require("../../middleware/projectViewVerification");
 
 const router = express.Router();
 
@@ -16,9 +17,19 @@ const router = express.Router();
 
 // router.post("/", createProject);
 
-router.get("/:reviewId", requireAuth, getReview);
+router.get(
+  "/:reviewId/project/:projectId",
+  requireAuth,
+  projectViewVerification,
+  getReview
+);
 
-router.patch("/:reviewId/projects/:projectId", requireAuth, updateReview);
+router.patch(
+  "/:reviewId/projects/:projectId",
+  requireAuth,
+  projectViewVerification,
+  updateReview
+);
 
 router.get("/getLearnerReview/:reviewId", getReview);
 

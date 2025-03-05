@@ -234,9 +234,9 @@ const updateVacation = async (req, res) => {
       await correctRemainingVacDays(user._id);
     }
     // console.log(vacationToUpdate);
-    res.status(200).json(vacationToUpdate);
+    return res.status(200).json(vacationToUpdate);
   } catch (error) {
-    res.status(404).json({ error: error.message });
+    return res.status(404).json({ error: error.message });
   }
 };
 

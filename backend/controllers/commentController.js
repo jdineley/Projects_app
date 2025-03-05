@@ -40,6 +40,7 @@ const createComment = async (req, res) => {
   try {
     const comment = await Comment.create({
       ...req.body,
+      project: projectId,
       isDemo: req.user.isDemo,
       isTest: req.user.isTest,
     });

@@ -39,6 +39,7 @@ mongoose
         const storedObjective = await ReviewObjective.create({
           ...objective,
           review: reviewId,
+          project: review.project,
           isDemo: true,
         });
         review.objectives.push(storedObjective._id);
@@ -62,6 +63,7 @@ mongoose
         const storedAction = await ReviewAction.create({
           ...action,
           reviewObjective: reviewObjectiveId,
+          project: reviewObjective.project,
           isDemo: true,
         });
         reviewObjective.actions.push(storedAction._id);

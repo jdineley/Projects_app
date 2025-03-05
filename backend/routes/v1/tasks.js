@@ -9,6 +9,7 @@ const {
 } = require("../../controllers/taskController");
 
 const requireAuth = require("../../middleware/requireAuth");
+const projectViewVerification = require("../../middleware/projectViewVerification");
 
 const router = express.Router();
 
@@ -18,13 +19,33 @@ const router = express.Router();
 
 router.get("/getTasks", requireAuth, getTasks);
 
-router.get("/:taskId", requireAuth, getTask);
+router.get(
+  "/:taskId/project/:projectId",
+  requireAuth,
+  projectViewVerification,
+  getTask
+);
 
-router.post("/project/:projectId", requireAuth, createTask);
+router.post(
+  "/project/:projectId",
+  requireAuth,
+  projectViewVerification,
+  createTask
+);
 
-router.patch("/:taskId", requireAuth, updateTask);
+router.patch(
+  "/:taskId/project/:projectId",
+  requireAuth,
+  // projectViewVerification,
+  updateTask
+);
 
-router.delete("/:taskId", requireAuth, deleteTask);
+router.delete(
+  "/:taskId/project/:projectId",
+  requireAuth,
+  // projectViewVerification,
+  deleteTask
+);
 
 router.get("/getLearnerTask/:taskId", getTask);
 

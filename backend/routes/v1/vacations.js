@@ -18,8 +18,8 @@ router.patch("/:vacationId", updateVacation);
 
 router.delete("/:vacationId", deleteVacation);
 
-router.get("/");
+// router.get("/");
 
-router.get("/");
+// router.get("/");
 
 module.exports = router;

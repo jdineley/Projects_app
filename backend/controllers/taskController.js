@@ -79,23 +79,29 @@ const getTask = async (req, res) => {
   try {
     // #5964
     // return task only if task is in tasksDomain
-    let task;
-    if (intent === "getLearnerProject") {
-      task = await Task.findById(taskId).populate([
-        "user",
-        "project",
-        "dependencies",
-        "secondaryUsers",
-      ]);
-    } else {
-      const projectsDomain = [...req.user.projects, ...req.user.userInProjects];
-      const tasksDomain = projectsDomain.reduce((acc, cur) => {
-        return [...acc, ...cur.tasks];
-      }, []);
-      task = await Task.findOne({
-        $and: [{ _id: taskId }, { _id: { $in: tasksDomain } }],
-      }).populate(["user", "project", "dependencies", "secondaryUsers"]);
-    }
+    // let task;
+    // if (intent === "getLearnerProject") {
+    //   task = await Task.findById(taskId).populate([
+    //     "user",
+    //     "project",
+    //     "dependencies",
+    //     "secondaryUsers",
+    //   ]);
+    // } else {
+    //   const projectsDomain = [...req.user.projects, ...req.user.userInProjects];
+    //   const tasksDomain = projectsDomain.reduce((acc, cur) => {
+    //     return [...acc, ...cur.tasks];
+    //   }, []);
+    //   task = await Task.findOne({
+    //     $and: [{ _id: taskId }, { _id: { $in: tasksDomain } }],
+    //   }).populate(["user", "project", "dependencies", "secondaryUsers"]);
+    // }
+    const task = await Task.findById(taskId).populate([
+      "user",
+      "project",
+      "dependencies",
+      "secondaryUsers",
+    ]);
     if (!task) {
       return res.status(404).json({ error: "No such task" });
     }
@@ -132,12 +138,15 @@ const createTask = async (req, res) => {
   try {
     // #1067
     // return if projectId is present in [...req.user.projects, req.user.userInProjects]
-    const project = await Project.findOne({
-      $and: [
-        { _id: projectId },
-        { _id: { $in: [...req.user.projects, ...req.user.userInProjects] } },
-      ],
-    }).populate([{ path: "tasks", populate: ["secondaryUsers"] }]);
+    // const project = await Project.findOne({
+    //   $and: [
+    //     { _id: projectId },
+    //     { _id: { $in: [...req.user.projects, ...req.user.userInProjects] } },
+    //   ],
+    // }).populate([{ path: "tasks", populate: ["secondaryUsers"] }]);
+    const project = await Project.findById(projectId).populate([
+      { path: "tasks", populate: ["secondaryUsers"] },
+    ]);
     if (!project) {
       return res.status(404).json({ error: "No such project" });
     }

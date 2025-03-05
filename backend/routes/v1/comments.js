@@ -9,17 +9,20 @@ const {
 } = require("../../controllers/commentController");
 
 const requireAuth = require("../../middleware/requireAuth");
+const projectViewVerification = require("../../middleware/projectViewVerification");
 
 const router = express.Router();
 
-router.use(requireAuth);
+// router.use(requireAuth);
 
 // /api/v1/comments
 // router.get("/", getAllComments);
 
 //  /api/v1/comments
 router.post(
-  "/",
+  "/project/:projectId",
+  requireAuth,
+  projectViewVerification,
   upload.fields([{ name: "uploaded_images" }, { name: "uploaded_videos" }]),
   createComment
 );

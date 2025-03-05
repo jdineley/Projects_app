@@ -3,7 +3,7 @@ const learningLoader = async ({ params, request }) => {
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   try {
     const resp1 = await fetch(
-      `${VITE_REACT_APP_API_URL}/api/v1/users/getLearnerUser?email=jenny@mail.com`,
+      `${VITE_REACT_APP_API_URL}/api/v1/users/getLearnerUser?email=henryTest@mail.com`,
       {
         method: "GET",
         mode: "cors",
@@ -30,7 +30,7 @@ const learningLoader = async ({ params, request }) => {
     const { project, projectTasks } = await resp2.json();
 
     const resp3 = await fetch(
-      `${VITE_REACT_APP_API_URL}/api/v1/reviews/getLearnerReview/${project.reviews[1]._id}?intent=getLearnerProject`,
+      `${VITE_REACT_APP_API_URL}/api/v1/reviews/getLearnerReview/${project.reviews[0]._id}?intent=getLearnerProject`,
       {
         method: "GET",
         mode: "cors",

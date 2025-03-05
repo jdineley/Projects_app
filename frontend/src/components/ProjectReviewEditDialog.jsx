@@ -145,7 +145,7 @@ const ProjectReviewEditDialog = ({
       if (type === "newObjective") {
         const { reviewId, title } = data;
         const res1 = await fetch(
-          `${VITE_REACT_APP_API_URL}/api/v1/reviewObjectives/${reviewId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/reviewObjectives/${reviewId}/project/${projectId}`,
           {
             method: "POST",
             mode: "cors",
@@ -153,7 +153,7 @@ const ProjectReviewEditDialog = ({
               "Content-Type": "application/json",
               Authorization: `Bearer ${user.token}`,
             },
-            body: JSON.stringify({ title }),
+            body: JSON.stringify({ title, project: projectId }),
           }
         );
 
@@ -169,7 +169,7 @@ const ProjectReviewEditDialog = ({
       if (type === "newAction") {
         const { objectiveId, content } = data;
         const res2 = await fetch(
-          `${VITE_REACT_APP_API_URL}/api/v1/reviewActions/objective/${objectiveId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/reviewActions/objective/${objectiveId}/project/${projectId}`,
           {
             method: "POST",
             mode: "cors",
@@ -177,7 +177,7 @@ const ProjectReviewEditDialog = ({
               "Content-Type": "application/json",
               Authorization: `Bearer ${user.token}`,
             },
-            body: JSON.stringify({ content }),
+            body: JSON.stringify({ content, project: projectId }),
           }
         );
 

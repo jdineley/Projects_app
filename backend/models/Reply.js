@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const replySchema = new mongoose.Schema({
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+    required: true,
+  },
   content: {
     type: String,
     // required: true,

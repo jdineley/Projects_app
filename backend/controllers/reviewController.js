@@ -20,7 +20,7 @@ const {
 
 const getReview = async (req, res) => {
   console.log("Hit getReview route");
-  const { reviewId } = req.params;
+  const { projectId, reviewId } = req.params;
   const { intent } = req.query;
   if (!mongoose.Types.ObjectId.isValid(reviewId)) {
     return res.status(404).json({ error: "No such review!" });
@@ -28,19 +28,20 @@ const getReview = async (req, res) => {
   try {
     // #7777
     // Get, only if user is member of review.project
-    let review;
-    if (intent === "getLearnerProject") {
-      review = await Review.findById(reviewId);
-    } else {
-      const userProjInvolve = [
-        ...req.user.projects.map((p) => p._id.toString()),
-        ...req.user.userInProjects.map((p) => p._id.toString()),
-      ];
-      review = await Review.findOne({
-        _id: reviewId,
-        project: { $in: userProjInvolve },
-      });
-    }
+    // let review;
+    // if (intent === "getLearnerProject") {
+    //   review = await Review.findById(reviewId);
+    // } else {
+    //   const userProjInvolve = [
+    //     ...req.user.projects.map((p) => p._id.toString()),
+    //     ...req.user.userInProjects.map((p) => p._id.toString()),
+    //   ];
+    //   review = await Review.findOne({
+    //     _id: reviewId,
+    //     project: { $in: userProjInvolve },
+    //   });
+    // }
+    const review = await Review.findById(reviewId);
     if (!review) {
       throw Error("Couldn't fetch Review");
     }

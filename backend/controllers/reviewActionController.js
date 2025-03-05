@@ -7,7 +7,7 @@ const Review = require("../models/Review");
 const createReviewAction = async (req, res) => {
   console.log("hit createReviewAction route");
   const { objectiveId } = req.params;
-  const { content } = req.body;
+  const { content, project } = req.body;
   const { isDemo, isTest } = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(objectiveId)) {
@@ -17,6 +17,7 @@ const createReviewAction = async (req, res) => {
   try {
     const newAction = await ReviewAction.create({
       content,
+      project,
       reviewObjective: objectiveId,
       isDemo,
       isTest,
@@ -44,7 +45,7 @@ const createReviewAction = async (req, res) => {
       },
       "project",
     ]);
-    console.log(review);
+    // console.log(review);
     res.status(200).json({ newAction, review });
   } catch (error) {
     res.status(404).json({ error: error.message });

@@ -3,7 +3,7 @@ const taskDetailLoader =
   async ({ params, request }) => {
     const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
-    const { taskId } = params;
+    const { projectId, taskId } = params;
     const url = new URL(request.url);
     const newCommentId = url.searchParams.get("commentId");
     const newCommenterEmail = url.searchParams.get("user");
@@ -17,7 +17,7 @@ const taskDetailLoader =
     try {
       if (user) {
         const response = await fetch(
-          `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}/project/${projectId}`,
           {
             headers: {
               Authorization: `Bearer: ${token}`,
@@ -53,6 +53,7 @@ const taskDetailLoader =
           newCommenterEmail,
           taskDep,
           searchedTasks,
+          projectId,
         };
       } else {
         return {
@@ -62,6 +63,7 @@ const taskDetailLoader =
           newCommenterEmail: null,
           taskDep: null,
           searchedTasks: null,
+          projectId: null,
         };
       }
     } catch (error) {

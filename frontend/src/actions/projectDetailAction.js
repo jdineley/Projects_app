@@ -31,7 +31,7 @@ const projectDetailAction =
 
       try {
         const response = await fetch(
-          `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}/project/${projectId}`,
           {
             method: "PATCH",
             mode: "cors",
@@ -168,7 +168,7 @@ const projectDetailAction =
         const { taskDetail } = list;
         const { taskId } = list;
         const res = await fetch(
-          `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/tasks/${taskId}/project/${projectId}`,
           {
             method: "DELETE",
             mode: "cors",
@@ -193,7 +193,7 @@ const projectDetailAction =
       const { comment } = list;
       try {
         const response = await fetch(
-          `${VITE_REACT_APP_API_URL}/api/v1/comments`,
+          `${VITE_REACT_APP_API_URL}/api/v1/comments/project/${projectId}`,
           {
             method: "POST",
             headers: {
@@ -205,6 +205,7 @@ const projectDetailAction =
               task: taskId,
               review: reviewId,
               content: comment,
+              project: projectId,
             }),
           }
         );

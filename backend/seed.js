@@ -45,26 +45,26 @@ mongoose
     console.log("Mongo connection open!!");
     const seedDb = async () => {
       try {
-        // await Project.deleteMany({});
-        // await User.deleteMany({});
-        // await Task.deleteMany({});
-        // await Comment.deleteMany({});
-        // await Reply.deleteMany({});
-        // await Review.deleteMany({});
-        // await ReviewObjective.deleteMany({});
-        // await ReviewAction.deleteMany({});
-        // await Vacation.deleteMany({});
-        // await Tenant.deleteMany({}); //OPTIONAL
+        await Project.deleteMany({});
+        await User.deleteMany({});
+        await Task.deleteMany({});
+        await Comment.deleteMany({});
+        await Reply.deleteMany({});
+        await Review.deleteMany({});
+        await ReviewObjective.deleteMany({});
+        await ReviewAction.deleteMany({});
+        await Vacation.deleteMany({});
+        await Tenant.deleteMany({}); //OPTIONAL
 
-        await Project.deleteMany({ isDemo: true });
-        await User.deleteMany({ isDemo: true });
-        await Task.deleteMany({ isDemo: true });
-        await Comment.deleteMany({ isDemo: true });
-        await Reply.deleteMany({ isDemo: true });
-        await Review.deleteMany({ isDemo: true });
-        await ReviewObjective.deleteMany({ isDemo: true });
-        await ReviewAction.deleteMany({ isDemo: true });
-        await Vacation.deleteMany({ isDemo: true });
+        // await Project.deleteMany({ isDemo: true });
+        // await User.deleteMany({ isDemo: true });
+        // await Task.deleteMany({ isDemo: true });
+        // await Comment.deleteMany({ isDemo: true });
+        // await Reply.deleteMany({ isDemo: true });
+        // await Review.deleteMany({ isDemo: true });
+        // await ReviewObjective.deleteMany({ isDemo: true });
+        // await ReviewAction.deleteMany({ isDemo: true });
+        // await Vacation.deleteMany({ isDemo: true });
 
         // delete everything related to demo users:
         // const demoUsers = await User.find({ demo: true });
@@ -299,6 +299,7 @@ mongoose
               ...comment,
               user: user._id,
               task: task._id,
+              project: task.project,
               isDemo: true,
             });
             task.comments.push(newComment._id);
@@ -325,6 +326,7 @@ mongoose
             const newReply = await Reply.create({
               ...reply,
               comment: comment_id,
+              project: comment.project,
               user: user._id,
               isDemo: true,
             });

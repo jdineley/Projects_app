@@ -20,7 +20,7 @@ const projectReviewLoader =
     try {
       if (user) {
         const res1 = await fetch(
-          `${VITE_REACT_APP_API_URL}/api/v1/reviews/${reviewId}`,
+          `${VITE_REACT_APP_API_URL}/api/v1/reviews/${reviewId}/project/${projectId}`,
           {
             method: "GET",
             mode: "cors",

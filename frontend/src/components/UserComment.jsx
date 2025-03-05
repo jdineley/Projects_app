@@ -247,7 +247,7 @@ export default function UserComment({
           intent="comment"
           target={comment}
           user={user}
-          endPoint="/api/v1/replies"
+          endPoint={`/api/v1/replies/project/${projectId}`}
           setIsSending={setIsSending}
           projectId={projectId}
           reviewId={reviewId}
