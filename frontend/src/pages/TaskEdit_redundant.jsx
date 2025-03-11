@@ -24,6 +24,7 @@ export default function TaskEdit() {
 
   async function handleTaskDelete() {
     console.log("handle delete task");
+    const token = user?.token ? user?.token : user?.accessToken;
     console.log("taskId:", selectedTask._id);
     try {
       const response = await fetch(
@@ -32,7 +33,7 @@ export default function TaskEdit() {
           method: "DELETE",
           mode: "cors",
           headers: {
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

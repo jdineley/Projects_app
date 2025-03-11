@@ -4,6 +4,7 @@ const projectDetailAction =
   (user) =>
   async ({ request, params }) => {
     console.log("in project detail action");
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, taskId, reviewId } = params;
     const data = await request.formData();
@@ -37,7 +38,7 @@ const projectDetailAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               title,
@@ -84,7 +85,7 @@ const projectDetailAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               title,
@@ -117,7 +118,7 @@ const projectDetailAction =
               method: "DELETE",
               mode: "cors",
               headers: {
-                Authorization: `Bearer ${user.token}`,
+                Authorization: `Bearer ${token}`,
               },
               body: JSON.stringify({ intent }),
             }
@@ -146,7 +147,7 @@ const projectDetailAction =
               mode: "cors",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${user.token}`,
+                Authorization: `Bearer ${token}`,
               },
               body: JSON.stringify({ intent }),
             }
@@ -173,7 +174,7 @@ const projectDetailAction =
             method: "DELETE",
             mode: "cors",
             headers: {
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -198,7 +199,7 @@ const projectDetailAction =
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               user: user._id,
@@ -228,7 +229,7 @@ const projectDetailAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ intent, title, start, end, ...reviews }),
           }
@@ -253,7 +254,7 @@ const projectDetailAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ intent }),
           }
@@ -279,7 +280,7 @@ const projectDetailAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ intent, freeze }),
           }

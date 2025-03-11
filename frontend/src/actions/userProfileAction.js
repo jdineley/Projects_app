@@ -2,6 +2,7 @@ const userProfileAction =
   (user) =>
   async ({ request }) => {
     console.log("hit userProfileAction");
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const data = await request.formData();
     const {
@@ -25,7 +26,7 @@ const userProfileAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               lastWorkDate,
@@ -49,7 +50,7 @@ const userProfileAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               vacationAccepted,
@@ -75,7 +76,7 @@ const userProfileAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               vacationId,

@@ -32,7 +32,7 @@ const loginAction = async ({ request }) => {
     if (!response.ok) {
       throw Error(json.error);
     }
-    console.log("JSON@@£@£@£@£@@£@£@£@£", json);
+    // console.log("JSON@@£@£@£@£@@£@£@£@£", json);
     return json;
   } catch (error) {
     return error;

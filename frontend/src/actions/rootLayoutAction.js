@@ -4,6 +4,7 @@ const rootLayoutAction =
   (user) =>
   async ({ request }) => {
     console.log("hit rootLayoutAction");
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const data = await request.formData();
     const { intent, path } = Object.fromEntries(data);
@@ -18,7 +19,7 @@ const rootLayoutAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               intent,

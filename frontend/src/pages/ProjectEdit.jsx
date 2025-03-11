@@ -19,6 +19,7 @@ export default function ProjectEdit() {
 
   async function handleProjectDelete() {
     console.log("handle delete project");
+    const token = user?.token ? user?.token : user?.accessToken;
     console.log("projectId:", project._id);
     try {
       const response = await fetch(
@@ -27,7 +28,7 @@ export default function ProjectEdit() {
           method: "DELETE",
           mode: "cors",
           headers: {
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

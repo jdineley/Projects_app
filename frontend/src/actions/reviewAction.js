@@ -2,6 +2,7 @@ const reviewAction =
   (user) =>
   async ({ request, params }) => {
     console.log("in the review action");
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const { projectId, reviewId } = params;
     const data = await request.formData();
@@ -16,7 +17,7 @@ const reviewAction =
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               user: user._id,

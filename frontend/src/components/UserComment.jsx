@@ -19,14 +19,16 @@ export default function UserComment({
   projectId,
   reviewId,
   learning,
+  ticket,
 }) {
-  console.log("**********COMMENT*************", comment);
-  console.log("projectId", projectId);
+  // console.log("**********COMMENT*************", comment);
+  // console.log("projectId", projectId);
+  // console.log("ticket", ticket);
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   const hasOnlyImageAttached =
-    comment.content === "" &&
-    comment.images.length === 1 &&
-    comment.videos.length === 0
+    (comment || ticket).content === "" &&
+    (comment || ticket).images.length === 1 &&
+    (comment || ticket).videos.length === 0
       ? true
       : false;
   // console.log("hasOnlyImageAttached", hasOnlyImageAttached);
@@ -53,35 +55,6 @@ export default function UserComment({
 
   const revalidator = useRevalidator();
 
-  // async function handleReplySubmit(e) {
-  //   e.preventDefault();
-  //   const reply = document.querySelector("#reply").value;
-  //   setIsReplying(false);
-  //   try {
-  //     const response = await fetch(`${VITE_REACT_APP_API_URL}/api/v1/replies`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${user.token}`,
-  //       },
-  //       body: JSON.stringify({
-  //         content: reply,
-  //         comment: comment._id,
-  //         user: user._id,
-  //         projectId,
-  //         reviewId,
-  //       }),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw Error("failed to create reply");
-  //     }
-  //     navigate("");
-  //   } catch (error) {
-  //     throw Error(error.message);
-  //   }
-  // }
-
   function handleShowDiscussion() {
     setIsDiscussion(!isDiscussion);
     setIsReplying(false);
@@ -92,10 +65,10 @@ export default function UserComment({
   const URL_REGEX_WORD =
     /https?:\/\/.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*/;
 
-  const words = comment.content.split(/ |\n/g);
+  const words = (comment || ticket).content.split(/ |\n/g);
   // console.log("words", words);
 
-  const urlsArr = comment.content.match(URL_REGEX) || null;
+  const urlsArr = (comment || ticket).content.match(URL_REGEX) || null;
   // console.log("urlsArr", urlsArr);
 
   const replyUrlsArr = reply.match(URL_REGEX) || null;
@@ -109,9 +82,11 @@ export default function UserComment({
   return (
     <div
       className={`user-comment-collector ${
-        comment._id === newCommentId && notification ? "new-comment" : ""
-      } bg-[#1564c0]`}
-      id={comment._id}
+        (comment || ticket)._id === newCommentId && notification
+          ? "new-comment"
+          : ""
+      }  ${ticket?.importance === "high" ? "bg-red-500" : "bg-[#1564c0]"} mb-2`}
+      id={(comment || ticket)._id}
       // style={
       //   {
       //     marginLeft: "auto",
@@ -122,7 +97,7 @@ export default function UserComment({
     >
       <div className="user-comment">
         <div className="flex flex-col gap-1">
-          {comment.content && (
+          {(comment || ticket).content && (
             <Text className="text-white">
               {words.map((word, i) => {
                 return URL_REGEX_WORD.test(word) ? (
@@ -135,9 +110,9 @@ export default function UserComment({
               })}
             </Text>
           )}
-          {comment.images.length > 0 && (
+          {(comment || ticket).images.length > 0 && (
             <div className="flex gap-4 flex-wrap">
-              {comment.images.map((img) => {
+              {(comment || ticket).images.map((img) => {
                 return (
                   <a key={img.url} href={img.url} target="_blank">
                     <img
@@ -152,9 +127,9 @@ export default function UserComment({
               })}
             </div>
           )}
-          {comment.videos && (
+          {(comment || ticket).videos && (
             <div className="flex">
-              {comment.videos.map((vid) => {
+              {(comment || ticket).videos.map((vid) => {
                 // console.log("vid", vid);
                 return (
                   <a key={vid.url} href={vid.url} target="_blank">
@@ -174,19 +149,19 @@ export default function UserComment({
         </div>
 
         <Text size="1" className="user-comment-email text-white">
-          {comment.user.email}
+          {(comment || ticket).user.email}
         </Text>
       </div>
       {/* modify construct to include an array of replies... */}
-      {comment.replies?.length > 0 && (
+      {(comment || ticket).replies?.length > 0 && (
         <button onClick={handleShowDiscussion}>
           {isDiscussion ? "Hide discussion" : "Show discussion"}
         </button>
       )}
 
-      {comment.replies?.length > 0 && isDiscussion && (
+      {(comment || ticket).replies?.length > 0 && isDiscussion && (
         <div className="comment-reply-collector">
-          {comment.replies?.map((reply) => {
+          {(comment || ticket).replies?.map((reply) => {
             return <UserReply key={reply._id} reply={reply} />;
           })}
           {isSending && (
@@ -199,9 +174,9 @@ export default function UserComment({
           )}
         </div>
       )}
-      {comment.replies?.length === 0 && isSending && (
+      {(comment || ticket).replies?.length === 0 && isSending && (
         <div className="comment-reply-collector">
-          {comment.replies?.map((reply) => {
+          {(comment || ticket).replies?.map((reply) => {
             return <UserReply key={reply._id} reply={reply} />;
           })}
           {isSending && (
@@ -215,12 +190,12 @@ export default function UserComment({
         </div>
       )}
 
-      {!comment.archived && comment.replies.length === 0 && (
+      {!comment?.archived && (comment || ticket).replies.length === 0 && (
         <button onClick={() => setIsReplying(!isReplying)}>
           {isReplying ? "Hide reply field" : "Show reply field"}
         </button>
       )}
-      {!comment.archived && isDiscussion && (
+      {!comment?.archived && isDiscussion && (
         <button onClick={() => setIsReplying(!isReplying)}>
           {isReplying ? "Hide reply field" : "Show reply field"}
         </button>
@@ -244,10 +219,13 @@ export default function UserComment({
           // handleSubmitMessage={handleSubmitMessage}
           setIsCommenting={setIsReplying}
           revalidate={revalidator.revalidate}
-          intent="comment"
-          target={comment}
+          intent={comment ? "comment" : "ticket"}
+          target={comment ? comment : ticket}
           user={user}
-          endPoint={`/api/v1/replies/project/${projectId}`}
+          // endPoint={`/api/v1/replies/project/${projectId}`}
+          endPoint={
+            ticket ? "/api/v1/replies" : `/api/v1/replies/project/${projectId}`
+          }
           setIsSending={setIsSending}
           projectId={projectId}
           reviewId={reviewId}

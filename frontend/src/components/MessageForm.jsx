@@ -13,6 +13,8 @@ import { IoSend } from "react-icons/io5";
 import { CiImageOn } from "react-icons/ci";
 import { CiVideoOn } from "react-icons/ci";
 
+import { Switch, Text } from "@radix-ui/themes";
+
 const MessageForm = ({
   comment,
   setComment,
@@ -37,11 +39,13 @@ const MessageForm = ({
   projectId,
   reviewId,
   learning,
+  commentWhat,
+  type,
 }) => {
   const hasAttachedFiles =
     [...inputImages, ...inputVideos].length > 0 ? true : false;
-  console.log("**************message form***************");
-  console.log("projectId", projectId);
+  // console.log("**************message form***************");
+  // console.log("projectId", projectId);
   // const URL_REGEX =
   //   /https?:\/\/.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*/g;
   // const urlsArr = comment.match(URL_REGEX) || null;
@@ -52,6 +56,7 @@ const MessageForm = ({
   //   });
   // }
   // console.log("urlsArr", urlsArr);
+  const [importance, setImportance] = useState("medium");
 
   return (
     <form
@@ -73,13 +78,15 @@ const MessageForm = ({
           revalidate,
           projectId,
           reviewId,
+          type,
+          importance,
         });
       }}
       method="POST"
       encType="multipart/form-data"
       id="submit-comment-form"
-      className={`${
-        intent === "task" && "sticky"
+      className={`${intent === "task" && "sticky"} ${
+        commentWhat && commentWhat !== type ? "pointer-events-none" : ""
       } flex mx-auto w-9/12 justify-center items-end bottom-5 bg-white`}
     >
       <div className="flex flex-col gap-4 w-full border-solid border-0.5 border-slate-200 focus-within:border-sky-500">
@@ -87,7 +94,9 @@ const MessageForm = ({
           placeholder={
             intent === "comment"
               ? `reply to ${target.user.email}`
-              : `${user.email} add new comment..`
+              : commentWhat && commentWhat !== type
+              ? ""
+              : `add new comment..`
           }
           className="flex-1 border-none outline-none"
           name="comment"
@@ -95,7 +104,8 @@ const MessageForm = ({
           onChange={(e) => {
             setComment(e.target.value);
           }}
-          value={comment}
+          disabled={commentWhat && commentWhat !== type}
+          value={commentWhat ? (commentWhat === type ? comment : "") : comment}
           id={intent === "action" && `comment-${target._id}`}
           rows="5"
         />
@@ -166,7 +176,7 @@ const MessageForm = ({
 
           <input
             onChange={(event) => {
-              console.log(event.target.files);
+              // console.log(event.target.files);
               setInputVideos([
                 ...Object.values(inputVideos),
                 ...Object.values(event.target.files),
@@ -181,7 +191,7 @@ const MessageForm = ({
           />
           <input
             onChange={(event) => {
-              console.log(event.target.files);
+              // console.log(event.target.files);
               setInputImages([
                 ...Object.values(inputImages),
                 ...Object.values(event.target.files),
@@ -224,6 +234,18 @@ const MessageForm = ({
             )}
           </button>
         </div>
+        {type && (
+          <div className="flex gap-2 items-center">
+            <Switch
+              onCheckedChange={(checked) => {
+                // console.log("checked", checked);
+                const importance = checked ? "high" : "medium";
+                setImportance(importance);
+              }}
+            />{" "}
+            <Text>Very Important</Text>
+          </div>
+        )}
       </div>
     </form>
   );

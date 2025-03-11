@@ -77,7 +77,7 @@ export default function Projects() {
   const archiveButtonRef = useRef(null);
 
   if (userObj) {
-    userTableRows = userObj.projects.map((project) => {
+    userTableRows = userObj.projects?.map((project) => {
       if (!project.archived) {
         return (
           <Table.Row key={project._id}>
@@ -243,7 +243,7 @@ export default function Projects() {
         );
       }
     });
-    userTableRowsArchived = userObj.projects.map((project) => {
+    userTableRowsArchived = userObj.projects?.map((project) => {
       if (project.archived) {
         return (
           <Table.Row key={project._id}>
@@ -262,7 +262,7 @@ export default function Projects() {
     });
 
     otherUsersTableRows = userObj.userInProjects
-      .map((project) => {
+      ?.map((project) => {
         if (!project.archived) {
           return (
             <Table.Row key={project._id}>
@@ -297,7 +297,7 @@ export default function Projects() {
       })
       .filter((el) => el !== undefined);
     otherUsersTableRowsArchived = userObj.userInProjects
-      .map((project) => {
+      ?.map((project) => {
         if (project.archived) {
           return (
             <Table.Row key={project._id}>
@@ -318,7 +318,7 @@ export default function Projects() {
       .filter((el) => el !== undefined);
 
     hasSomeUnArchivedProjects =
-      userObj.projects.filter((project) => !project.archived).length > 0;
+      userObj.projects?.filter((project) => !project.archived).length > 0;
   }
 
   return (

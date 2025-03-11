@@ -31,7 +31,15 @@ const signUpUser = async (req, res) => {
     }
     const token = createToken(user._id);
 
-    return res.status(201).json({ user: { _id: user._id, email, token } });
+    return res.status(201).json({
+      user: {
+        _id: user._id,
+        email,
+        token,
+        isGlobalAdmin: user.isGlobalAdmin,
+        isTenantAdmin: user.isTenantAdmin,
+      },
+    });
   } catch (error) {
     console.log("signup error", error);
     res.status(400).json({ error: error.message });
@@ -58,7 +66,9 @@ const loginUser = async (req, res) => {
     payload._id = user._id;
     payload.email = email;
     payload.token = token;
-    console.log("login payload", payload);
+    payload.isGlobalAdmin = user.isGlobalAdmin;
+    payload.isTenantAdmin = user.isTenantAdmin;
+    // console.log("login payload", payload);
     res.status(200).json(payload);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -71,7 +81,7 @@ const loginEntraUser = async (req, res) => {
   const { oid, tid, preferred_username } = decoded;
 
   // const { oid, tid, preferred_username } = req.user;
-  console.log("req.user", req.user);
+  // console.log("req.user", req.user);
   // Business logic to handle user login/signup/tenant creation
   // No sign-up option for entra sign in, so that must be handled here
   try {
@@ -94,9 +104,13 @@ const loginEntraUser = async (req, res) => {
         email: preferred_username,
       });
     }
-    return res
-      .status(200)
-      .json({ accessToken, email: preferred_username, _id: user._id });
+    return res.status(200).json({
+      accessToken,
+      email: preferred_username,
+      _id: user._id,
+      isGlobalAdmin: user.isGlobalAdmin,
+      isTenantAdmin: user.isTenantAdmin,
+    });
   } catch (error) {
     return res.status(401).json({ error: error.message });
   }
@@ -127,7 +141,8 @@ const getUsers = async (req, res) => {
   console.log("hit getUsers route");
   const { assignUser, intent, projectId } = req.query;
   const { isDemo } = req.user;
-  console.log("req.user", req.user);
+  // console.log("req.user", req.user);
+  console.log("intent", intent);
   try {
     // const users = await User.find({
     //   email: { $regex: assignUser, $options: "i" },
@@ -135,13 +150,23 @@ const getUsers = async (req, res) => {
     // });
     let users;
     let query;
+    // console.log("HERE", intent === "selfWorkLoad");
+    // if (intent === "selfWorkLoad") {
+    if (intent === "allTenantUsers") {
+      // console.log("req.user.tenant", req.user.tenant);
+      if (req.user.tenant) {
+        query = { tenant: req.user.tenant };
+        users = await User.find(query);
+      } else users = [];
+    }
+    // }
     // #6823
     // if for task then taken from tenant or global only
     if (intent === "task") {
       console.log("in task");
       query = {
         tenant: req.user.tenant,
-        isDemo,
+        // isDemo,
       };
       if (assignUser === "*") {
         // Match all titles by omitting the $regex condition
@@ -159,7 +184,8 @@ const getUsers = async (req, res) => {
       //   }
       //   return !user.organisation;
       // });
-    } else if (intent === "reviewAction") {
+    }
+    if (intent === "reviewAction") {
       // if for review action then taken from project
       console.log("in reviewAction");
       query = {
@@ -167,7 +193,7 @@ const getUsers = async (req, res) => {
           { projects: new mongoose.Types.ObjectId(projectId) },
           { userInProjects: new mongoose.Types.ObjectId(projectId) },
         ],
-        isDemo,
+        // isDemo,
       };
       if (assignUser === "*") {
         // Match all titles by omitting the $regex condition
@@ -199,7 +225,7 @@ const getUsers = async (req, res) => {
     //   });
     // }
     // console.log("validUsers", validUsers);
-    res.status(200).json(users);
+    return res.status(200).json(users);
   } catch (error) {
     return res.status(404).json({ error: error.message });
   }
@@ -245,9 +271,9 @@ const getUser = async (req, res) => {
       "vacationAllocation",
     ]);
 
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (error) {
-    res.status(400).json(error.message);
+    return res.status(400).json(error.message);
   }
 };
 
@@ -266,7 +292,8 @@ const readUser = async (req, res) => {
       user = await User.findOne({ email: userEmail, tenant: null });
     } else {
       // user.tenant !== null
-      user = await User.findOne({ email: userEmail, tenant: decoded.tid });
+      const tenant = await Tenant.findOne({ tenantId: decoded.tid });
+      user = await User.findOne({ email: userEmail, tenant: tenant._id });
       if (!user) {
         throw Error;
       }
@@ -284,7 +311,7 @@ const readUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   console.log("****************hit updateUser route*********************");
-  const { intent } = req.body;
+  const { intent, selfWorkLoad, ...changedVacAlloc } = req.body;
   // const { intent, ...notificationObj } = req.body;
   console.log("intent", intent);
 
@@ -293,48 +320,24 @@ const updateUser = async (req, res) => {
     if (intent === "clear-notifications") {
       user.recievedNotifications = [];
       await user.save();
-      return res.status(200).json(user);
     }
-
-    // if (intent === "filter-notifications") {
-    //   const notificationType = Object.keys(notificationObj)[0];
-    //   const url = notificationObj[notificationType];
-    //   let receivedNotications = "";
-    //   switch (notificationType) {
-    //     case "comment":
-    //       receivedNotications = "recentReceivedComments";
-    //       break;
-    //     case "reply":
-    //       receivedNotications = "recentReceivedReply";
-    //       break;
-    //     case "task":
-    //       receivedNotications = "recentReceivedTasks";
-    //       break;
-    //     case "vacation":
-    //       receivedNotications = "recentReceivedVacRequest";
-    //       break;
-    //     case "vacation-accepted":
-    //       receivedNotications = "recentReceivedVacAccepted";
-    //       break;
-    //     case "vacation-rejected":
-    //       receivedNotications = "recentReceivedVacRejected";
-    //       break;
-    //     case "vacation-approved":
-    //       receivedNotications = "recentReceivedVacApproved";
-    //       break;
-    //     default:
-    //       console.log("no match.. try again");
-    //   }
-    //   if (user[receivedNotications].length > 0) {
-    //     user[receivedNotications] = user[receivedNotications].filter((not) => {
-    //       return not !== url;
-    //     });
-    //     console.log("receivedNotications 2", user[receivedNotications]);
-    //     await user.save();
-    //   }
-
-    //   res.status(200).json(user);
-    // }
+    if (intent === "selfWorkLoad") {
+      user.selfWorkLoad = selfWorkLoad;
+      await user.save();
+    }
+    if (intent === "vacAllocUpdate") {
+      // get all modified users
+      let upatedUsersId = [];
+      for (const updatedUserId in changedVacAlloc) {
+        const newVacAlloc = changedVacAlloc[updatedUserId];
+        const userObj = await User.findById(updatedUserId);
+        userObj.vacationAllocation = newVacAlloc;
+        await userObj.save();
+        upatedUsersId.push(userObj._id);
+      }
+      return res.status(200).json({ upatedUsersId });
+    }
+    return res.status(200).json(user);
   } catch (error) {
     res.status(400).json(error.message);
   }

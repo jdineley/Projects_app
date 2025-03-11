@@ -47,7 +47,7 @@ export default function Login() {
   const [emailVerify, setEmailVerify] = useState("");
   const { user, dispatch } = useAuthContext();
   let json = useActionData();
-  console.log("jsonjsonjsonjsonjsonjson", json);
+  // console.log("jsonjsonjsonjsonjsonjson", json);
   // let json = null;
   // if (json) entraIDSignedIn.current = true;
 
@@ -96,8 +96,11 @@ export default function Login() {
         });
     }
     if (json?._id) {
-      const { _id, email, token, accessToken } = json;
-      const user = token ? { _id, email, token } : { _id, email, accessToken };
+      const { _id, email, token, accessToken, isGlobalAdmin, isTenantAdmin } =
+        json;
+      const user = token
+        ? { _id, email, isGlobalAdmin, isTenantAdmin, token }
+        : { _id, email, isGlobalAdmin, isTenantAdmin, accessToken };
       localStorage.setItem("user", JSON.stringify(user));
       dispatch({
         type: "LOGIN",

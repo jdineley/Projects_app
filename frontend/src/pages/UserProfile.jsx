@@ -34,32 +34,43 @@ export default function UserProfile() {
   const [vacEndInState, setVacEndInState] = useState(null);
   const [dateSelectionErrors, setDateSelectionErrors] = useState([]);
   const userObj = useLoaderData();
+  console.log(userObj);
+
+  const totalNonRejectedVacationsDays =
+    userObj?.vacationRequests.length > 0
+      ? userObj.vacationRequests.reduce((acc, cur) => {
+          if (cur.status !== "rejected") {
+            acc += differenceInBusinessDays(
+              new Date(cur.returnToWorkDate),
+              new Date(cur.lastWorkDate)
+            );
+            acc += 1;
+          }
+          return acc;
+        }, 0)
+      : 0;
+
+  const remainingVacationDays =
+    userObj?.vacationAllocation - totalNonRejectedVacationsDays;
+  console.log("remainingVacationDays", remainingVacationDays);
 
   const location = useLocation();
   const url = new URL("..", window.origin + location.pathname);
 
-  // if (!userObj || userObj.error) return null;
-
   const fetcher = useFetcher();
 
-  // useEffect(() => {
-  //   console.log("in UserProfile useEffect");
-  //   if (fetcher.data) {
-  //     setVacStartInState("");
-  //     setVacEndInState("");
-  //   }
-  // }, [fetcher.data]);
-
-  const pendingVacationRequests = userObj?.vacationRequests.filter((vacReq) => {
-    return vacReq.status === "pending";
-  });
-  const approvedVacationRequests = userObj?.vacationRequests.filter(
+  const pendingVacationRequests = userObj?.vacationRequests?.filter(
+    (vacReq) => {
+      return vacReq.status === "pending";
+    }
+  );
+  const approvedVacationRequests = userObj?.vacationRequests?.filter(
     (vacReq) => {
       return vacReq.status === "approved";
     }
   );
 
-  const rejectedVacationRequests = userObj?.vacationRequests.filter(
+  const rejectedVacationRequests = userObj?.vacationRequests?.filter(
     (vacReq) => {
       return vacReq.status === "rejected";
     }
@@ -70,7 +81,7 @@ export default function UserProfile() {
 
   if (vacStartInState && vacEndInState) {
     localVacDaysRemaining =
-      userObj?.remainingVacationDays -
+      remainingVacationDays -
       differenceInBusinessDays(
         new Date(vacEndInState),
         new Date(vacStartInState)
@@ -170,7 +181,7 @@ export default function UserProfile() {
                   localVacDaysRemainingRendered === 0) &&
                 dateSelectionErrors.length === 0
                   ? localVacDaysRemainingRendered
-                  : userObj?.remainingVacationDays}
+                  : remainingVacationDays}
               </small>
             </h3>
           </div>

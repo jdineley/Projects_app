@@ -103,38 +103,6 @@ export default function ProjectsDetail() {
     }
   }, [notification, newTaskId, json]);
 
-  // let userTasks;
-  // let otherUsersTasks;
-  // if (projectTasks) {
-  //   userTasks = projectTasks.filter((task) => task.user.email === user.email);
-  //   if (project.msProjectGUID) {
-  //     userTasks.sort((a, b) =>
-  //       new Date(a.startDate).getTime() > new Date(b.startDate).getTime()
-  //         ? 1
-  //         : -1
-  //     );
-  //   } else {
-  //     userTasks.sort((a) => {
-  //       if (!a.completed) return -1;
-  //     });
-  //   }
-
-  //   otherUsersTasks = projectTasks.filter(
-  //     (task) => task.user.email !== user.email
-  //   );
-  //   if (project.msProjectGUID) {
-  //     otherUsersTasks.sort((a, b) =>
-  //       new Date(a.startDate).getTime() > new Date(b.startDate).getTime()
-  //         ? 1
-  //         : -1
-  //     );
-  //   } else {
-  //     otherUsersTasks.sort((a) => {
-  //       if (!a.completed) return -1;
-  //     });
-  //   }
-  // }
-
   function handleSubmitAllPercentFetchers() {
     percentChangeButtonsRef.current.forEach((button) => {
       submit(button);
@@ -142,98 +110,6 @@ export default function ProjectsDetail() {
       setPercentCompleteChanged(false);
     });
   }
-
-  // const otherUsersTableRows = otherUsersTasks?.map((task) => {
-  //   return (
-  //     <Table.Row
-  //       key={task._id}
-  //       id={task._id === newTaskId && notification ? newTaskId : ""}
-  //       className={
-  //         task._id === newTaskId && notification ? "new-task-notification" : ""
-  //       }
-  //     >
-  //       <Table.Cell>
-  //         <Link to={`tasks/${task._id}`}>{task.title}</Link>
-  //       </Table.Cell>
-  //       {!task.archived && (
-  //         <>
-  //           <Table.Cell>
-  //             {isTabletResolution ? (
-  //               `${task.percentageComplete}%`
-  //             ) : (
-  //               <>
-  //                 <h5>Percent complete:</h5>
-  //                 <div className="numerical-percent-complete">
-  //                   {task.percentageComplete}
-  //                   {"%"}
-  //                   {isTaskAtRisk(task) >= 1 ? (
-  //                     <Badge color="tomato" variant="solid">
-  //                       At risk
-  //                     </Badge>
-  //                   ) : (
-  //                     ""
-  //                   )}
-  //                   {task.completed && (
-  //                     <Badge color="green" variant="solid">
-  //                       Complete
-  //                     </Badge>
-  //                   )}
-  //                   {!task.completed &&
-  //                     new Date(task.deadline).getTime() < Date.now() && (
-  //                       <Badge color="purple" variant="solid">
-  //                         Overdue
-  //                       </Badge>
-  //                     )}
-  //                 </div>
-  //                 <div id="task-deps">
-  //                   <h5>Task dependencies:</h5>
-  //                   {task.dependencies.length > 0 ? (
-  //                     task.dependencies.map((dep) => (
-  //                       <Badge
-  //                         highContrast
-  //                         color={
-  //                           dep.completed
-  //                             ? "green"
-  //                             : dep.percentageComplete <= 25
-  //                             ? "red"
-  //                             : "orange"
-  //                         }
-  //                         key={dep._id}
-  //                       >
-  //                         <Link
-  //                           to={`/projects/${dep.project}/tasks/${dep._id}`}
-  //                         >
-  //                           <div>{dep.title.slice(0, 15)}...</div>
-  //                           <div>{dep.percentageComplete}%</div>
-  //                         </Link>
-  //                       </Badge>
-  //                     ))
-  //                   ) : (
-  //                     <div>None assigned</div>
-  //                   )}
-  //                 </div>
-  //               </>
-  //             )}
-  //           </Table.Cell>
-  //           {!isTabletResolution && (
-  //             <Table.Cell>{task.daysToComplete}</Table.Cell>
-  //           )}
-  //         </>
-  //       )}
-  //       {!isMobileResolution && (
-  //         <Table.Cell>
-  //           {format(new Date(task.deadline), "dd/MM/yyyy")}
-  //         </Table.Cell>
-  //       )}
-  //       <Table.Cell>
-  //         <Flex direction="column">
-  //           <b>{task.user.email.split("@")[0]}</b>
-  //           {task.secondaryUsers.map((u) => u.email.split("@")[0])}
-  //         </Flex>
-  //       </Table.Cell>
-  //     </Table.Row>
-  //   );
-  // });
 
   return (
     <div

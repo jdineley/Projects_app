@@ -38,10 +38,26 @@ const userSchema = new mongoose.Schema(
     },
     tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
     secondaryTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
-    isAdmin: {
+    isTenantAdmin: {
       type: Boolean,
       default: false,
     },
+    isGlobalAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    ticketInbox: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Ticket",
+      },
+    ],
+    tickets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Ticket",
+      },
+    ],
     isLoggedIn: {
       type: Boolean,
       default: false,
@@ -86,6 +102,12 @@ const userSchema = new mongoose.Schema(
       },
     },
     verificationToken: { type: String },
+    selfWorkLoad: {
+      type: Number,
+      default: 80,
+      min: 50,
+      max: 100,
+    },
   },
   { timestamps: true }
 );

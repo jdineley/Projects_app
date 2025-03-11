@@ -22,11 +22,11 @@ export default function Signup() {
   const [confirmPasswordError, setConfirmPasswordError] = useState(null);
   const [emailVerify, setEmailVerify] = useState("");
 
-  console.log(passwordError);
+  // console.log(passwordError);
 
   const { dispatch } = useAuthContext();
   const json = useActionData();
-  console.log("signup json:", json);
+  // console.log("signup json:", json);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function Signup() {
         statusText: json.message,
       });
     }
-    console.log("bar");
+    // console.log("bar");
   }, [json, dispatch, navigate, password, confirmPassword]);
 
   return (
@@ -141,16 +141,6 @@ export default function Signup() {
               : ""}
           </p>
         </label>
-        {/* <label htmlFor="for-test">
-          isTest
-          <input
-            id="for-test"
-            type="checkbox"
-            className="hidden"
-            name="isTest"
-            defaultValue={false}
-          />
-        </label> */}
         <button
           disabled={
             emailError ||

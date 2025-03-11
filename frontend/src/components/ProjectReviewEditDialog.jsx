@@ -119,6 +119,7 @@ const ProjectReviewEditDialog = ({
   // }
 
   async function handleSaveProjectReview(data, type) {
+    const token = user?.token ? user?.token : user?.accessToken;
     try {
       if (reviewInStateChangedRef.current === true) {
         const response = await fetch(
@@ -128,7 +129,7 @@ const ProjectReviewEditDialog = ({
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               ...reviewInState,
@@ -151,7 +152,7 @@ const ProjectReviewEditDialog = ({
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ title, project: projectId }),
           }
@@ -175,7 +176,7 @@ const ProjectReviewEditDialog = ({
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ content, project: projectId }),
           }

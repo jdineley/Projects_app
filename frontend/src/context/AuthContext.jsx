@@ -31,19 +31,6 @@ export const AuthContextProvider = ({ children }) => {
 
   const { dispatch: notificationDispatch } = useNotificationContext();
 
-  // async function updateUser(user, url, type) {
-  //   console.log("in updateUser handler....", user._id);
-  //   await fetch(`http://localhost:4000/api/v1/users/${user.Id}`, {
-  //     method: "PATCH",
-  //     mode: "cors",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${user.token}`,
-  //     },
-  //     body: JSON.stringify({ [type]: url, intent: "filter-notifications" }),
-  //   });
-  // }
-
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
@@ -237,6 +224,29 @@ export const AuthContextProvider = ({ children }) => {
         });
         toast(`task-owner-change`);
       });
+      ssEvents.addEventListener(`new-ticket-notification${user._id}`, (e) => {
+        console.log("in notification dispatch");
+        notificationDispatch({
+          type: "NEW_NOTIFICATION",
+          payload: {
+            url: e.data,
+          },
+        });
+        toast(`new-ticket-received`);
+      });
+      ssEvents.addEventListener(
+        `ticket-update-notification${user._id}`,
+        (e) => {
+          console.log("in notification dispatch");
+          notificationDispatch({
+            type: "NEW_NOTIFICATION",
+            payload: {
+              url: e.data,
+            },
+          });
+          toast(`ticket-update`);
+        }
+      );
       ssEvents.addEventListener("open", () => {
         console.log("Connection opened");
       });

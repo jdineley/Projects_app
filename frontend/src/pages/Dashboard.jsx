@@ -1,6 +1,16 @@
-import { useLoaderData, Link } from "react-router-dom";
+import { useState } from "react";
 
-import { Table, Badge, Grid, Flex } from "@radix-ui/themes";
+import { useLoaderData, Link, useFetcher } from "react-router-dom";
+
+import {
+  Table,
+  Badge,
+  Grid,
+  Flex,
+  Text,
+  HoverCard,
+  Button,
+} from "@radix-ui/themes";
 
 // util
 import { goBackToStartOfArrayIndex, isTaskAtRisk } from "../utility";
@@ -17,11 +27,20 @@ import { tabletScreenWidth } from "../utility";
 // icons
 import { TiVendorMicrosoft } from "react-icons/ti";
 
+import { isAfter, isBefore, format, isWithinInterval } from "date-fns";
+
 export default function Home() {
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
 
-  const userObj = useLoaderData();
-  console.log(userObj);
+  const { userObj, allDomainUsers } = useLoaderData() || {};
+  // const loaderData = useLoaderData();
+  // if (!loaderData) return <div>loading...</div>;
+  // const { userObj, allDomainUsers } = loaderData;
+  // console.log(allDomainUsers);
+  const [selfWorkLoad, setSelfWorkLoad] = useState(userObj?.selfWorkLoad);
+  const [selfWorkLoadChanged, setSelfWorkLoadChanged] = useState(false);
+  const fetcher = useFetcher();
+
   if (!userObj || userObj.error) return null;
   const themeColors = ["brown", "tomato", "purple", "blue", "green", "sky"];
 
@@ -31,11 +50,47 @@ export default function Home() {
   let riskOrderedTasks;
   let taskRiskRow;
   let hasSomeUnArchivedProjects;
+  let currentUserInWorkTasksRow;
   if (!userObj.error) {
     activeProjects = [...userObj.projects, ...userObj.userInProjects].filter(
       (proj) => !proj.archived
     );
-
+    currentUserInWorkTasksRow = userObj.tasks
+      .filter(
+        (t) =>
+          isAfter(new Date(), new Date(t.startDate)) &&
+          isBefore(new Date(), new Date(t.deadline)) &&
+          !t.milestone
+      )
+      .sort((a, b) =>
+        new Date(a.startDate).getTime() > new Date(b.startDate).getTime()
+          ? 1
+          : -1
+      )
+      .map((t) => {
+        return (
+          <Table.Row key={t._id}>
+            <Table.Cell>
+              <Link to={`/projects/${t.project._id}/tasks/${t._id}`}>
+                <Flex align="center" gap="2">
+                  {/* {proj?.msProjectGUID && (
+                  <TiVendorMicrosoft className="min-w-5" />
+                )} */}
+                  {t.title}
+                </Flex>
+              </Link>
+            </Table.Cell>
+            <Table.Cell>
+              {format(new Date(t.startDate), "dd/MM/yyyy")}
+              {/* {t.startDate ? format(new Date(t.startDate), "dd/MM/yyyy") : null} */}
+            </Table.Cell>
+            <Table.Cell>
+              {format(new Date(t.deadline), "dd/MM/yyyy")}
+            </Table.Cell>
+            <Table.Cell>{t.percentageComplete}</Table.Cell>
+          </Table.Row>
+        );
+      });
     currentUserProjectTasks = activeProjects.reduce((acc, cur) => {
       const activeTasks = cur.tasks.filter(
         (task) =>
@@ -76,7 +131,15 @@ export default function Home() {
     });
 
     riskOrderedTasks = userObj.tasks
-      .filter((task) => !task.archived && task)
+      .filter(
+        (task) =>
+          !task.archived &&
+          task &&
+          isWithinInterval(new Date(Date.now()), {
+            start: new Date(task.startDate),
+            end: new Date(task.deadline),
+          })
+      )
       .sort((a, b) => isTaskAtRisk(b) - isTaskAtRisk(a))
       .slice(0, 5);
 
@@ -115,26 +178,59 @@ export default function Home() {
     <div id="dashboard">
       {/* <h1 className="mb-4">Dashboard</h1> */}
       <Grid columns={isTabletResolution ? "1" : "2"} gap="3" width="auto">
-        {hasSomeUnArchivedProjects && (
-          <div>
-            <h2>Project Management</h2>
-            <div id="proj-sum-cards-collector">
-              {userObj.projects.map((project, i) => {
-                if (!project.archived) {
-                  return (
-                    <UserProjectDashSummary
-                      key={project._id}
-                      project={project}
-                      accentColor={
-                        themeColors[goBackToStartOfArrayIndex(themeColors, i)]
-                      }
-                    />
-                  );
-                }
-              })}
+        <>
+          {hasSomeUnArchivedProjects && (
+            <div>
+              <h2>Project Management</h2>
+              <div id="proj-sum-cards-collector">
+                {userObj.projects.map((project, i) => {
+                  if (!project.archived) {
+                    return (
+                      <UserProjectDashSummary
+                        key={project._id}
+                        project={project}
+                        accentColor={
+                          themeColors[goBackToStartOfArrayIndex(themeColors, i)]
+                        }
+                      />
+                    );
+                  }
+                })}
+              </div>
+              <HoverCard.Root>
+                <HoverCard.Trigger>
+                  <h3 className="cursor-pointer">
+                    User's current and short term workload %
+                  </h3>
+                </HoverCard.Trigger>
+                <HoverCard.Content maxWidth="300px">
+                  <Flex gap="4" direction="column">
+                    {allDomainUsers
+                      .sort((a, b) => a.selfWorkLoad - b.selfWorkLoad)
+                      .map((u) => {
+                        return (
+                          <div className="flex mb-2 gap-2">
+                            <Text>{u.email.split("@")[0]}</Text>
+                            <Badge
+                              color={
+                                Number(u.selfWorkLoad) <= 60
+                                  ? "green"
+                                  : Number(u.selfWorkLoad) <= 80
+                                  ? "orange"
+                                  : "red"
+                              }
+                            >
+                              {u.selfWorkLoad}
+                            </Badge>
+                          </div>
+                        );
+                      })}
+                  </Flex>
+                </HoverCard.Content>
+              </HoverCard.Root>{" "}
             </div>
-          </div>
-        )}
+          )}
+        </>
         <div>
           {currentUserProjectTasks?.length > 0 && (
             <>
@@ -170,6 +266,56 @@ export default function Home() {
                   </Table.Root>
                 </>
               )}
+              <>
+                <h3 style={{ marginTop: "10px" }}>My in-work tasks</h3>
+                {currentUserInWorkTasksRow.length > 0 && (
+                  <Table.Root variant="surface">
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.ColumnHeaderCell>Task</Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>
+                          Start date
+                        </Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>
+                          Finish date
+                        </Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>
+                          Percentage complete
+                        </Table.ColumnHeaderCell>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>{currentUserInWorkTasksRow}</Table.Body>
+                  </Table.Root>
+                )}
+                <h3 style={{ marginTop: "10px" }}>My current workload</h3>
+                <fetcher.Form method="POST" className="flex gap-6 w-80">
+                  <input
+                    type="range"
+                    name="selfWorkLoad"
+                    min="50"
+                    max="100"
+                    step="5"
+                    // defaultValue="80"
+                    // value={60}
+                    value={selfWorkLoad}
+                    onChange={(e) => {
+                      setSelfWorkLoadChanged(true);
+                      setSelfWorkLoad(e.target.value);
+                    }}
+                  />
+                  <input type="hidden" name="intent" value="selfWorkLoad" />
+                  <Button
+                    size="1"
+                    radius="full"
+                    color={selfWorkLoadChanged ? "crimson" : ""}
+                    onClick={(e) => {
+                      setSelfWorkLoadChanged(false);
+                    }}
+                  />
+                </fetcher.Form>
+                {selfWorkLoad}
+                {"%"}
+              </>
             </>
           )}
         </div>

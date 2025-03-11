@@ -33,23 +33,6 @@ const createVacation = async (req, res) => {
     console.log("vacation", vacation);
     // console.log("User");
     const user = await User.findById(req.user._id);
-    // .populate("vacationRequests");
-    // const totalNonRejectedVacationsDays =
-    //   user.vacationRequests.length > 0
-    //     ? user.vacationRequests.reduce((acc, cur) => {
-    //         if (cur.status !== "rejected") {
-    //           acc += differenceInBusinessDays(
-    //             cur.returnToWorkDate,
-    //             cur.lastWorkDate
-    //           );
-    //         }
-    //         return acc;
-    //       }, 0)
-    //     : 0;
-    // user.remainingVacationDays =
-    //   user.vacationAllocation -
-    //   (differenceInBusinessDays(returnToWorkDate, lastWorkDate) +
-    //     totalNonRejectedVacationsDays);
 
     user.vacationRequests.push(vacation._id);
     await user.save();

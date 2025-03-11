@@ -17,6 +17,8 @@ const reviewObjectivesRoutes = require("./routes/v1/reviewObjectives");
 const reviewActionRoutes = require("./routes/v1/reviewActions");
 const vacationRoutes = require("./routes/v1/vacations");
 const testRoutes = require("./routes/v1/test");
+const ticketRoutes = require("./routes/v1/tickets.js");
+// const counterRoutes = require("./routes/v1/counter.js");
 const helmet = require("helmet");
 
 // express app
@@ -44,6 +46,8 @@ app.use("/api/v1/reviewObjectives", reviewObjectivesRoutes);
 app.use("/api/v1/reviewActions", reviewActionRoutes);
 app.use("/api/v1/vacations", vacationRoutes);
 app.use("/api/v1/test", testRoutes);
+app.use("/api/v1/tickets", ticketRoutes);
+// app.use("/api/v1/counter", counterRoutes);
 
 // app.get("/debug-sentry", function mainHandler(req, res) {
 //   throw new Error("My first Sentry error!");

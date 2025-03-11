@@ -29,6 +29,8 @@ import ProjectReview from "./pages/ProjectReview";
 import UserProfile from "./pages/UserProfile";
 import Learning from "./pages/Learning";
 import Account from "./pages/Account";
+import ItTickets from "./pages/ItTickets";
+import TenantAdmin from "./pages/TenantAdmin";
 
 // loaders
 import projectsLoader from "./loaders/projectLoader";
@@ -39,6 +41,8 @@ import dashboardLoader from "./loaders/dashboardLoader";
 import projectReviewLoader from "./loaders/projectReviewLoader";
 import userProfileLoader from "./loaders/userProfileLoader";
 import learningLoader from "./loaders/learningLoader";
+import itTicketsLoader from "./loaders/itTicketsLoader";
+import tenantAdminLoader from "./loaders/tenantAdminLoader";
 
 // actions
 import projectAction from "./actions/projectAction";
@@ -49,6 +53,8 @@ import projectDetailAction from "./actions/projectDetailAction";
 import reviewAction from "./actions/reviewAction";
 import userProfileAction from "./actions/userProfileAction";
 import rootLayoutAction from "./actions/rootLayoutAction";
+import dashboardAction from "./actions/dashboardAction";
+import tenantAdminAction from "./actions/tenantAdminAction";
 
 // auth context
 import { useAuthContext } from "./hooks/useAuthContext";
@@ -96,6 +102,7 @@ function App() {
               path="dashboard"
               element={<Dashboard />}
               loader={dashboardLoader(user)}
+              action={dashboardAction(user)}
             />
             <Route
               path="learning"
@@ -178,6 +185,20 @@ function App() {
               errorElement={<Error />}
               loader={userProfileLoader(user)}
               action={userProfileAction(user)}
+            />
+            <Route
+              path="/admin"
+              element={<TenantAdmin />}
+              errorElement={<Error />}
+              loader={tenantAdminLoader(user)}
+              action={tenantAdminAction(user)}
+            />
+            <Route
+              path="/tickets"
+              element={<ItTickets />}
+              errorElement={<Error />}
+              loader={itTicketsLoader(user)}
+              // action={}
             />
           </Route>
         </>

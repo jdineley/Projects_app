@@ -2,6 +2,7 @@ const commentAction =
   (user) =>
   async ({ request, params }) => {
     console.log("in commentAction");
+    const token = user?.token ? user?.token : user?.accessToken;
     const { VITE_REACT_APP_API_URL } = import.meta.env;
     const taskId = params.taskId;
     const reviewId = params.reviewId;
@@ -23,7 +24,7 @@ const commentAction =
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               user: user._id,
@@ -67,7 +68,7 @@ const commentAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               title,

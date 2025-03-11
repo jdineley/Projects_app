@@ -1,5 +1,6 @@
 const Reply = require("../models/Reply");
 const Comment = require("../models/Comment");
+const Ticket = require("../models/Ticket");
 const Task = require("../models/Task");
 const User = require("../models/User");
 const ReviewAction = require("../models/ReviewAction");
@@ -38,13 +39,19 @@ const { removeAllFilesAsync } = require("../util");
 // create reply
 const createReply = async (req, res) => {
   console.log("hit createReply route");
+  // const { ticket } = req.query;
+  // console.log("ticket", ticket);
+  // console.log("req.url", req.url);
+  // const model = req.url === "/" ? Ticket : Comment
   const {
     content,
     comment: commentId,
+    ticket: ticketId,
     user: userId,
     projectId,
     reviewId,
   } = req.body;
+  console.log("req.body", req.body);
   // console.log("req.body", req.body);
   // console.log("commentId", commentId);
   console.log("&&&&&&&&&&&&&projectId&&&&&&&&&&&&&&&&&&&", projectId);
@@ -62,71 +69,36 @@ const createReply = async (req, res) => {
   try {
     // #4290
     // reply to be attached to a comment within user's projects
-    const comment = await Comment.findById(commentId);
-    // if (comment.task) {
-    //   await comment.populate("task");
-    //   if (!userProjInvolve.includes(comment.task.project.toString())) {
-    //     throw Error("Unauthorised to complete this action");
-    //   }
-    // }
-    // if (comment.action) {
-    //   await comment.populate([
-    //     {
-    //       path: "action",
-    //       populate: [{ path: "reviewObjective", populate: "review" }],
-    //     },
-    //   ]);
-    //   if (
-    //     !userProjInvolve.includes(
-    //       comment.action.reviewObjective.review.project.toString()
-    //     )
-    //   ) {
-    //     throw Error("Unauthorised to complete this action");
-    //   }
-    // }
-    // console.log(comment);
-    if (!comment) {
-      throw Error("no associated comment found");
-    }
+    let comment;
+    let ticket;
     let task;
     let action;
     let actionees;
-    if (comment.task) {
-      // console.log("!!!", comment.task);
-      // await comment.populate("task");
-      // if (!userProjInvolve.includes(comment.task.project.toString())) {
-      //   throw Error("Unauthorised to complete this action");
-      // }
-      task = await Task.findById(comment.task);
-      // console.log("task", task);
-      if (!task) {
-        throw Error("no associated task found");
+    if (commentId) {
+      comment = await Comment.findById(commentId);
+      if (!comment) {
+        throw Error("no associated comment found");
       }
-    }
-    if (comment.action) {
-      // await comment.populate([
-      //   {
-      //     path: "action",
-      //     populate: [{ path: "reviewObjective", populate: "review" }],
-      //   },
-      // ]);
-      // if (
-      //   !userProjInvolve.includes(
-      //     comment.action.reviewObjective.review.project.toString()
-      //   )
-      // ) {
-      //   throw Error("Unauthorised to complete this action");
-      // }
-      action = await ReviewAction.findById(comment.action);
-      if (!action) {
-        throw Error("no associated action found");
+      if (comment.task) {
+        task = await Task.findById(comment.task);
+        if (!task) {
+          throw Error("no associated task found");
+        }
       }
-      actionees = action.actionees.map((a) => a.toString());
-      // console.log("actionees", actionees);
+      if (comment.action) {
+        action = await ReviewAction.findById(comment.action);
+        if (!action) {
+          throw Error("no associated action found");
+        }
+        actionees = action.actionees.map((a) => a.toString());
+        // console.log("actionees", actionees);
+      }
+    } else {
+      ticket = await Ticket.findById(ticketId);
     }
     const reply = await Reply.create({
       ...req.body,
-      project: projectId,
+      // project: projectId,
       isDemo,
       isTest,
     });
@@ -176,50 +148,74 @@ const createReply = async (req, res) => {
       // .then(() => console.log("All files have been removed asynchronously."))
       // .catch(console.error);
     }
-    comment.replies.push(reply._id);
-    await comment.save();
-    const commentWithPopReplies = await Comment.findById(comment._id).populate(
-      "replies"
-    );
-    const allUsersInDisscussion = commentWithPopReplies.replies.map((reply) =>
-      reply.user.toString()
-    );
-    console.log("allUsersInDisscussion", allUsersInDisscussion);
-    res.status(200).json(reply);
-    // notification logic needs updating to with with action / actionees etc..
-    // const taskOrActionOwners = comment.task ? task.user.toString() : action.actionees;
-
-    // task.user.toString(),
-    const messageEes = [
-      // ...allUsersInDisscussion.map((user) => user.toString()),
-      ...allUsersInDisscussion,
-      ...(comment.task
-        ? [task.user.toString()]
-        : // : action.actionees.map((a) => a.toString()),
-          actionees),
-      comment.user.toString(),
-    ]
-      .filter((userId, i, arr) => arr.indexOf(userId) === i) //remove duplicates
-      .filter((userId) => userId !== currentUserId.toString()); //remove the commenter/replier from notifications
-
-    console.log("messageees", messageEes);
-
-    for (const messageEe of messageEes) {
-      const userObj = await User.findById(messageEe);
-      console.log("userObj", userObj);
-      userObj.recievedNotifications.push(
-        comment.task
-          ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-task-reply`
-          : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-review-reply`
+    if (commentId || ticketId) {
+      const target = commentId ? comment : ticket;
+      const Model = commentId ? Comment : Ticket;
+      target.replies.push(reply._id);
+      await target.save();
+      const commentWithPopReplies = await Model.findById(target._id).populate(
+        "replies"
       );
-      await userObj.save();
-      channel.publish(
-        comment.task
-          ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-task-reply`
-          : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-review-reply`,
-        `new-reply-notification${messageEe}`
+      const allUsersInDisscussion = commentWithPopReplies.replies.map((reply) =>
+        reply.user.toString()
       );
+      console.log("allUsersInDisscussion", allUsersInDisscussion);
+      // res.status(200).json(reply);
+      // notification logic needs updating to with with action / actionees etc..
+      // const taskOrActionOwners = comment.task ? task.user.toString() : action.actionees;
+
+      // task.user.toString(),
+      let messageEes;
+      if (commentId) {
+        messageEes = [
+          // ...allUsersInDisscussion.map((user) => user.toString()),
+          ...allUsersInDisscussion,
+          ...(comment.task
+            ? [task.user.toString()]
+            : // : action.actionees.map((a) => a.toString()),
+              actionees),
+          comment.user.toString(),
+        ]
+          .filter((userId, i, arr) => arr.indexOf(userId) === i) //remove duplicates
+          .filter((userId) => userId !== currentUserId.toString()); //remove the commenter/replier from notifications
+      } else {
+        messageEes = [
+          // ...allUsersInDisscussion.map((user) => user.toString()),
+          ...allUsersInDisscussion,
+          target.user.toString(),
+        ]
+          .filter((userId, i, arr) => arr.indexOf(userId) === i) //remove duplicates
+          .filter((userId) => userId !== currentUserId.toString()); //remove the commenter/replier from notifications
+      }
+
+      console.log("messageees", messageEes);
+
+      for (const messageEe of messageEes) {
+        const userObj = await User.findById(messageEe);
+        console.log("userObj", userObj);
+        userObj.recievedNotifications.push(
+          comment?.task
+            ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-task-reply`
+            : ticket
+            ? `/tickets?ticketId=${ticket._id}&user=${req.user.email}&intent=ticket-reply`
+            : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-review-reply`
+        );
+        await userObj.save();
+        channel.publish(
+          comment?.task
+            ? `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-task-reply`
+            : ticket
+            ? `/tickets?ticketId=${ticket._id}&user=${req.user.email}&intent=ticket-reply`
+            : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-review-reply`,
+          `new-reply-notification${messageEe}`
+        );
+      }
     }
+    // else {
+    //   ticket.replies.push(reply._id);
+    //   await ticket.save();
+    // }
+    res.status(200).json(reply);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

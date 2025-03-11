@@ -42,7 +42,8 @@ export default function RouteLayout() {
 
   const { user, dispatch } = useAuthContext();
   const location = useLocation();
-  console.log("location.pathname", location.pathname);
+  // console.log("location.pathname", location.pathname);
+  // console.log("user", user);
 
   const submit = useSubmit();
 
@@ -50,7 +51,7 @@ export default function RouteLayout() {
 
   const { userObj, notificationsCleared } = useLoaderData();
 
-  // console.log(userObj);
+  // console.log("userObj", userObj);
   const path = useActionData();
   if (path) {
     actionDataMonitor.current = true;
@@ -165,6 +166,20 @@ export default function RouteLayout() {
                 {!isMobileResolution ? "Learning" : "Learn"}
               </Button>
             </NavLink>
+            {user?.isTenantAdmin && (
+              <NavLink to="/admin">
+                <Button variant="ghost" color="gray">
+                  Admin
+                </Button>
+              </NavLink>
+            )}
+            {user && (
+              <NavLink to="/tickets">
+                <Button variant="ghost" color="gray">
+                  {!isMobileResolution ? "Ticket" : "Tick"}
+                </Button>
+              </NavLink>
+            )}
             {!user && (
               <NavLink to="/account">
                 <VscAccount />
@@ -216,6 +231,7 @@ export default function RouteLayout() {
                             actionContent: "",
                           };
                           const queryString = url.split("?")[1];
+                          // console.log("queryString", queryString);
                           queryString.split("&").forEach((str) => {
                             if (new RegExp("intent", "i").test(str)) {
                               notificationControlObj.intent = str.split("=")[1];
@@ -245,7 +261,11 @@ export default function RouteLayout() {
                                 str.split("=")[1].slice(0, 15) + "...";
                             }
                           });
-
+                          // console.log("urls", urls);
+                          // console.log(
+                          //   "notificationControlObj",
+                          //   notificationControlObj
+                          // );
                           return (
                             <Link key={i} to={url} data-testid="avatar-drop">
                               <DropdownMenu.Item>

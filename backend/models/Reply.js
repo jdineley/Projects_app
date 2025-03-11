@@ -4,7 +4,6 @@ const replySchema = new mongoose.Schema({
   project: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Project",
-    required: true,
   },
   content: {
     type: String,
@@ -13,7 +12,16 @@ const replySchema = new mongoose.Schema({
   comment: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Comment",
-    required: true,
+    required: function () {
+      return !this.ticket;
+    },
+  },
+  ticket: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Ticket",
+    required: function () {
+      return !this.comment;
+    },
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

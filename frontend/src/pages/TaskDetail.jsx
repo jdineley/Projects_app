@@ -90,16 +90,6 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
   const fetcher = useFetcher();
 
   useEffect(() => {
-    // if (fetcher.state === "loading") {
-    //   setComment("");
-    //   setIsCommenting(false);
-    //   document.querySelector(".root-layout").scrollIntoView({
-    //     behavior: "smooth",
-    //     block: "end",
-    //     inline: "end",
-    //   });
-    // }
-
     if (notification) {
       document.getElementById(newCommentId)?.scrollIntoView({
         behavior: "smooth",
@@ -115,52 +105,6 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
     }
     setIsCommenting(!isCommenting);
   }
-
-  // function handleSubmitMessage({ e, comment }) {
-  //   e.preventDefault();
-  //   console.log("sending....");
-  //   setIsSending(true);
-  //   setIsCommenting(false);
-  //   document.querySelector(".root-layout").scrollIntoView({
-  //     behavior: "smooth",
-  //     block: "end",
-  //     inline: "end",
-  //   });
-  //   let formData = new FormData();
-  //   formData.append("content", comment);
-  //   formData.append("task", task._id);
-  //   formData.append("user", user._id);
-  //   if (inputImages.length > 0) {
-  //     for (const image of inputImages) {
-  //       formData.append("uploaded_images", image);
-  //     }
-  //   }
-  //   if (inputVideos.length > 0) {
-  //     for (const video of inputVideos) {
-  //       formData.append("uploaded_videos", video);
-  //     }
-  //   }
-  //   fetch(`${VITE_REACT_APP_API_URL}/api/v1/comments`, {
-  //     method: "POST",
-  //     headers: {
-  //       Authorization: `Bearer ${user.token}`,
-  //     },
-  //     body: formData,
-  //   })
-  //     .then((resp) => resp.json())
-  //     .then((data) => {
-  //       setIsSending(false);
-  //       if (data.errors) {
-  //         alert(data.errors);
-  //       } else {
-  //         setInputImages([]);
-  //         setInputVideos([]);
-  //         setComment("");
-  //         console.log(data);
-  //         revalidator.revalidate();
-  //       }
-  //     });
-  // }
 
   return (
     <div data-testid="task-detail" className="relative pb-4">
@@ -290,7 +234,6 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
           setUploadPicButHover={setUploadPicButHover}
           messButHover={messButHover}
           setMessageButHover={setMessageButHover}
-          // handleSubmitMessage={handleSubmitMessage}
           setIsCommenting={setIsCommenting}
           revalidate={revalidator.revalidate}
           intent="task"

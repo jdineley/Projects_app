@@ -422,6 +422,7 @@ function submitMsProject(
   project
 ) {
   console.log("clicked");
+  const token = user?.token ? user?.token : user?.accessToken;
   e.preventDefault();
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   setLoading(true);
@@ -464,7 +465,7 @@ function submitMsProject(
           result,
           user._id,
           user.email,
-          user.token
+          token
         );
         setValidEmailCheck(true);
         setSummaryPredecessorCheck(true);
@@ -477,7 +478,7 @@ function submitMsProject(
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               msProjObj: result,
@@ -493,7 +494,7 @@ function submitMsProject(
               method: "PATCH",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${user.token}`,
+                Authorization: `Bearer ${token}`,
               },
               body: JSON.stringify({
                 msProjObj: result,
@@ -546,7 +547,7 @@ function submitMsProject(
                 mode: "cors",
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization: `Bearer ${user.token}`,
+                  Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ intent: "archive-project" }),
               }
@@ -564,7 +565,7 @@ function submitMsProject(
                 mode: "cors",
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization: `Bearer ${user.token}`,
+                  Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ intent: "delete-project" }),
               }
@@ -612,11 +613,16 @@ function handleSubmitMessage({
   revalidate,
   projectId,
   reviewId,
+  type,
+  importance,
 }) {
   console.log("in handleSubmitMessage..");
+  const token = user?.token ? user?.token : user?.accessToken;
   // console.log("$$$$$$$$$$$$$$INTENT$$$$$$$$$$$$", intent);
   // console.log("@@@@@@@@@@@@TARGET@@@@@@@@@@@", target._id);
   const { VITE_REACT_APP_API_URL } = import.meta.env;
+  console.log("content", comment);
+  console.log("endpoint", endPoint);
   setIsSending(true);
   setIsCommenting(false);
   if (intent === "task") {
@@ -626,12 +632,15 @@ function handleSubmitMessage({
       inline: "end",
     });
   }
+  // console.log("@@@@@@@@@@@ comment", comment);
   let formData = new FormData();
   formData.append("content", comment);
-  formData.append(intent, target._id);
+  formData.append(intent, target?._id);
   formData.append("user", user._id);
-  formData.append("projectId", projectId || null);
-  formData.append("reviewId", reviewId || null);
+  formData.append("projectId", projectId);
+  formData.append("reviewId", reviewId);
+  formData.append("type", type);
+  formData.append("importance", importance);
   // if (intent === "action") {
   //   formData.append("projectId", projectId);
   //   formData.append("reviewId", reviewId);
@@ -650,7 +659,7 @@ function handleSubmitMessage({
   fetch(`${VITE_REACT_APP_API_URL}${endPoint}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${user.token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: formData,
   })

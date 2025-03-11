@@ -27,6 +27,12 @@ router.post(
   upload.fields([{ name: "uploaded_images" }, { name: "uploaded_videos" }]),
   createReply
 );
+router.post(
+  "/",
+  requireAuth,
+  upload.fields([{ name: "uploaded_images" }, { name: "uploaded_videos" }]),
+  createReply
+);
 
 // router.patch("/replyId", updateReply);
 

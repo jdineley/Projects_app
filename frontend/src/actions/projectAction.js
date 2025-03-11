@@ -22,7 +22,7 @@ const projectAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ intent, title, start, end, ...reviews }),
           }
@@ -95,7 +95,7 @@ const projectAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ intent }),
           }
@@ -121,7 +121,7 @@ const projectAction =
             mode: "cors",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ intent, freeze }),
           }

@@ -9,6 +9,7 @@ import { FaFileImport } from "react-icons/fa6";
 import { TiVendorMicrosoft } from "react-icons/ti";
 
 const ImportProjectDialog = () => {
+  const token = user?.token ? user?.token : user?.accessToken;
   const { VITE_REACT_APP_API_URL } = import.meta.env;
   const { user } = useAuthContext();
   // const [open, setOpen] = useState(false);
@@ -39,7 +40,7 @@ const ImportProjectDialog = () => {
       fetch(`${VITE_REACT_APP_API_URL}/api/v1/projects`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       })
