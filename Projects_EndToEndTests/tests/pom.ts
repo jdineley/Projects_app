@@ -470,3 +470,15 @@ export class UserProfilePage {
     );
   }
 }
+
+export class HomePage {
+  readonly $homePageLocator: Locator;
+
+  constructor(page: Page) {
+    this.$homePageLocator = page.getByText("Lift Your Project Management");
+  }
+
+  public async isReady() {
+    return expect(this.$homePageLocator).toBeVisible();
+  }
+}

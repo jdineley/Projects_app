@@ -31,6 +31,7 @@ import Learning from "./pages/Learning";
 import Account from "./pages/Account";
 import ItTickets from "./pages/ItTickets";
 import TenantAdmin from "./pages/TenantAdmin";
+import Home from "./pages/Home";
 
 // loaders
 import projectsLoader from "./loaders/projectLoader";
@@ -73,6 +74,11 @@ function App() {
             loader={rootLayoutLoader(user)}
             action={rootLayoutAction(user)}
           >
+            <Route
+              path="/"
+              element={<Home />}
+              // loader={dashboardLoader(user)}
+            />
             <Route
               path="account"
               element={<Account />}

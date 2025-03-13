@@ -35,10 +35,11 @@ import { FaMicrosoft } from "react-icons/fa";
 import useMatchMedia from "../hooks/useMatchMedia";
 
 // constants
-import { mobileScreenWidth } from "../utility";
+import { mobileScreenWidth, tabletScreenWidth } from "../utility";
 
 export default function RouteLayout() {
-  const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
+  // const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
+  const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
 
   const { user, dispatch } = useAuthContext();
   const location = useLocation();
@@ -86,9 +87,10 @@ export default function RouteLayout() {
       location.pathname !== "/account/signup" &&
       location.pathname !== "/learning" &&
       location.pathname !== "/account/login" &&
-      location.pathname !== "/account/microsoft"
+      location.pathname !== "/account/microsoft" &&
+      location.pathname !== "/account"
     ) {
-      navigate("/account");
+      navigate("/");
     }
     if (notificationsCleared) {
       if (notification) {
@@ -133,54 +135,54 @@ export default function RouteLayout() {
               <FcCollaboration size="40px" />
               <h1>Projects</h1>
             </div>
-            {user && (
+            {!user && (
+              <NavLink to="/">
+                <Button variant="ghost" color="gray">
+                  Home
+                  {/* {!isMobileResolution ? "Home" : "Dash"} */}
+                </Button>
+              </NavLink>
+            )}
+            {user && !isTabletResolution && (
               <NavLink to="/dashboard">
                 <Button variant="ghost" color="gray">
-                  {!isMobileResolution ? "Dashboard" : "Dash"}
+                  Dahboard
+                  {/* {!isMobileResolution ? "Dashboard" : "Dash"} */}
                 </Button>
               </NavLink>
             )}
-            {user && (
+            {user && !isTabletResolution && (
               <NavLink to="/projects">
                 <Button variant="ghost" color="gray">
-                  {!isMobileResolution ? "Projects" : "Proj"}
+                  Projects
+                  {/* {!isMobileResolution ? "Projects" : "Proj"} */}
                 </Button>
               </NavLink>
             )}
-            {/* {!user && (
-              <NavLink to="/login">
+            {!isTabletResolution && (
+              <NavLink to="/learning">
                 <Button variant="ghost" color="gray">
-                  Login
+                  Learning
+                  {/* {!isMobileResolution ? "Learning" : "Learn"} */}
                 </Button>
               </NavLink>
             )}
-            {!user && (
-              <NavLink to="/signup">
-                <Button variant="ghost" color="gray">
-                  Signup
-                </Button>
-              </NavLink>
-            )} */}
-            <NavLink to="/learning">
-              <Button variant="ghost" color="gray">
-                {!isMobileResolution ? "Learning" : "Learn"}
-              </Button>
-            </NavLink>
-            {user?.isTenantAdmin && (
+            {user?.isTenantAdmin && !isTabletResolution && (
               <NavLink to="/admin">
                 <Button variant="ghost" color="gray">
                   Admin
                 </Button>
               </NavLink>
             )}
-            {user && (
+            {user && !isTabletResolution && (
               <NavLink to="/tickets">
                 <Button variant="ghost" color="gray">
-                  {!isMobileResolution ? "Ticket" : "Tick"}
+                  Ticket
+                  {/* {!isMobileResolution ? "Ticket" : "Tick"} */}
                 </Button>
               </NavLink>
             )}
-            {!user && (
+            {!user && !isTabletResolution && (
               <NavLink to="/account">
                 <VscAccount />
               </NavLink>
@@ -190,7 +192,7 @@ export default function RouteLayout() {
                 {!isMobileResolution ? "Playwright - CI" : "CI"}
               </Button>
             </NavLink> */}
-            {user && (
+            {user && !isTabletResolution && (
               <div className="current-user-container">
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger>
@@ -334,48 +336,22 @@ export default function RouteLayout() {
             {currentPathNoQuery !== "/user" && <BreadCrumbs />}
             <Text size="1">{user?.email}</Text>
           </div>
+          {isTabletResolution && (
+            <Text size="1" color="red">
+              Currently a Desktop application only
+            </Text>
+          )}
         </header>
         <main className={navigation.state !== "idle" ? "loading" : ""}>
           <Outlet />
         </main>
       </>
       <footer>
-        <small>James Dineley</small>
-        <a href="https://github.com/jdineley/Projects_app">
+        <small>© Projects-Web 2025</small>
+        {/* <a href="https://github.com/jdineley/Projects_app">
           <FaGithub />
-        </a>
+        </a> */}
       </footer>
     </div>
   );
 }
-
-// {user && (
-//   <DropdownMenu.Root>
-//     <DropdownMenu.Trigger>
-//       <Flex gap="2" align="center">
-//         <VscAccount />
-//       </Flex>
-//     </DropdownMenu.Trigger>
-//     <DropdownMenu.Content>
-//       <DropdownMenu.Sub>
-//         <DropdownMenu.SubTrigger>
-//           Try Projects
-//         </DropdownMenu.SubTrigger>
-//         <DropdownMenu.SubContent>
-//           <DropdownMenu.Item>
-//             <NavLink to="/signup">Signup</NavLink>
-//           </DropdownMenu.Item>
-//           <DropdownMenu.Item>
-//             <NavLink to="/login">Login</NavLink>
-//           </DropdownMenu.Item>
-//         </DropdownMenu.SubContent>
-//       </DropdownMenu.Sub>
-//       <DropdownMenu.Item>
-//         <Flex align="center" gap="2">
-//           <FaMicrosoft />
-//           <Text>MS Signin</Text>
-//         </Flex>
-//       </DropdownMenu.Item>
-//     </DropdownMenu.Content>
-//   </DropdownMenu.Root>
-// )}

@@ -108,7 +108,7 @@ const ItTickets = () => {
             // projectId={projectId}
             // learning={learning}
           />
-          <h3>open</h3>
+          <h2>Open</h2>
           {orderedBugTickets
             .filter((t) => t.status === "open")
             .map((t) => (
@@ -119,7 +119,7 @@ const ItTickets = () => {
                 ticketId={ticketId}
               />
             ))}
-          <h4>closed</h4>
+          <h2>Closed</h2>
           {orderedBugTickets
             .filter((t) => t.status === "closed")
             .map((t) => (
@@ -161,7 +161,7 @@ const ItTickets = () => {
             // learning={learning}
           />
           {/* )} */}
-          <h3>open</h3>
+          <h2>Open</h2>
           {orderedfeatureTickets
             .filter((t) => t.status === "open")
             .map((t) => (
@@ -172,7 +172,7 @@ const ItTickets = () => {
                 ticketId={ticketId}
               />
             ))}
-          <h4>closed</h4>
+          <h2>Closed</h2>
           {orderedfeatureTickets
             .filter((t) => t.status === "closed")
             .map((t) => (
@@ -183,7 +183,7 @@ const ItTickets = () => {
                 ticketId={ticketId}
               />
             ))}
-          <h4>Future</h4>
+          <h2>Future</h2>
           {orderedfeatureTickets
             .filter((t) => t.status === "future")
             .map((t) => (

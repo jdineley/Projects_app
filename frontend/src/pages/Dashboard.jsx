@@ -29,7 +29,7 @@ import { TiVendorMicrosoft } from "react-icons/ti";
 
 import { isAfter, isBefore, format, isWithinInterval } from "date-fns";
 
-export default function Home() {
+export default function Dashboard() {
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
 
   const { userObj, allDomainUsers } = useLoaderData() || {};
@@ -250,9 +250,9 @@ export default function Home() {
                 </Table.Header>
                 <Table.Body>{currentUserProjectRow}</Table.Body>
               </Table.Root>
-              {riskOrderedTasks.length > 0 && (
+              <h3 style={{ marginTop: "10px" }}>My most at risk tasks</h3>
+              {riskOrderedTasks.length > 0 ? (
                 <>
-                  <h3 style={{ marginTop: "10px" }}>My most at risk tasks</h3>
                   <Table.Root variant="surface">
                     <Table.Header>
                       <Table.Row>
@@ -265,10 +265,14 @@ export default function Home() {
                     <Table.Body>{taskRiskRow}</Table.Body>
                   </Table.Root>
                 </>
+              ) : (
+                <Text color="blue" style={{ fontStyle: "italic" }}>
+                  Empty
+                </Text>
               )}
               <>
                 <h3 style={{ marginTop: "10px" }}>My in-work tasks</h3>
-                {currentUserInWorkTasksRow.length > 0 && (
+                {currentUserInWorkTasksRow.length > 0 ? (
                   <Table.Root variant="surface">
                     <Table.Header>
                       <Table.Row>
@@ -286,35 +290,41 @@ export default function Home() {
                     </Table.Header>
                     <Table.Body>{currentUserInWorkTasksRow}</Table.Body>
                   </Table.Root>
+                ) : (
+                  <Text color="blue" style={{ fontStyle: "italic" }}>
+                    Empty
+                  </Text>
                 )}
-                <h3 style={{ marginTop: "10px" }}>My current workload</h3>
-                <fetcher.Form method="POST" className="flex gap-6 w-80">
-                  <input
-                    type="range"
-                    name="selfWorkLoad"
-                    min="50"
-                    max="100"
-                    step="5"
-                    // defaultValue="80"
-                    // value={60}
-                    value={selfWorkLoad}
-                    onChange={(e) => {
-                      setSelfWorkLoadChanged(true);
-                      setSelfWorkLoad(e.target.value);
-                    }}
-                  />
-                  <input type="hidden" name="intent" value="selfWorkLoad" />
-                  <Button
-                    size="1"
-                    radius="full"
-                    color={selfWorkLoadChanged ? "crimson" : ""}
-                    onClick={(e) => {
-                      setSelfWorkLoadChanged(false);
-                    }}
-                  />
-                </fetcher.Form>
-                {selfWorkLoad}
-                {"%"}
+                <>
+                  <h3 style={{ marginTop: "10px" }}>My current workload</h3>
+                  <fetcher.Form method="POST" className="flex gap-6 w-80">
+                    <input
+                      type="range"
+                      name="selfWorkLoad"
+                      min="50"
+                      max="100"
+                      step="5"
+                      // defaultValue="80"
+                      // value={60}
+                      value={selfWorkLoad}
+                      onChange={(e) => {
+                        setSelfWorkLoadChanged(true);
+                        setSelfWorkLoad(e.target.value);
+                      }}
+                    />
+                    <input type="hidden" name="intent" value="selfWorkLoad" />
+                    <Button
+                      size="1"
+                      radius="full"
+                      color={selfWorkLoadChanged ? "crimson" : ""}
+                      onClick={(e) => {
+                        setSelfWorkLoadChanged(false);
+                      }}
+                    />
+                  </fetcher.Form>
+                  {selfWorkLoad}
+                  {"%"}
+                </>
               </>
             </>
           )}

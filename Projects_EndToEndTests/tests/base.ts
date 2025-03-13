@@ -10,6 +10,7 @@ import {
   ProjectReviewPage,
   UserProfilePage,
   AccountPage,
+  HomePage,
 } from "./pom";
 
 type MyFixtures = {
@@ -23,6 +24,7 @@ type MyFixtures = {
   projectReviewPage: ProjectReviewPage;
   userProfilePage: UserProfilePage;
   accountPage: AccountPage;
+  homePage: HomePage;
 };
 
 export const test = base.extend<MyFixtures>({
@@ -55,6 +57,9 @@ export const test = base.extend<MyFixtures>({
   },
   accountPage: async ({ page }, use) => {
     await use(new AccountPage(page));
+  },
+  homePage: async ({ page }, use) => {
+    await use(new HomePage(page));
   },
 });
 

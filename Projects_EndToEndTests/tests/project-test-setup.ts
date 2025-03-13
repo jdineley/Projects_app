@@ -33,6 +33,7 @@ setup(
     page,
     rootLayout,
     accountPage,
+    homePage,
   }) => {
     setup.setTimeout(200000);
     page.on("dialog", (dialog) => dialog.accept());
@@ -58,6 +59,8 @@ setup(
       console.log(`${user[1]} uploaded`);
       if (user[0] !== "henryTest@mail.com") {
         await rootLayout.logout();
+        await homePage.isReady();
+        await accountPage.goto();
         await accountPage.isReady();
         await loginPage.goto();
         await loginPage.isReady();

@@ -39,7 +39,7 @@ import TaskDetailComponent from "../components/page_components/TaskDetailCompone
 const Learning = () => {
   const { userObj, project, projectTasks, review, task, taskComments } =
     useLoaderData();
-  console.log("userObj", userObj);
+  // console.log("userObj", userObj);
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
   const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
   const subHeadElemsRef = useRef([]);

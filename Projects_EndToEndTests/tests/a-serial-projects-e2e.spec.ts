@@ -47,6 +47,7 @@ test("test ms project edit percentage complete & finish date", async ({
   rootLayout,
   loginPage,
   accountPage,
+  homePage,
   page,
 }) => {
   test.setTimeout(80000);
@@ -97,6 +98,8 @@ test("test ms project edit percentage complete & finish date", async ({
       (el) => el.name === inWorkUser
     );
     console.log(inWorkUserCredentials);
+    await homePage.isReady();
+    await accountPage.goto();
     await accountPage.isReady();
     await loginPage.goto();
     await loginPage.isReady();
@@ -144,6 +147,7 @@ test("task comment and reply", async ({
   loginPage,
   accountPage,
   dashboardPage,
+  homePage,
 }) => {
   test.setTimeout(80000);
   await projectsPage.goto();
@@ -155,6 +159,8 @@ test("task comment and reply", async ({
   const newComment = `Comment: ${randomstring.generate()}`;
   await taskDetailPage.addNewComment(newComment);
   await rootLayout.logout();
+  await homePage.isReady();
+  await accountPage.goto();
   await accountPage.isReady();
   await loginPage.goto();
   await loginPage.isReady();
@@ -169,6 +175,8 @@ test("task comment and reply", async ({
   await taskDetailPage.addReplyToComment(newReply, newComment);
   //check nofifications are correct for new-task-comment & new-task-reply
   await rootLayout.logout();
+  await homePage.isReady();
+  await accountPage.goto();
   await accountPage.isReady();
   await loginPage.goto();
   await loginPage.isReady();
@@ -181,6 +189,8 @@ test("task comment and reply", async ({
     )
   ).toBe(1);
   await page.getByRole("menuitem", { name: "Logout" }).click();
+  await homePage.isReady();
+  await accountPage.goto();
   await accountPage.isReady();
   await loginPage.goto();
   await loginPage.isReady();
@@ -203,6 +213,7 @@ test("Create and populate Review", async ({
   loginPage,
   accountPage,
   projectReviewPage,
+  homePage,
 }) => {
   test.setTimeout(120000);
   let reviewDataTracker: any = [];
@@ -375,6 +386,8 @@ test("Create and populate Review", async ({
   for (const assignee of testUsersMinusHenry) {
     console.log("assignee", assignee);
     if (m === 0) await rootLayout.logout();
+    await homePage.isReady();
+    await accountPage.goto();
     await accountPage.isReady();
     await loginPage.goto();
     await loginPage.isReady();
@@ -388,6 +401,8 @@ test("Create and populate Review", async ({
     m++;
   }
   // comment/reply tests
+  await homePage.isReady();
+  await accountPage.goto();
   await accountPage.isReady();
   await loginPage.goto();
   await loginPage.isReady();
@@ -422,6 +437,8 @@ test("Create and populate Review", async ({
   const actioneeEmail = testUsers.find((u) => u.name === actioneeName)?.email;
   const actioneePw = testUsers.find((u) => u.name === actioneeName)?.pw;
   await rootLayout.logout();
+  await homePage.isReady();
+  await accountPage.goto();
   await accountPage.isReady();
   await loginPage.goto();
   await loginPage.isReady();
@@ -466,6 +483,8 @@ test("Create and populate Review", async ({
   );
   for (const assigneeName of actionees) {
     const assignee = testUsersMinusHenry.find((a) => a.name === assigneeName);
+    await homePage.isReady();
+    await accountPage.goto();
     await accountPage.isReady();
     await loginPage.goto();
     await loginPage.isReady();
@@ -499,6 +518,7 @@ test("User profile...", async ({
   loginPage,
   accountPage,
   projectDetailPage,
+  homePage,
 }) => {
   test.setTimeout(120000);
   let userStore: User[] = [];
@@ -669,6 +689,8 @@ test("User profile...", async ({
     }
     console.log("vacation", vacation);
     await rootLayout.logout();
+    await homePage.isReady();
+    await accountPage.goto();
     await accountPage.isReady();
     await loginPage.goto();
     await loginPage.isReady();
@@ -803,6 +825,8 @@ test("User profile...", async ({
         }
       }
       await rootLayout.logout();
+      await homePage.isReady();
+      await accountPage.goto();
       await accountPage.isReady();
       await loginPage.goto();
       await loginPage.isReady();
@@ -887,6 +911,8 @@ test("User profile...", async ({
   await userProfilePage.checkRemainingVacDays(loggedInUser);
 
   await rootLayout.logout();
+  await homePage.isReady();
+  await accountPage.goto();
   await accountPage.isReady();
   await loginPage.goto();
   await loginPage.isReady();
@@ -960,6 +986,8 @@ test("User profile...", async ({
       }
     }
     await rootLayout.logout();
+    await homePage.isReady();
+    await accountPage.goto();
     await accountPage.isReady();
     await loginPage.goto();
     await loginPage.isReady();
@@ -1100,6 +1128,8 @@ test("User profile...", async ({
 
   // go to henry's account and check that the vacation has updated..
   await rootLayout.logout();
+  await homePage.isReady();
+  await accountPage.goto();
   await accountPage.isReady();
   await loginPage.goto();
   await loginPage.isReady();
@@ -1145,6 +1175,8 @@ test("User profile...", async ({
   }
   // delete penelope native test task
   await rootLayout.logout();
+  await homePage.isReady();
+  await accountPage.goto();
   await accountPage.isReady();
   await loginPage.goto();
   await loginPage.isReady();
@@ -1182,6 +1214,8 @@ test("User profile...", async ({
 
   //go to henry and check the integrity of the vacations
   await rootLayout.logout();
+  await homePage.isReady();
+  await accountPage.goto();
   await accountPage.isReady();
   await loginPage.goto();
   await loginPage.isReady();
