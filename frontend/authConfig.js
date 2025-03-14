@@ -14,8 +14,7 @@ console.log("MSAL Redirect URI:", import.meta.env.VITE_MSAL_REDIRECT_URI);
 export const msalConfig = {
   auth: {
     clientId: "1cb7a583-b8a8-4f42-ac10-0bf62d78fe38",
-    authority:
-      "https://login.microsoftonline.com/ff447367-496a-49c8-a501-4779ea49961f",
+    authority: "https://login.microsoftonline.com/common",
     redirectUri: import.meta.env.VITE_MSAL_REDIRECT_URI,
   },
   cache: {
