@@ -10,7 +10,7 @@ import { LogLevel } from "@azure/msal-browser";
  * For a full list of MSAL.js configuration parameters, visit:
  * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/configuration.md
  */
-
+console.log("MSAL Redirect URI:", import.meta.env.VITE_MSAL_REDIRECT_URI);
 export const msalConfig = {
   auth: {
     clientId: "1cb7a583-b8a8-4f42-ac10-0bf62d78fe38",
@@ -19,7 +19,7 @@ export const msalConfig = {
   },
   cache: {
     cacheLocation: "sessionStorage", // This configures where your cache will be stored
-    storeAuthStateInCookie: false, // Set this to "true" if you are having issues on IE11 or Edge
+    storeAuthStateInCookie: true, // Set this to "true" if you are having issues on IE11 or Edge
   },
   system: {
     loggerOptions: {
