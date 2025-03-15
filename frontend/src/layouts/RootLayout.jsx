@@ -13,7 +13,7 @@ import {
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNotificationContext } from "../hooks/useNotificationContext";
 import { useLogout } from "../hooks/useLogout";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // components
 import AvatarCustom from "../Avatar";
@@ -37,9 +37,14 @@ import useMatchMedia from "../hooks/useMatchMedia";
 // constants
 import { mobileScreenWidth, tabletScreenWidth } from "../utility";
 
+import { useMsal } from "@azure/msal-react";
+
 export default function RouteLayout() {
   // const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
+
+  const { accounts, inProgress } = useMsal();
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   const { user, dispatch } = useAuthContext();
   const location = useLocation();
@@ -73,6 +78,11 @@ export default function RouteLayout() {
 
   useEffect(() => {
     console.log("in RootLayout useEffect");
+
+    if (inProgress !== "startup" && inProgress !== "handleRedirect") {
+      setCheckingAuth(false); // Only check authentication when MSAL is ready
+    }
+
     if (user && location.pathname === "/") {
       navigate("/dashboard");
     }
@@ -82,15 +92,17 @@ export default function RouteLayout() {
         type: "LOGOUT",
       });
     }
-    if (
-      !user &&
-      location.pathname !== "/account/signup" &&
-      location.pathname !== "/learning" &&
-      location.pathname !== "/account/login" &&
-      location.pathname !== "/account/microsoft" &&
-      location.pathname !== "/account"
-    ) {
-      navigate("/");
+    if (!checkingAuth && accounts.length === 0) {
+      if (
+        !user &&
+        location.pathname !== "/account/signup" &&
+        location.pathname !== "/learning" &&
+        location.pathname !== "/account/login" &&
+        location.pathname !== "/account/microsoft" &&
+        location.pathname !== "/account"
+      ) {
+        navigate("/");
+      }
     }
     if (notificationsCleared) {
       if (notification) {
@@ -124,6 +136,7 @@ export default function RouteLayout() {
     location.pathname,
     notificationsCleared,
     dispatch,
+    inProgress,
   ]);
 
   return (
