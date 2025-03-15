@@ -146,7 +146,7 @@ export default function RouteLayout() {
             {user && !isTabletResolution && (
               <NavLink to="/dashboard">
                 <Button variant="ghost" color="gray">
-                  Dahboard
+                  Dashboard
                   {/* {!isMobileResolution ? "Dashboard" : "Dash"} */}
                 </Button>
               </NavLink>
