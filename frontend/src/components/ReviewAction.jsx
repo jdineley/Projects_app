@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   useFetcher,
   useNavigate,
@@ -29,6 +29,7 @@ const ReviewAction = ({
   newActionId,
   learning,
 }) => {
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
   const [open, setOpen] = useState(() => (newCommentId ? true : false));
   const [isCommenting, setIsCommenting] = useState(false);
   const [comment, setComment] = useState("");
@@ -37,11 +38,14 @@ const ReviewAction = ({
   const [uploadPicButHover, setUploadPicButHover] = useState(false);
   const [inputImages, setInputImages] = useState([]);
   const [inputVideos, setInputVideos] = useState([]);
-  const hasAttachedFiles =
-    [...inputImages, ...inputVideos].length > 0 ? true : false;
+  const [projectUsers, setProjectUsers] = useState([]);
+  const atTotal = useRef(0);
+  const AT_REGEX = / @/g;
+  // const hasAttachedFiles =
+  //   [...inputImages, ...inputVideos].length > 0 ? true : false;
   const [isSending, setIsSending] = useState(false);
   const { user } = useAuthContext();
-
+  const token = user?.token ? user?.token : user?.accessToken;
   const { notification } = useNotificationContext();
 
   const navigate = useNavigate();
@@ -85,6 +89,42 @@ const ReviewAction = ({
         inline: "nearest",
       });
     }
+    if (comment) {
+      if (AT_REGEX.test(comment)) {
+        const totalAts = comment.match(AT_REGEX).length;
+        console.log("totalAts", totalAts);
+        console.log("atTotal.current", atTotal.current);
+        if (totalAts > atTotal.current) {
+          console.log("SETTING IS NEW AT");
+          atTotal.current = totalAts;
+          fetch(
+            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?intent=allProjectUsers&projectId=${projectId}`,
+            {
+              method: "GET",
+              mode: "cors",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+            .then((res) => {
+              return res.json();
+            })
+            .then((json) => {
+              console.log(json);
+              setProjectUsers(json);
+            });
+        } else if (totalAts < atTotal.current) {
+          atTotal.current = totalAts;
+          setProjectUsers([]);
+        } else {
+          setProjectUsers([]);
+        }
+      } else {
+        atTotal.current = 0;
+        setProjectUsers([]);
+      }
+    }
   }, [
     action._id,
     newActionId,
@@ -93,6 +133,7 @@ const ReviewAction = ({
     currentPathNoQuery,
     isCommenting,
     fetcher.data,
+    comment,
   ]);
 
   async function handleAddComment() {
@@ -193,6 +234,7 @@ const ReviewAction = ({
               setIsSending={setIsSending}
               projectId={projectId}
               reviewId={reviewId}
+              projectUsers={projectUsers}
               learning={learning}
             />
             /* <fetcher.Form method="POST" className="add-task-comment-form">

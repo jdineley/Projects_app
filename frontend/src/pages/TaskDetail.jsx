@@ -43,9 +43,13 @@ import { mobileScreenWidth, tabletScreenWidth } from "../utility";
 // export default function TaskDetail() {
 export default function TaskDetail({ learning, task, taskComments, user }) {
   // const { VITE_REACT_APP_API_URL } = import.meta.env;
-  // console.log("USER", user);
+  ({ user } = !learning ? useAuthContext() : { user });
+  console.log("USER", user);
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
   const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
+  const token = user?.token ? user?.token : user?.accessToken;
+  console.log("token", token);
   // const loaderData = useLoaderData();
   const loaderData = !learning ? useLoaderData() : {};
   // const { task, taskComments, projectId } = loaderData;
@@ -57,7 +61,7 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
   // const { task, taskComments, newCommentId, taskDep, searchedTasks } =
   //   useLoaderData();
   // const { user } = useAuthContext();
-  ({ user } = !learning ? useAuthContext() : { user });
+
   console.log("newCommentId", newCommentId);
   const [isCommenting, setIsCommenting] = useState(false);
   const [comment, setComment] = useState("");
@@ -66,6 +70,12 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
   const [uploadPicButHover, setUploadPicButHover] = useState(false);
   const [inputImages, setInputImages] = useState([]);
   const [inputVideos, setInputVideos] = useState([]);
+  const [projectUsers, setProjectUsers] = useState([]);
+  // const [isNewAt, setIsNewAt] = useState(false);
+  // console.log("isNewAt", isNewAt);
+  const atTotal = useRef(0);
+  const taggedUsers = useRef([]);
+  // const isNewAt = useRef(false);
   // const hasAttachedFiles =
   //   [...inputImages, ...inputVideos].length > 0 ? true : false;
   const [isSending, setIsSending] = useState(false);
@@ -75,7 +85,14 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
   // get urls as typed:
   const URL_REGEX =
     /https?:\/\/.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*/g;
+  const AT_REGEX = / @/g;
+  const TAG_REGEX = / @\S*/g;
+  console.log(comment.match(TAG_REGEX));
+  // Need to handle if the user deletes a tagged person. render the @tags in a non-editable text, but remain part of the main flow..  result is that taggedUsers.current[] stays insync with comment.match(TAG_REGEX).  Remind myself how to return only a section of the returned match [' @catherineTest@mail.com', ' @jamesTest@mail.com'] => [catherineTest, jamesTest]
+
   const urlsArr = comment.match(URL_REGEX) || null;
+
+  // console.log("isNewAt", isNewAt);
   let emmbeddedLinksArr;
   if (urlsArr) {
     emmbeddedLinksArr = urlsArr.map((url) => {
@@ -83,13 +100,16 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
     });
   }
   console.log("urlsArr", urlsArr);
-  const isUserTask = user._id === task?.user._id;
+  const isUserTask = user?._id === task?.user._id;
 
   const { notification } = useNotificationContext();
 
-  const fetcher = useFetcher();
+  // const fetcher = useFetcher();
 
+  // console.log("isNewAt", isNewAt);
+  // let projectUsers;
   useEffect(() => {
+    console.log("in TaskDetail useEffect");
     if (notification) {
       document.getElementById(newCommentId)?.scrollIntoView({
         behavior: "smooth",
@@ -97,7 +117,51 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
         inline: "end",
       });
     }
-  }, [task, notification, newCommentId]);
+    if (comment) {
+      if (AT_REGEX.test(comment)) {
+        const totalAts = comment.match(AT_REGEX).length;
+        const currentTags = comment
+          .match(TAG_REGEX)
+          .map((t) => t.split("@")[1] + t.split("@")[2]);
+        taggedUsers.current = currentTags;
+        // console.log("currentTags", currentTags);
+        console.log("taggedUsers.current", taggedUsers.current);
+        // console.log("totalAts", totalAts);
+        // console.log("atTotal.current", atTotal.current);
+        if (totalAts > atTotal.current) {
+          // console.log("SETTING IS NEW AT");
+          atTotal.current = totalAts;
+          fetch(
+            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?intent=allProjectUsers&projectId=${projectId}`,
+            {
+              method: "GET",
+              mode: "cors",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+            .then((res) => {
+              return res.json();
+            })
+            .then((json) => {
+              console.log(json);
+              setProjectUsers(json);
+            });
+        } else if (totalAts < atTotal.current) {
+          atTotal.current = totalAts;
+          setProjectUsers([]);
+        } else {
+          setProjectUsers([]);
+        }
+      } else {
+        atTotal.current = 0;
+        setProjectUsers([]);
+      }
+    }
+  }, [task, notification, newCommentId, comment]);
+
+  console.log("!!!!!!projectUsers", projectUsers);
 
   function handleAddComment() {
     if (searchParams.size > 0) {
@@ -242,6 +306,9 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
           endPoint={`/api/v1/comments/project/${projectId}`}
           setIsSending={setIsSending}
           projectId={projectId}
+          // isNewAt={isNewAt}
+          projectUsers={projectUsers}
+          taggedUsers={taggedUsers}
           // learning={learning}
         />
         // <form

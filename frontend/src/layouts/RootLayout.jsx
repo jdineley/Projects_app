@@ -137,6 +137,7 @@ export default function RouteLayout() {
     notificationsCleared,
     dispatch,
     inProgress,
+    checkingAuth,
   ]);
 
   return (

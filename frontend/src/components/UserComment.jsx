@@ -87,13 +87,6 @@ export default function UserComment({
           : ""
       }  ${ticket?.importance === "high" ? "bg-red-500" : "bg-[#1564c0]"} mb-2`}
       id={(comment || ticket)._id}
-      // style={
-      //   {
-      //     marginLeft: "auto",
-      //     width: "fit-content",
-      //     maxWidth: "80%",
-      //   }
-      // }
     >
       <div className="user-comment">
         <div className="flex flex-col gap-1">

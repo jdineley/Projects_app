@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const Tenant = require("../models/Tenant");
+const Project = require("../models/Project");
 
 const createToken = (_id) => {
   return jwt.sign({ _id }, process.env.SECRET, { expiresIn: "3d" });
@@ -158,6 +159,11 @@ const getUsers = async (req, res) => {
         query = { tenant: req.user.tenant };
         users = await User.find(query);
       } else users = [];
+    }
+    if (intent === "allProjectUsers") {
+      const project = await Project.findById(projectId).populate("users");
+      console.log("project", project);
+      users = project.users.map((u) => u.email);
     }
     // }
     // #6823
