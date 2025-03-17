@@ -14,6 +14,7 @@ import { CiImageOn } from "react-icons/ci";
 import { CiVideoOn } from "react-icons/ci";
 
 import { Switch, Text, Badge, Button } from "@radix-ui/themes";
+import { set } from "date-fns";
 
 const MessageForm = ({
   comment,
@@ -41,27 +42,13 @@ const MessageForm = ({
   learning,
   commentWhat,
   type,
-  // isNewAt,
   projectUsers,
-  taggedUsers,
 }) => {
   console.log("projectUsers", projectUsers);
   const hasAttachedFiles =
     [...inputImages, ...inputVideos].length > 0 ? true : false;
-  // console.log("**************message form***************");
-  // console.log("projectId", projectId);
-  // const URL_REGEX =
-  //   /https?:\/\/.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*/g;
-  // const urlsArr = comment.match(URL_REGEX) || null;
-  // let emmbeddedLinksArr;
-  // if (urlsArr) {
-  //   emmbeddedLinksArr = urlsArr.map((url) => {
-  //     return <EmbeddedLink url={url} />;
-  //   });
-  // }
-  // console.log("urlsArr", urlsArr);
+
   const [importance, setImportance] = useState("medium");
-  // const taggedUsers = useRef([]);
 
   return (
     <div className={`${intent === "task" && "sticky bottom-5"} mx-auto w-9/12`}>
@@ -78,12 +65,12 @@ const MessageForm = ({
                   document.getElementById(`comment-${target._id}`);
                 const cursorPosition = textField.selectionStart;
                 console.log(cursorPosition);
-                comment = comment.slice(0, cursorPosition) + u + " ";
-                comment.slice(cursorPosition);
-                setComment(comment);
-                // if (!taggedUsers.current.includes(u)) {
-                //   taggedUsers.current.push(u);
-                // }
+                let commentMut =
+                  comment.slice(0, cursorPosition) +
+                  u +
+                  " " +
+                  comment.slice(cursorPosition);
+                setComment(commentMut);
               }}
             >
               {u.split("@")[0]}

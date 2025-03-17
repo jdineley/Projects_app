@@ -1,53 +1,12 @@
 {
-  "cookies": [
-    {
-      "name": "YSC",
-      "value": "At6r30W4kpE",
-      "domain": ".youtube.com",
-      "path": "/",
-      "expires": -1,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "__Secure-ROLLOUT_TOKEN",
-      "value": "CJPQza7yobTwFhDLtZOWiYeMAxjLtZOWiYeMAw%3D%3D",
-      "domain": ".youtube.com",
-      "path": "/",
-      "expires": 1757421398.955914,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "VISITOR_INFO1_LIVE",
-      "value": "H7flwWeu7d4",
-      "domain": ".youtube.com",
-      "path": "/",
-      "expires": 1757421398.956137,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "VISITOR_PRIVACY_METADATA",
-      "value": "CgJHQhIEGgAgPA%3D%3D",
-      "domain": ".youtube.com",
-      "path": "/",
-      "expires": 1757421398.956167,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    }
-  ],
+  "cookies": [],
   "origins": [
     {
       "origin": "http://localhost:5173",
       "localStorage": [
         {
           "name": "user",
-          "value": "{\"_id\":\"67d2d131012d08c762e0cf80\",\"email\":\"henryTest@mail.com\",\"isGlobalAdmin\":false,\"isTenantAdmin\":false,\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2QyZDEzMTAxMmQwOGM3NjJlMGNmODAiLCJpYXQiOjE3NDE4NjkzOTksImV4cCI6MTc0MjEyODU5OX0.NDk5dHOKYSzS4AyipV5uS4i_7MNnSPdw36gd6lOmGy0\"}"
+          "value": "{\"_id\":\"67d814ab5da0e2af65c952f1\",\"email\":\"henryTest@mail.com\",\"isGlobalAdmin\":false,\"isTenantAdmin\":false,\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2Q4MTRhYjVkYTBlMmFmNjVjOTUyZjEiLCJpYXQiOjE3NDIyMTQzNTMsImV4cCI6MTc0MjQ3MzU1M30.vfx-OIEdAyPpiKke7HaNV9Yu2SrevjslNunbxyL-BSY\"}"
         }
       ]
     }

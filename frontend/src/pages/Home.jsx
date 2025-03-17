@@ -136,14 +136,7 @@ export default function Home() {
             allowfullscreen
           ></iframe>
         </div>
-        <a href="https://res.cloudinary.com/dm3g0oh2q/image/upload/v1741772784/Projects_application_security_schematic.drawio_white_f02pke.svg">
-          <img
-            width="100px"
-            src="https://res.cloudinary.com/dm3g0oh2q/image/upload/v1741772784/Projects_application_security_schematic.drawio_white_f02pke.svg"
-            alt=""
-          />
-        </a>
-        <HomeNavButtons intent={"projects-security"} />
+        <HomeNavButtons intent={"projects-security"} security={true} />
       </div>
       <div
         style={{ height: "100dvh", backgroundColor: "#3A4A54" }}

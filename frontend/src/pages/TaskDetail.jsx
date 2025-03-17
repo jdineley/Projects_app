@@ -1,10 +1,7 @@
 import {
   useLoaderData,
-  Form,
-  useFetcher,
   useSearchParams,
   useRevalidator,
-  // useNavigate,
 } from "react-router-dom";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useState, useEffect, useRef } from "react";
@@ -17,7 +14,6 @@ import UserComment from "../components/UserComment";
 import TaskPercentageCompleteGUI from "../components/TaskPercentageCompleteGUI";
 import UserActiveTaskRow from "../components/UserActiveTaskRow";
 import TaskEditDialog from "../components/TaskEditDialog";
-// import EmbeddedAttachment from "../components/EmbeddedAttachment";
 import EmbeddedLink from "../components/EmbeddedLink";
 import OptimisticUserComment from "../components/OptimisticUserComment";
 import MessageForm from "../components/MessageForm";
@@ -31,25 +27,15 @@ import { format } from "date-fns";
 // constants
 import { mobileScreenWidth, tabletScreenWidth } from "../utility";
 
-// utility
-// import { handleSubmitMessage } from "../utility";
-
-// icons
-// import { IoSendOutline } from "react-icons/io5";
-// import { IoSend } from "react-icons/io5";
-// import { CiImageOn } from "react-icons/ci";
-// import { CiVideoOn } from "react-icons/ci";
-
 // export default function TaskDetail() {
 export default function TaskDetail({ learning, task, taskComments, user }) {
-  // const { VITE_REACT_APP_API_URL } = import.meta.env;
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
   ({ user } = !learning ? useAuthContext() : { user });
   console.log("USER", user);
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
   const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
-  const { VITE_REACT_APP_API_URL } = import.meta.env;
   const token = user?.token ? user?.token : user?.accessToken;
-  console.log("token", token);
+  // console.log("token", token);
   // const loaderData = useLoaderData();
   const loaderData = !learning ? useLoaderData() : {};
   // const { task, taskComments, projectId } = loaderData;
@@ -58,11 +44,6 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
   }
   const { newCommentId, taskDep, searchedTasks, projectId } = loaderData;
 
-  // const { task, taskComments, newCommentId, taskDep, searchedTasks } =
-  //   useLoaderData();
-  // const { user } = useAuthContext();
-
-  console.log("newCommentId", newCommentId);
   const [isCommenting, setIsCommenting] = useState(false);
   const [comment, setComment] = useState("");
   const [messButHover, setMessageButHover] = useState(false);
@@ -71,13 +52,11 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
   const [inputImages, setInputImages] = useState([]);
   const [inputVideos, setInputVideos] = useState([]);
   const [projectUsers, setProjectUsers] = useState([]);
-  // const [isNewAt, setIsNewAt] = useState(false);
-  // console.log("isNewAt", isNewAt);
+
   const atTotal = useRef(0);
   const taggedUsers = useRef([]);
-  // const isNewAt = useRef(false);
-  // const hasAttachedFiles =
-  //   [...inputImages, ...inputVideos].length > 0 ? true : false;
+  const projectUsersRef = useRef([]);
+
   const [isSending, setIsSending] = useState(false);
   let [searchParams, setSearchParams] = useSearchParams();
 
@@ -87,12 +66,9 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
     /https?:\/\/.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*/g;
   const AT_REGEX = / @/g;
   const TAG_REGEX = / @\S*/g;
-  console.log(comment.match(TAG_REGEX));
-  // Need to handle if the user deletes a tagged person. render the @tags in a non-editable text, but remain part of the main flow..  result is that taggedUsers.current[] stays insync with comment.match(TAG_REGEX).  Remind myself how to return only a section of the returned match [' @catherineTest@mail.com', ' @jamesTest@mail.com'] => [catherineTest, jamesTest]
 
   const urlsArr = comment.match(URL_REGEX) || null;
 
-  // console.log("isNewAt", isNewAt);
   let emmbeddedLinksArr;
   if (urlsArr) {
     emmbeddedLinksArr = urlsArr.map((url) => {
@@ -104,10 +80,7 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
 
   const { notification } = useNotificationContext();
 
-  // const fetcher = useFetcher();
-
   // console.log("isNewAt", isNewAt);
-  // let projectUsers;
   useEffect(() => {
     console.log("in TaskDetail useEffect");
     if (notification) {
@@ -122,10 +95,37 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
         const totalAts = comment.match(AT_REGEX).length;
         const currentTags = comment
           .match(TAG_REGEX)
-          .map((t) => t.split("@")[1] + t.split("@")[2]);
+          .map((t) => t.split("@")[1] + "@" + t.split("@")[2]);
         taggedUsers.current = currentTags;
-        // console.log("currentTags", currentTags);
-        console.log("taggedUsers.current", taggedUsers.current);
+        console.log("currentTags", currentTags);
+        // console.log("taggedUsers.current", taggedUsers.current);
+        if (taggedUsers.current.length > 0) {
+          // if (taggedUsers.current.length > 0) {
+          const incorrectEmails = taggedUsers.current.filter(
+            // const incorrectEmails = taggedUsers.current.filter(
+            (t) => !projectUsersRef.current.includes(t)
+          );
+          console.log("incorrectEmails", incorrectEmails);
+          if (incorrectEmails.length > 0) {
+            let newComment;
+            // comment config: klkkdfs @jim@mail.com fdsad @jill@mail.com
+            for (const incorrectEmail of incorrectEmails) {
+              console.log("incorrectEmail", incorrectEmail);
+              newComment = comment
+                .split(" ")
+                .filter((w) => {
+                  console.log("w", w);
+                  if (w[0] === "@") {
+                    w = w.substring(1);
+                    return w !== incorrectEmail;
+                  } else return true;
+                })
+                .join(" ");
+              console.log("newComment", newComment);
+            }
+            setComment(newComment);
+          }
+        }
         // console.log("totalAts", totalAts);
         // console.log("atTotal.current", atTotal.current);
         if (totalAts > atTotal.current) {
@@ -147,6 +147,7 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
             .then((json) => {
               console.log(json);
               setProjectUsers(json);
+              projectUsersRef.current = json;
             });
         } else if (totalAts < atTotal.current) {
           atTotal.current = totalAts;
@@ -306,155 +307,11 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
           endPoint={`/api/v1/comments/project/${projectId}`}
           setIsSending={setIsSending}
           projectId={projectId}
-          // isNewAt={isNewAt}
           projectUsers={projectUsers}
           taggedUsers={taggedUsers}
-          // learning={learning}
+          projectUsersRef={projectUsersRef}
+          learning={learning}
         />
-        // <form
-        //   onSubmit={(e) => handleSubmitComment(e, comment)}
-        //   method="POST"
-        //   encType="multipart/form-data"
-        //   id="submit-comment-form"
-        //   className="sticky flex mx-auto w-9/12 justify-center items-end bottom-5 bg-white"
-        // >
-        //   <div className="flex flex-col w-full border-solid border-0.5 border-slate-200 focus-within:border-sky-500">
-        //     <textarea
-        //       placeholder="add new comment..."
-        //       className="flex-1 border-none outline-none"
-        //       name="comment"
-        //       required={hasAttachedFiles ? "" : "true"}
-        //       onChange={(e) => {
-        //         setComment(e.target.value);
-        //       }}
-        //       value={comment}
-        //     />
-        //     <div className="bg-white flex gap-4 mx-2 flex-wrap">
-        //       {inputImages.map((image) => {
-        //         return (
-        //           <EmbeddedAttachment
-        //             key={image.name}
-        //             fileName={image.name}
-        //             inputImages={inputImages}
-        //             setInputImages={setInputImages}
-        //           />
-        //         );
-        //       })}
-        //       {inputVideos.map((video) => {
-        //         return (
-        //           <EmbeddedAttachment
-        //             key={video.name}
-        //             fileName={video.name}
-        //             inputVideos={inputVideos}
-        //             setInputVideos={setInputVideos}
-        //           />
-        //         );
-        //       })}
-        //       {emmbeddedLinksArr}
-        //     </div>
-        //     <div className="flex justify-end gap-4">
-        //       <label
-        //         htmlFor="video-upload"
-        //         className="my-auto"
-        //         onMouseEnter={(e) => {
-        //           setUploadFileButHover(true);
-        //         }}
-        //         onMouseLeave={(e) => {
-        //           setUploadFileButHover(false);
-        //         }}
-        //       >
-        //         <CiVideoOn
-        //           size={20}
-        //           fontWeight="1"
-        //           color={
-        //             uploadFileButHover
-        //               ? `rgba(22, 101, 192, 1)`
-        //               : `rgba(22, 101, 192, 0.6)`
-        //           }
-        //         />
-        //       </label>
-        //       <label
-        //         htmlFor="pic-upload"
-        //         className="my-auto"
-        //         onMouseEnter={(e) => {
-        //           setUploadPicButHover(true);
-        //         }}
-        //         onMouseLeave={(e) => {
-        //           setUploadPicButHover(false);
-        //         }}
-        //       >
-        //         <CiImageOn
-        //           size={20}
-        //           fontWeight="1"
-        //           color={
-        //             uploadPicButHover
-        //               ? `rgba(22, 101, 192, 1)`
-        //               : `rgba(22, 101, 192, 0.6)`
-        //           }
-        //         />
-        //       </label>
-
-        //       <input
-        //         onChange={(event) => {
-        //           console.log(event.target.files);
-        //           setInputVideos([
-        //             ...Object.values(inputVideos),
-        //             ...Object.values(event.target.files),
-        //           ]);
-        //         }}
-        //         name="uploaded_videos"
-        //         id="video-upload"
-        //         accept="video/*"
-        //         type="file"
-        //         className="hidden"
-        //         multiple
-        //       />
-        //       <input
-        //         onChange={(event) => {
-        //           console.log(event.target.files);
-        //           setInputImages([
-        //             ...Object.values(inputImages),
-        //             ...Object.values(event.target.files),
-        //           ]);
-        //         }}
-        //         name="uploaded_images"
-        //         id="pic-upload"
-        //         type="file"
-        //         accept="image/*"
-        //         className="hidden"
-        //         multiple
-        //       />
-        //       <button
-        //         type="submit"
-        //         name="intent"
-        //         value="task-comment"
-        //         className="bg-white"
-        //         onMouseEnter={(e) => {
-        //           setMessageButHover(true);
-        //         }}
-        //         onMouseLeave={(e) => {
-        //           setMessageButHover(false);
-        //         }}
-        //       >
-        //         {messButHover ? (
-        //           <IoSend
-        //             className="my-auto"
-        //             size={20}
-        //             fontWeight="1"
-        //             color="rgb(22, 101, 192)"
-        //           />
-        //         ) : (
-        //           <IoSendOutline
-        //             color="rgb(22, 101, 192)"
-        //             className="my-auto"
-        //             size={20}
-        //             fontWeight="1"
-        //           />
-        //         )}
-        //       </button>
-        //     </div>
-        //   </div>
-        // </form>
       )}
     </div>
   );
