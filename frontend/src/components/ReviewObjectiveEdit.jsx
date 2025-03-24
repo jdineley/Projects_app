@@ -56,7 +56,8 @@ const ReviewObjectiveEdit = ({
               // disabled={learning}
               variant="soft"
               color={accentColor}
-              defaultValue={objective.title}
+              value={objective.title}
+              // defaultValue={objective.title}
               onChange={(e) => {
                 setReviewInState((draft) => {
                   reviewInStateChangedRef.current = true;

@@ -33,6 +33,11 @@ const createComment = async (req, res) => {
   const user = req.user;
   console.log("req.files", req.files);
   console.log("req.body", req.body);
+  const { tagged_users } = req.body;
+  // if (tagged_users) {
+  //   console.log("tagged_users", tagged_users);
+
+  // }
   // const xml = await fs.readFile(req.file.path, { encoding: "utf8" });
 
   const { task: taskId, action: actionId, projectId, reviewId } = req.body;
@@ -96,7 +101,7 @@ const createComment = async (req, res) => {
     }
 
     if (taskId) {
-      const task = await Task.findById(taskId);
+      const task = await Task.findById(taskId).populate("user");
       if (!task) {
         throw Error("no task found");
       }
@@ -110,20 +115,38 @@ const createComment = async (req, res) => {
       // }
       task.comments.push(comment._id);
       await task.save();
-      const taskOwner = await User.findById(task.user);
-      if (user._id.toString() !== taskOwner._id.toString()) {
-        taskOwner.recievedNotifications.push(
-          `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-task-comment`
-        );
-        // taskOwner.recentReceivedComments.push(
-        //   `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-comment`
-        // );
-        await taskOwner.save();
-        channel.publish(
-          `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-task-comment`,
-          `new-comment-notification${taskOwner._id}`
-        );
+      // distribute notification to [taskOwner,...taggedUsers]
+      const taskNotees = tagged_users
+        ? [
+            user._id.toString() !== task.user._id.toString() && task.user.email,
+            ...tagged_users,
+          ]
+        : [user._id.toString() !== task.user._id.toString() && task.user.email];
+      console.log("taskNotees", taskNotees);
+      if (taskNotees.length > 0) {
+        for (const taskNotee of taskNotees) {
+          const noteeObj = await User.findOne({ email: taskNotee });
+          noteeObj.recievedNotifications.push(
+            `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-task-comment`
+          );
+          await noteeObj.save();
+          channel.publish(
+            `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-task-comment`,
+            `new-comment-notification${noteeObj._id}`
+          );
+        }
       }
+      // const taskOwner = await User.findById(task.user);
+      // if (user._id.toString() !== taskOwner._id.toString()) {
+      //   taskOwner.recievedNotifications.push(
+      //     `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-task-comment`
+      //   );
+      //   await taskOwner.save();
+      //   channel.publish(
+      //     `/projects/${task.project}/tasks/${task._id}?commentId=${comment._id}&user=${user.email}&intent=new-task-comment`,
+      //     `new-comment-notification${taskOwner._id}`
+      //   );
+      // }
     }
     if (actionId) {
       const action = await ReviewAction.findById(actionId).populate(
@@ -135,24 +158,52 @@ const createComment = async (req, res) => {
       action.comments.push(comment._id);
       await action.save();
 
-      if (action.actionees.length > 0) {
-        for (const actionee of action.actionees) {
-          if (actionee._id.toString() !== user._id.toString()) {
-            actionee.recievedNotifications.push(
-              `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-review-comment`
-            );
-            // actionee.recentReceivedComments.push(
-            //   `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-comment`
-            // );
-            await actionee.save();
+      const actionNotees = tagged_users
+        ? [
+            ...action.actionees
+              .filter((a) => a._id.toString() !== user._id.toString())
+              .map((a) => a.email),
+            ...tagged_users,
+          ]
+        : action.actionees
+            .filter((a) => a._id.toString() !== user._id.toString())
+            .map((a) => a.email);
 
-            channel.publish(
-              `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-review-comment`,
-              `new-comment-notification${actionee._id}`
-            );
-          }
+      console.log("actionNotees", actionNotees);
+
+      if (actionNotees.length > 0) {
+        for (const actionNotee of actionNotees) {
+          const actionNoteeObj = await User.findOne({ email: actionNotee });
+          actionNoteeObj.recievedNotifications.push(
+            `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-review-comment`
+          );
+          await actionNoteeObj.save();
+
+          channel.publish(
+            `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-review-comment`,
+            `new-comment-notification${actionNoteeObj._id}`
+          );
         }
       }
+
+      // if (action.actionees.length > 0) {
+      //   for (const actionee of action.actionees) {
+      //     if (actionee._id.toString() !== user._id.toString()) {
+      //       actionee.recievedNotifications.push(
+      //         `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-review-comment`
+      //       );
+      //       // actionee.recentReceivedComments.push(
+      //       //   `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-comment`
+      //       // );
+      //       await actionee.save();
+
+      //       channel.publish(
+      //         `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${user.email}&intent=new-review-comment`,
+      //         `new-comment-notification${actionee._id}`
+      //       );
+      //     }
+      //   }
+      // }
     }
     res.status(200).json(comment);
   } catch (error) {

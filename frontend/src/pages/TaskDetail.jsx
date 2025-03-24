@@ -29,14 +29,10 @@ import { mobileScreenWidth, tabletScreenWidth } from "../utility";
 
 // export default function TaskDetail() {
 export default function TaskDetail({ learning, task, taskComments, user }) {
-  const { VITE_REACT_APP_API_URL } = import.meta.env;
   ({ user } = !learning ? useAuthContext() : { user });
   console.log("USER", user);
   const isTabletResolution = useMatchMedia(`${tabletScreenWidth}`, true);
   const isMobileResolution = useMatchMedia(`${mobileScreenWidth}`, true);
-  const token = user?.token ? user?.token : user?.accessToken;
-  // console.log("token", token);
-  // const loaderData = useLoaderData();
   const loaderData = !learning ? useLoaderData() : {};
   // const { task, taskComments, projectId } = loaderData;
   if (!learning) {
@@ -51,11 +47,6 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
   const [uploadPicButHover, setUploadPicButHover] = useState(false);
   const [inputImages, setInputImages] = useState([]);
   const [inputVideos, setInputVideos] = useState([]);
-  const [projectUsers, setProjectUsers] = useState([]);
-
-  const atTotal = useRef(0);
-  const taggedUsers = useRef([]);
-  const projectUsersRef = useRef([]);
 
   const [isSending, setIsSending] = useState(false);
   let [searchParams, setSearchParams] = useSearchParams();
@@ -64,8 +55,6 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
   // get urls as typed:
   const URL_REGEX =
     /https?:\/\/.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*/g;
-  const AT_REGEX = / @/g;
-  const TAG_REGEX = / @\S*/g;
 
   const urlsArr = comment.match(URL_REGEX) || null;
 
@@ -90,79 +79,79 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
         inline: "end",
       });
     }
-    if (comment) {
-      if (AT_REGEX.test(comment)) {
-        const totalAts = comment.match(AT_REGEX).length;
-        const currentTags = comment
-          .match(TAG_REGEX)
-          .map((t) => t.split("@")[1] + "@" + t.split("@")[2]);
-        taggedUsers.current = currentTags;
-        console.log("currentTags", currentTags);
-        // console.log("taggedUsers.current", taggedUsers.current);
-        if (taggedUsers.current.length > 0) {
-          // if (taggedUsers.current.length > 0) {
-          const incorrectEmails = taggedUsers.current.filter(
-            // const incorrectEmails = taggedUsers.current.filter(
-            (t) => !projectUsersRef.current.includes(t)
-          );
-          console.log("incorrectEmails", incorrectEmails);
-          if (incorrectEmails.length > 0) {
-            let newComment;
-            // comment config: klkkdfs @jim@mail.com fdsad @jill@mail.com
-            for (const incorrectEmail of incorrectEmails) {
-              console.log("incorrectEmail", incorrectEmail);
-              newComment = comment
-                .split(" ")
-                .filter((w) => {
-                  console.log("w", w);
-                  if (w[0] === "@") {
-                    w = w.substring(1);
-                    return w !== incorrectEmail;
-                  } else return true;
-                })
-                .join(" ");
-              console.log("newComment", newComment);
-            }
-            setComment(newComment);
-          }
-        }
-        // console.log("totalAts", totalAts);
-        // console.log("atTotal.current", atTotal.current);
-        if (totalAts > atTotal.current) {
-          // console.log("SETTING IS NEW AT");
-          atTotal.current = totalAts;
-          fetch(
-            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?intent=allProjectUsers&projectId=${projectId}`,
-            {
-              method: "GET",
-              mode: "cors",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          )
-            .then((res) => {
-              return res.json();
-            })
-            .then((json) => {
-              console.log(json);
-              setProjectUsers(json);
-              projectUsersRef.current = json;
-            });
-        } else if (totalAts < atTotal.current) {
-          atTotal.current = totalAts;
-          setProjectUsers([]);
-        } else {
-          setProjectUsers([]);
-        }
-      } else {
-        atTotal.current = 0;
-        setProjectUsers([]);
-      }
-    }
-  }, [task, notification, newCommentId, comment]);
+    // if (comment) {
+    //   if (AT_REGEX.test(comment)) {
+    //     const totalAts = comment.match(AT_REGEX).length;
+    //     const currentTags = comment
+    //       .match(TAG_REGEX)
+    //       .map((t) => t.split("@")[1] + "@" + t.split("@")[2]);
+    //     taggedUsers.current = currentTags;
+    //     console.log("currentTags", currentTags);
+    //     // console.log("taggedUsers.current", taggedUsers.current);
+    //     if (taggedUsers.current.length > 0) {
+    //       // if (taggedUsers.current.length > 0) {
+    //       const incorrectEmails = taggedUsers.current.filter(
+    //         // const incorrectEmails = taggedUsers.current.filter(
+    //         (t) => !projectUsersRef.current.includes(t)
+    //       );
+    //       console.log("incorrectEmails", incorrectEmails);
+    //       if (incorrectEmails.length > 0) {
+    //         let newComment;
+    //         // comment config: klkkdfs @jim@mail.com fdsad @jill@mail.com
+    //         for (const incorrectEmail of incorrectEmails) {
+    //           console.log("incorrectEmail", incorrectEmail);
+    //           newComment = comment
+    //             .split(" ")
+    //             .filter((w) => {
+    //               console.log("w", w);
+    //               if (w[0] === "@") {
+    //                 w = w.substring(1);
+    //                 return w !== incorrectEmail;
+    //               } else return true;
+    //             })
+    //             .join(" ");
+    //           console.log("newComment", newComment);
+    //         }
+    //         setComment(newComment);
+    //       }
+    //     }
+    //     // console.log("totalAts", totalAts);
+    //     // console.log("atTotal.current", atTotal.current);
+    //     if (totalAts > atTotal.current) {
+    //       // console.log("SETTING IS NEW AT");
+    //       atTotal.current = totalAts;
+    //       fetch(
+    //         `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?intent=allProjectUsers&projectId=${projectId}`,
+    //         {
+    //           method: "GET",
+    //           mode: "cors",
+    //           headers: {
+    //             Authorization: `Bearer ${token}`,
+    //           },
+    //         }
+    //       )
+    //         .then((res) => {
+    //           return res.json();
+    //         })
+    //         .then((json) => {
+    //           console.log(json);
+    //           setProjectUsers(json);
+    //           projectUsersRef.current = json;
+    //         });
+    //     } else if (totalAts < atTotal.current) {
+    //       atTotal.current = totalAts;
+    //       setProjectUsers([]);
+    //     } else {
+    //       setProjectUsers([]);
+    //     }
+    //   } else {
+    //     atTotal.current = 0;
+    //     setProjectUsers([]);
+    //   }
+    // }
+  }, [task, notification, newCommentId]);
 
-  console.log("!!!!!!projectUsers", projectUsers);
+  // console.log("!!!!!!projectUsers", projectUsers);
 
   function handleAddComment() {
     if (searchParams.size > 0) {
@@ -307,10 +296,12 @@ export default function TaskDetail({ learning, task, taskComments, user }) {
           endPoint={`/api/v1/comments/project/${projectId}`}
           setIsSending={setIsSending}
           projectId={projectId}
-          projectUsers={projectUsers}
-          taggedUsers={taggedUsers}
-          projectUsersRef={projectUsersRef}
+          // projectUsers={projectUsers}
+          // taggedUsers={taggedUsers}
+          // projectUsersRef={projectUsersRef}
           learning={learning}
+          //
+          // atTotal={atTotal}
         />
       )}
     </div>

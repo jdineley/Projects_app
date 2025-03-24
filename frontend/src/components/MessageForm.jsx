@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // util
 import { handleSubmitMessage } from "../utility";
@@ -14,7 +14,7 @@ import { CiImageOn } from "react-icons/ci";
 import { CiVideoOn } from "react-icons/ci";
 
 import { Switch, Text, Badge, Button } from "@radix-ui/themes";
-import { set } from "date-fns";
+// import { set } from "date-fns";
 
 const MessageForm = ({
   comment,
@@ -42,13 +42,104 @@ const MessageForm = ({
   learning,
   commentWhat,
   type,
-  projectUsers,
+  // projectUsers,
+  //
+  // taggedUsers,
+  // atTotal,
+  // projectUsersRef,
 }) => {
-  console.log("projectUsers", projectUsers);
+  const { VITE_REACT_APP_API_URL } = import.meta.env;
+  const token = user?.token ? user?.token : user?.accessToken;
+
+  const [projectUsers, setProjectUsers] = useState([]);
+
+  const atTotal = useRef(0);
+  const taggedUsers = useRef([]);
+  console.log("taggedUsers.current", taggedUsers.current);
+  const projectUsersRef = useRef([]);
+
+  // console.log("projectUsers", projectUsers);
   const hasAttachedFiles =
     [...inputImages, ...inputVideos].length > 0 ? true : false;
 
   const [importance, setImportance] = useState("medium");
+
+  const AT_REGEX = / @/g;
+  const TAG_REGEX = / @\S*/g;
+
+  useEffect(() => {
+    console.log("in messageform useEffect");
+    if (comment) {
+      if (AT_REGEX.test(comment)) {
+        const totalAts = comment.match(AT_REGEX).length;
+        const currentTags = comment
+          .match(TAG_REGEX)
+          .map((t) => t.split("@")[1] + "@" + t.split("@")[2]);
+        taggedUsers.current = currentTags;
+        console.log("currentTags", currentTags);
+        // console.log("taggedUsers.current", taggedUsers.current);
+        if (taggedUsers.current.length > 0) {
+          // if (taggedUsers.current.length > 0) {
+          const incorrectEmails = taggedUsers.current.filter(
+            // const incorrectEmails = taggedUsers.current.filter(
+            (t) => !projectUsersRef.current.includes(t)
+          );
+          console.log("incorrectEmails", incorrectEmails);
+          if (incorrectEmails.length > 0) {
+            let newComment;
+            // comment config: klkkdfs @jim@mail.com fdsad @jill@mail.com
+            for (const incorrectEmail of incorrectEmails) {
+              console.log("incorrectEmail", incorrectEmail);
+              newComment = comment
+                .split(" ")
+                .filter((w) => {
+                  console.log("w", w);
+                  if (w[0] === "@") {
+                    w = w.substring(1);
+                    return w !== incorrectEmail;
+                  } else return true;
+                })
+                .join(" ");
+              console.log("newComment", newComment);
+            }
+            setComment(newComment);
+          }
+        }
+        // console.log("totalAts", totalAts);
+        // console.log("atTotal.current", atTotal.current);
+        if (totalAts > atTotal.current) {
+          // console.log("SETTING IS NEW AT");
+          atTotal.current = totalAts;
+          fetch(
+            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?intent=allProjectUsers&projectId=${projectId}`,
+            {
+              method: "GET",
+              mode: "cors",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+            .then((res) => {
+              return res.json();
+            })
+            .then((json) => {
+              console.log(json);
+              setProjectUsers(json);
+              projectUsersRef.current = json;
+            });
+        } else if (totalAts < atTotal.current) {
+          atTotal.current = totalAts;
+          setProjectUsers([]);
+        } else {
+          setProjectUsers([]);
+        }
+      } else {
+        atTotal.current = 0;
+        setProjectUsers([]);
+      }
+    }
+  }, [comment, atTotal, taggedUsers]);
 
   return (
     <div className={`${intent === "task" && "sticky bottom-5"} mx-auto w-9/12`}>
@@ -100,6 +191,9 @@ const MessageForm = ({
             reviewId,
             type,
             importance,
+            taggedUsers: taggedUsers.current,
+            token,
+            VITE_REACT_APP_API_URL,
           });
         }}
         method="POST"

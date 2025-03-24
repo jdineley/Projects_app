@@ -615,12 +615,15 @@ function handleSubmitMessage({
   reviewId,
   type,
   importance,
+  taggedUsers,
+  token,
+  VITE_REACT_APP_API_URL,
 }) {
   console.log("in handleSubmitMessage..");
-  const token = user?.token ? user?.token : user?.accessToken;
+  // const token = user?.token ? user?.token : user?.accessToken;
   // console.log("$$$$$$$$$$$$$$INTENT$$$$$$$$$$$$", intent);
   // console.log("@@@@@@@@@@@@TARGET@@@@@@@@@@@", target._id);
-  const { VITE_REACT_APP_API_URL } = import.meta.env;
+  // const { VITE_REACT_APP_API_URL } = import.meta.env;
   console.log("content", comment);
   console.log("endpoint", endPoint);
   setIsSending(true);
@@ -645,6 +648,11 @@ function handleSubmitMessage({
   //   formData.append("projectId", projectId);
   //   formData.append("reviewId", reviewId);
   // }
+  if (taggedUsers.length > 0) {
+    for (const user of taggedUsers) {
+      formData.append("tagged_users", user);
+    }
+  }
   if (inputImages.length > 0) {
     for (const image of inputImages) {
       formData.append("uploaded_images", image);

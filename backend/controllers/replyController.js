@@ -50,6 +50,7 @@ const createReply = async (req, res) => {
     user: userId,
     projectId,
     reviewId,
+    tagged_users,
   } = req.body;
   console.log("req.body", req.body);
   // console.log("req.body", req.body);
@@ -182,16 +183,22 @@ const createReply = async (req, res) => {
         messageEes = [
           // ...allUsersInDisscussion.map((user) => user.toString()),
           ...allUsersInDisscussion,
-          target.user.toString(),
+          ticket.user.toString(),
         ]
           .filter((userId, i, arr) => arr.indexOf(userId) === i) //remove duplicates
           .filter((userId) => userId !== currentUserId.toString()); //remove the commenter/replier from notifications
       }
 
       console.log("messageees", messageEes);
+      messageEes = tagged_users ? [...messageEes, ...tagged_users] : messageEes;
 
       for (const messageEe of messageEes) {
-        const userObj = await User.findById(messageEe);
+        let userObj;
+        if (mongoose.Types.ObjectId.isValid(messageEe)) {
+          userObj = await User.findById(messageEe);
+        } else {
+          userObj = await User.findOne({ email: messageEe });
+        }
         console.log("userObj", userObj);
         userObj.recievedNotifications.push(
           comment?.task

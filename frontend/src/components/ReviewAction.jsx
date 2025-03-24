@@ -89,42 +89,42 @@ const ReviewAction = ({
         inline: "nearest",
       });
     }
-    if (comment) {
-      if (AT_REGEX.test(comment)) {
-        const totalAts = comment.match(AT_REGEX).length;
-        console.log("totalAts", totalAts);
-        console.log("atTotal.current", atTotal.current);
-        if (totalAts > atTotal.current) {
-          console.log("SETTING IS NEW AT");
-          atTotal.current = totalAts;
-          fetch(
-            `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?intent=allProjectUsers&projectId=${projectId}`,
-            {
-              method: "GET",
-              mode: "cors",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          )
-            .then((res) => {
-              return res.json();
-            })
-            .then((json) => {
-              console.log(json);
-              setProjectUsers(json);
-            });
-        } else if (totalAts < atTotal.current) {
-          atTotal.current = totalAts;
-          setProjectUsers([]);
-        } else {
-          setProjectUsers([]);
-        }
-      } else {
-        atTotal.current = 0;
-        setProjectUsers([]);
-      }
-    }
+    // if (comment) {
+    //   if (AT_REGEX.test(comment)) {
+    //     const totalAts = comment.match(AT_REGEX).length;
+    //     console.log("totalAts", totalAts);
+    //     console.log("atTotal.current", atTotal.current);
+    //     if (totalAts > atTotal.current) {
+    //       console.log("SETTING IS NEW AT");
+    //       atTotal.current = totalAts;
+    //       fetch(
+    //         `${VITE_REACT_APP_API_URL}/api/v1/users/getUsers?intent=allProjectUsers&projectId=${projectId}`,
+    //         {
+    //           method: "GET",
+    //           mode: "cors",
+    //           headers: {
+    //             Authorization: `Bearer ${token}`,
+    //           },
+    //         }
+    //       )
+    //         .then((res) => {
+    //           return res.json();
+    //         })
+    //         .then((json) => {
+    //           console.log(json);
+    //           setProjectUsers(json);
+    //         });
+    //     } else if (totalAts < atTotal.current) {
+    //       atTotal.current = totalAts;
+    //       setProjectUsers([]);
+    //     } else {
+    //       setProjectUsers([]);
+    //     }
+    //   } else {
+    //     atTotal.current = 0;
+    //     setProjectUsers([]);
+    //   }
+    // }
   }, [
     action._id,
     newActionId,
@@ -133,7 +133,7 @@ const ReviewAction = ({
     currentPathNoQuery,
     isCommenting,
     fetcher.data,
-    comment,
+    // comment,
   ]);
 
   async function handleAddComment() {
