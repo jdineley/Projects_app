@@ -7,7 +7,8 @@ const { channel } = require("../routes/v1/sse");
 const path = require("path");
 
 require("dotenv").config();
-const cloudinary = require("cloudinary").v2;
+// const cloudinary = require("cloudinary").v2;
+const cloudinary = require("../cloudinary");
 // console.log("cloudinary", cloudinary.config().cloud_name);
 
 // util

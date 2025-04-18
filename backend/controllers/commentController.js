@@ -10,8 +10,10 @@ const ReviewAction = require("../models/ReviewAction");
 const { channel } = require("../routes/v1/sse");
 
 require("dotenv").config();
-const cloudinary = require("cloudinary").v2;
-console.log("cloudinary", cloudinary.config().cloud_name);
+// const cloudinary = require("cloudinary").v2;
+const cloudinary = require("../cloudinary");
+console.log("cloudinary_cloud_name", cloudinary.config().cloud_name);
+console.log("cloudinary_api_key", cloudinary.config().api_key);
 
 // util
 const { removeAllFilesAsync } = require("../util");

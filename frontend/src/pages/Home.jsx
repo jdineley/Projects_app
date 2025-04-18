@@ -66,7 +66,7 @@ export default function Home() {
               size={`${isTabletResolution ? "3" : "5"}`}
               className={`${isTabletResolution && "text-center"}`}
             >
-              Holistic Project Encaptulation
+              Holistic Project Encapsulation
             </Heading>
             <Heading
               style={{ color: "#ffa726" }}
