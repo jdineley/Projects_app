@@ -44,7 +44,7 @@ const createReply = async (req, res) => {
   // console.log("ticket", ticket);
   // console.log("req.url", req.url);
   // const model = req.url === "/" ? Ticket : Comment
-  const {
+  let {
     content,
     comment: commentId,
     ticket: ticketId,
@@ -54,6 +54,10 @@ const createReply = async (req, res) => {
     tagged_users,
   } = req.body;
   console.log("req.body", req.body);
+  if (!Array.isArray(tagged_users)) {
+    // fix if only one tagged user which arrives as a string
+    tagged_users = [tagged_users];
+  }
   // console.log("req.body", req.body);
   // console.log("commentId", commentId);
   console.log("&&&&&&&&&&&&&projectId&&&&&&&&&&&&&&&&&&&", projectId);
@@ -190,8 +194,8 @@ const createReply = async (req, res) => {
           .filter((userId) => userId !== currentUserId.toString()); //remove the commenter/replier from notifications
       }
 
-      console.log("messageees", messageEes);
       messageEes = tagged_users ? [...messageEes, ...tagged_users] : messageEes;
+      console.log("messageees", messageEes);
 
       for (const messageEe of messageEes) {
         let userObj;
@@ -215,7 +219,8 @@ const createReply = async (req, res) => {
             : ticket
             ? `/tickets?ticketId=${ticket._id}&user=${req.user.email}&intent=ticket-reply`
             : `/projects/${projectId}/reviews/${reviewId}?commentId=${comment._id}&user=${currentUserEmail}&intent=new-review-reply`,
-          `new-reply-notification${messageEe}`
+          // `new-reply-notification${messageEe}`
+          `new-reply-notification${userObj._id}`
         );
       }
     }

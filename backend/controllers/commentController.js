@@ -35,7 +35,12 @@ const createComment = async (req, res) => {
   const user = req.user;
   console.log("req.files", req.files);
   console.log("req.body", req.body);
-  const { tagged_users } = req.body;
+  let { tagged_users } = req.body;
+  console.log("tagged_users", tagged_users);
+  if (!Array.isArray(tagged_users)) {
+    // fix if only one tagged user which arrives as a string
+    tagged_users = [tagged_users];
+  }
   // if (tagged_users) {
   //   console.log("tagged_users", tagged_users);
 
