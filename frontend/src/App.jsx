@@ -75,7 +75,7 @@ function App() {
             action={rootLayoutAction(user)}
           >
             <Route
-              path="/"
+              index
               element={<Home />}
               // loader={dashboardLoader(user)}
             />
